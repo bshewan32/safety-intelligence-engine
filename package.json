@@ -2,7 +2,8 @@
   "name": "safety-intelligence-engine",
   "version": "1.0.0",
   "description": "Risk-Based Safety Intelligence Platform",
-  "main": "electron/main.js",
+  "main": "electron/main.cjs",
+  "type": "module",
   "scripts": {
     "dev": "concurrently \"vite\" \"electron .\"",
     "build": "vite build",
