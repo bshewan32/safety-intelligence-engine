@@ -1,0 +1,121 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./si.db"
+}
+
+model Worker {
+  id        String   @id @default(cuid())
+  employeeId String  @unique
+  firstName String
+  lastName  String
+  email     String?
+  phone     String?
+  companyId String
+  roleId    String?
+  status    String   @default("active")
+  createdAt DateTime @default(now())
+  
+  role      Role?    @relation(fields: [roleId], references: [id])
+  required  RequiredControl[]
+}
+
+model Role {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  activityPackage String? // JSON
+  createdAt   DateTime @default(now())
+  
+  workers     Worker[]
+}
+
+model Hazard {
+  id              String   @id @default(cuid())
+  code            String   @unique
+  name            String
+  description     String?
+  category        String
+  preControlRisk  Int      @default(0)
+  postControlRisk Int      @default(0)
+  industryId      String?
+  createdAt       DateTime @default(now())
+  
+  controls        HazardControl[]
+}
+
+model Control {
+  id           String   @id @default(cuid())
+  code         String   @unique
+  title        String
+  type         String   // Training, Document, Verification, PPE, etc.
+  description  String?
+  reference    String?  // e.g., "AS/NZS 4836"
+  validityDays Int?
+  metadata     String?  // JSON
+  createdAt    DateTime @default(now())
+  
+  hazards      HazardControl[]
+  required     RequiredControl[]
+}
+
+model HazardControl {
+  id         String  @id @default(cuid())
+  hazardId   String
+  controlId  String
+  isCritical Boolean @default(false)
+  priority   Int     @default(0)
+  
+  hazard     Hazard  @relation(fields: [hazardId], references: [id], onDelete: Cascade)
+  control    Control @relation(fields: [controlId], references: [id], onDelete: Cascade)
+  
+  @@unique([hazardId, controlId])
+}
+
+model RequiredControl {
+  id        String    @id @default(cuid())
+  workerId  String
+  controlId String
+  status    String    // Required, Satisfied, Overdue
+  dueDate   DateTime?
+  
+  tempValidUntil    DateTime?
+  tempEvidenceId    String?
+  tempNotes         String?
+  
+  worker    Worker    @relation(fields: [workerId], references: [id], onDelete: Cascade)
+  control   Control   @relation(fields: [controlId], references: [id], onDelete: Cascade)
+  evidence  Evidence[]
+  
+  @@unique([workerId, controlId])
+}
+
+model Evidence {
+  id                String    @id @default(cuid())
+  requiredControlId String
+  type              String    // Training, Document, Verification, PPE, Temporary
+  status            String    // Valid, Expired, Invalid, Pending
+  issuedDate        DateTime?
+  expiryDate        DateTime?
+  filePath          String?
+  checksum          String?   // NEW: File integrity check
+  fileSize          Int?      // NEW: File size in bytes
+  originalName      String?   // NEW: Original filename
+  notes             String?
+  createdAt         DateTime  @default(now())
+  
+  requiredControl   RequiredControl @relation(fields: [requiredControlId], references: [id], onDelete: Cascade)
+}
+
+model KPI {
+  id          String   @id @default(cuid())
+  period      String   // YYYY-MM
+  hoursWorked Int
+  incidents   Int
+  nearMiss    Int
+  crvRate     Float
+  createdAt   DateTime @default(now())
+}
