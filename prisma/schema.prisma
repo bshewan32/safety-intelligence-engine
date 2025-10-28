@@ -8,29 +8,89 @@ datasource db {
 }
 
 model Worker {
-  id        String   @id @default(cuid())
-  employeeId String  @unique
-  firstName String
-  lastName  String
-  email     String?
-  phone     String?
-  companyId String
-  roleId    String?
-  status    String   @default("active")
-  createdAt DateTime @default(now())
-  
-  role      Role?    @relation(fields: [roleId], references: [id])
-  required  RequiredControl[]
+  id         String   @id @default(cuid())
+  employeeId String   @unique
+  firstName  String
+  lastName   String
+  email      String?
+  phone      String?
+  companyId  String
+  // DEPRECATE: roleId/role will be removed after migrating to WorkerRole assignments
+  roleId     String?
+  status     String   @default("active")
+  createdAt  DateTime @default(now())
+
+  role     Role?             @relation("WorkerPrimaryRole", fields: [roleId], references: [id])
+  required RequiredControl[]
+  roles    WorkerRole[] // NEW: multi-role assignments
 }
 
 model Role {
-  id          String   @id @default(cuid())
-  name        String   @unique
-  description String?
+  id              String   @id @default(cuid())
+  name            String   @unique
+  description     String?
   activityPackage String? // JSON
-  createdAt   DateTime @default(now())
-  
-  workers     Worker[]
+  createdAt       DateTime @default(now())
+
+  // Legacy back-relation for Worker.role (primary)
+  primaryWorkers Worker[]     @relation("WorkerPrimaryRole")
+  // New many-to-many via assignment table
+  workers        WorkerRole[]
+}
+
+enum RoleSource {
+  Org // assigned by employer
+  Client // client-driven assignment
+  Site // site-specific assignment
+  Project // short-term project
+}
+
+model Client {
+  id          String       @id @default(cuid())
+  name        String       @unique
+  createdAt   DateTime     @default(now())
+  sites       Site[]
+  workerRoles WorkerRole[]
+}
+
+model Site {
+  id        String   @id @default(cuid())
+  clientId  String
+  name      String
+  createdAt DateTime @default(now())
+
+  client      Client       @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  workerRoles WorkerRole[]
+
+  @@unique([clientId, name])
+}
+
+model WorkerRole {
+  id        String     @id @default(cuid())
+  workerId  String
+  roleId    String
+  isPrimary Boolean    @default(false)
+  source    RoleSource @default(Org)
+
+  // Optional scoping (either/both can be null for global)
+  clientId String?
+  siteId   String?
+
+  // Time-bounded assignment
+  startAt DateTime  @default(now())
+  endAt   DateTime?
+
+  notes String?
+
+  worker Worker  @relation(fields: [workerId], references: [id], onDelete: Cascade)
+  role   Role    @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  client Client? @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  site   Site?   @relation(fields: [siteId], references: [id], onDelete: SetNull)
+
+  @@unique([workerId, roleId, clientId, siteId, startAt], name: "worker_role_scope_start")
+  @@index([workerId, isPrimary])
+  @@index([workerId, startAt, endAt])
+  @@index([clientId, siteId])
 }
 
 model Hazard {
@@ -43,23 +103,23 @@ model Hazard {
   postControlRisk Int      @default(0)
   industryId      String?
   createdAt       DateTime @default(now())
-  
-  controls        HazardControl[]
+
+  controls HazardControl[]
 }
 
 model Control {
   id           String   @id @default(cuid())
   code         String   @unique
   title        String
-  type         String   // Training, Document, Verification, PPE, etc.
+  type         String // Training, Document, Verification, PPE, etc.
   description  String?
-  reference    String?  // e.g., "AS/NZS 4836"
+  reference    String? // e.g., "AS/NZS 4836"
   validityDays Int?
-  metadata     String?  // JSON
+  metadata     String? // JSON
   createdAt    DateTime @default(now())
-  
-  hazards      HazardControl[]
-  required     RequiredControl[]
+
+  hazards  HazardControl[]
+  required RequiredControl[]
 }
 
 model HazardControl {
@@ -68,10 +128,10 @@ model HazardControl {
   controlId  String
   isCritical Boolean @default(false)
   priority   Int     @default(0)
-  
-  hazard     Hazard  @relation(fields: [hazardId], references: [id], onDelete: Cascade)
-  control    Control @relation(fields: [controlId], references: [id], onDelete: Cascade)
-  
+
+  hazard  Hazard  @relation(fields: [hazardId], references: [id], onDelete: Cascade)
+  control Control @relation(fields: [controlId], references: [id], onDelete: Cascade)
+
   @@unique([hazardId, controlId])
 }
 
@@ -79,40 +139,40 @@ model RequiredControl {
   id        String    @id @default(cuid())
   workerId  String
   controlId String
-  status    String    // Required, Satisfied, Overdue
+  status    String // Required, Satisfied, Overdue
   dueDate   DateTime?
-  
-  tempValidUntil    DateTime?
-  tempEvidenceId    String?
-  tempNotes         String?
-  
-  worker    Worker    @relation(fields: [workerId], references: [id], onDelete: Cascade)
-  control   Control   @relation(fields: [controlId], references: [id], onDelete: Cascade)
-  evidence  Evidence[]
-  
+
+  tempValidUntil DateTime?
+  tempEvidenceId String?
+  tempNotes      String?
+
+  worker   Worker     @relation(fields: [workerId], references: [id], onDelete: Cascade)
+  control  Control    @relation(fields: [controlId], references: [id], onDelete: Cascade)
+  evidence Evidence[]
+
   @@unique([workerId, controlId])
 }
 
 model Evidence {
   id                String    @id @default(cuid())
   requiredControlId String
-  type              String    // Training, Document, Verification, PPE, Temporary
-  status            String    // Valid, Expired, Invalid, Pending
+  type              String // Training, Document, Verification, PPE, Temporary
+  status            String // Valid, Expired, Invalid, Pending
   issuedDate        DateTime?
   expiryDate        DateTime?
   filePath          String?
-  checksum          String?   // NEW: File integrity check
-  fileSize          Int?      // NEW: File size in bytes
-  originalName      String?   // NEW: Original filename
+  checksum          String? // NEW: File integrity check
+  fileSize          Int? // NEW: File size in bytes
+  originalName      String? // NEW: Original filename
   notes             String?
   createdAt         DateTime  @default(now())
-  
-  requiredControl   RequiredControl @relation(fields: [requiredControlId], references: [id], onDelete: Cascade)
+
+  requiredControl RequiredControl @relation(fields: [requiredControlId], references: [id], onDelete: Cascade)
 }
 
 model KPI {
   id          String   @id @default(cuid())
-  period      String   // YYYY-MM
+  period      String // YYYY-MM
   hoursWorked Int
   incidents   Int
   nearMiss    Int

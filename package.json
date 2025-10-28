@@ -17,13 +17,14 @@
     "electron:build": "electron-builder",
     "postinstall": "electron-builder install-app-deps",
     "build:all": "npx tsc -p tsconfig.main.json && vite build",
-    "setup": "npm install && npx prisma generate && npx prisma migrate dev && npx tsx src/db/seed.ts" 
+    "setup": "npm install && npx prisma generate && npx prisma migrate dev && npx tsx src/db/seed.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.17.1",
     "@supabase/supabase-js": "^2.39.3",
     "better-sqlite3": "^9.2.2",
     "date-fns": "^3.0.6",
+    "dayjs": "^1.11.18",
     "docx": "^8.5.0",
     "lodash": "^4.17.21",
     "lucide-react": "^0.263.1",

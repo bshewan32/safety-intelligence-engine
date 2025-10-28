@@ -12,6 +12,6 @@
     "esModuleInterop": true,
     "resolveJsonModule": true
   },
-  "include": ["electron/**/*.ts", "src/**/*"],
-  "exclude": ["electron/preload.cjs"]
+  "include": ["electron/**/*.ts", "src/db/**/*", "src/core/**/*"],
+  "exclude": ["electron/preload.cjs", "src/components/**/*", "node_modules"]
 }
