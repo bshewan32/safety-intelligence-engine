@@ -5,6 +5,7 @@ import { WorkerList } from './components/workers/WorkerList';
 import { HazardLibrary } from './components/hazards/HazardLibrary';
 import { ControlLibrary } from './components/controls/ControlLibrary';
 import { ReportBuilder } from './components/reports/ReportBuilder';
+import { ClientList } from './components/clients/ClientList';
 
 function App() {
   const [currentView, setCurrentView] = useState('dashboard');
@@ -15,6 +16,8 @@ function App() {
         return <Dashboard />;
       case 'workers':
         return <WorkerList />;
+      case 'clients':
+        return <ClientList />;
       case 'hazards':
         return <HazardLibrary />;
       case 'controls':

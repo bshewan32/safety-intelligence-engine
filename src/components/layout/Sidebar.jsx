@@ -5,12 +5,14 @@ import {
   AlertTriangle, 
   Shield, 
   FileText,
-  Settings
+  Settings, 
+  Building2
 } from 'lucide-react';
 
 function Sidebar({ currentView, onNavigate }) {
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { id: 'clients', label: 'Clients', icon: Building2 },
     { id: 'workers', label: 'Workers', icon: Users },
     { id: 'hazards', label: 'Hazards', icon: AlertTriangle },
     { id: 'controls', label: 'Controls', icon: Shield },

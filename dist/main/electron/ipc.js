@@ -752,6 +752,176 @@ export function handleIPC(ipc, win) {
         };
     });
     // ========================================
+    // CLIENTS
+    // ========================================
+    // List all clients
+    ipc.handle('db:listClients', async () => {
+        try {
+            return await prisma.client.findMany({
+                include: {
+                    sites: true,
+                    _count: {
+                        select: { sites: true, workerRoles: true }
+                    }
+                },
+                orderBy: { createdAt: 'desc' }
+            });
+        }
+        catch (err) {
+            console.error('listClients failed', err);
+            return [];
+        }
+    });
+    // Get single client with full details
+    ipc.handle('db:getClient', async (_e, clientId) => {
+        try {
+            return await prisma.client.findUnique({
+                where: { id: clientId },
+                include: {
+                    sites: true,
+                    workerRoles: {
+                        include: { worker: true, role: true }
+                    }
+                }
+            });
+        }
+        catch (err) {
+            console.error('getClient failed', err);
+            return null;
+        }
+    });
+    // Create new client
+    // Create new client
+    ipc.handle('db:createClient', async (_e, payload) => {
+        try {
+            const data = {
+                name: String(payload.name || '').trim(),
+            };
+            if (!data.name)
+                throw new Error('Client name is required');
+            // Use upsert to handle duplicates gracefully
+            const created = await prisma.client.upsert({
+                where: { name: data.name },
+                update: {},
+                create: data
+            });
+            return created;
+        }
+        catch (err) {
+            console.error('createClient failed', err);
+            throw err;
+        }
+    });
+    // Update client
+    ipc.handle('db:updateClient', async (_e, payload) => {
+        try {
+            const { id, ...data } = payload;
+            if (!id)
+                throw new Error('Client ID is required');
+            return await prisma.client.update({
+                where: { id },
+                data
+            });
+        }
+        catch (err) {
+            console.error('updateClient failed', err);
+            throw err;
+        }
+    });
+    // Delete client
+    ipc.handle('db:deleteClient', async (_e, clientId) => {
+        try {
+            return await prisma.client.delete({ where: { id: clientId } });
+        }
+        catch (err) {
+            console.error('deleteClient failed', err);
+            throw err;
+        }
+    });
+    //.handle('db:setupClientFramework', async (_e, payload: {
+    // Setup client with hazards and controls based on industry/jurisdiction
+    ipc.handle('db:setupClientFramework', async (_e, payload) => {
+        try {
+            const { clientId, industry, jurisdiction, isoAlignment } = payload;
+            const results = {
+                hazardsImported: 0,
+                controlsImported: 0,
+                mappingsCreated: 0
+            };
+            // Import industry controls using upsert
+            if (industry) {
+                const industryControls = [
+                    { code: 'TR-EL-LVR-CPR', title: 'LVR + CPR', type: 'Training', description: 'Low Voltage Rescue + CPR competency', reference: 'AS/NZS 4836', validityDays: 365 },
+                    { code: 'DOC-SWMS-ELEC-GEN', title: 'SWMS – General Electrical', type: 'Document', description: 'Baseline electrical safe work method statement', validityDays: null },
+                    { code: 'PPE-ARC-GLOVES', title: 'Arc-rated Gloves', type: 'PPE', description: 'Appropriate class for task per arc flash study', validityDays: null },
+                    { code: 'INSP-HARNESS-6M', title: 'Harness Inspection', type: 'Inspection', description: 'Formal inspection of fall-arrest harness', reference: 'AS/NZS 1891', validityDays: 180 },
+                    { code: 'LIC-ESA-SPARKY', title: 'Electrical Worker Licence', type: 'Licence', description: 'State/Territory electrical worker licence', validityDays: null },
+                ];
+                for (const control of industryControls) {
+                    await prisma.control.upsert({
+                        where: { code: control.code },
+                        update: {},
+                        create: control
+                    });
+                }
+                results.controlsImported += 5;
+            }
+            // Import jurisdiction controls using upsert
+            if (jurisdiction) {
+                const jurisdictionControls = [
+                    { code: 'DOC-LEG-EL-TEST-TAG', title: 'Test & Tag Procedure', type: 'Document', reference: 'AS/NZS 3760', validityDays: null },
+                    { code: 'VER-RCD-TEST', title: 'RCD Test Record', type: 'Verification', description: 'Periodic verification and record of RCD tests', validityDays: 180 },
+                    { code: 'DOC-WHS-CONSULT', title: 'WHS Consultation Procedure', type: 'Document', reference: 'WHS Act s47-49', validityDays: null },
+                ];
+                for (const control of jurisdictionControls) {
+                    await prisma.control.upsert({
+                        where: { code: control.code },
+                        update: {},
+                        create: control
+                    });
+                }
+                results.controlsImported += 3;
+            }
+            // Import ISO controls using upsert
+            if (isoAlignment) {
+                const isoControls = [
+                    { code: 'DOC-ISO-POLICY', title: 'OH&S Policy', type: 'Document', reference: 'ISO 45001:2018 cl.5.2', validityDays: null },
+                    { code: 'DOC-ISO-COMPETENCE', title: 'Competence & Awareness Procedure', type: 'Document', reference: 'ISO 45001:2018 cl.7.2-7.3', validityDays: null },
+                    { code: 'VER-ISO-AUDIT', title: 'Internal Audit Record', type: 'Verification', reference: 'ISO 45001:2018 cl.9.2', validityDays: 365 },
+                ];
+                for (const control of isoControls) {
+                    await prisma.control.upsert({
+                        where: { code: control.code },
+                        update: {},
+                        create: control
+                    });
+                }
+                results.controlsImported += 3;
+            }
+            // Import hazards based on industry using upsert
+            if (industry === 'Electrical') {
+                const hazards = [
+                    { code: 'ELEC-001', name: 'Electric Shock', description: 'Contact with live conductors', category: 'Electrical', preControlRisk: 20, postControlRisk: 8 },
+                    { code: 'ELEC-002', name: 'Arc Flash', description: 'Electrical arc explosion', category: 'Electrical', preControlRisk: 25, postControlRisk: 10 },
+                    { code: 'HEIGHT-001', name: 'Falls from Height', description: 'Work above 2m', category: 'Heights', preControlRisk: 20, postControlRisk: 6 },
+                ];
+                for (const hazard of hazards) {
+                    await prisma.hazard.upsert({
+                        where: { code: hazard.code },
+                        update: {},
+                        create: hazard
+                    });
+                }
+                results.hazardsImported += 3;
+            }
+            return results;
+        }
+        catch (err) {
+            console.error('setupClientFramework failed', err);
+            throw err;
+        }
+    });
+    // ========================================
     // REPORTS
     // ========================================
     ipc.handle('report:buildClient', async (_e, filters) => {

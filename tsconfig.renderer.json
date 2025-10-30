@@ -14,5 +14,5 @@
       "@/*": ["./src/*"]
     }
   },
-   "include": ["src", "src/types/window.d.ts"]
+   "include": ["src", "src/types/window.d.ts", "electron/report.js", "electron/ipc.ts", "electron/report.ts", "electron/main.ts"]
 }

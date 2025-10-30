@@ -108,6 +108,25 @@ interface Hazard {
   risk?: RiskLabel;
 }
 
+interface Client {
+  id: string;
+  name: string;
+  createdAt: Date | string;
+  sites?: Site[];
+  _count?: {
+    sites: number;
+    workerRoles: number;
+  };
+}
+
+interface Site {
+  id: string;
+  clientId: string;
+  name: string;
+  createdAt: Date | string;
+  client?: Client;
+}
+
 interface DashboardSummary {
   operationalReadiness: number;
   auditReadiness: number;
@@ -219,6 +238,19 @@ declare global {
       createControl?: (payload: Partial<Control>) => Promise<Control>;
       updateControl?: (payload: Partial<Control> & { id: string }) => Promise<Control>;
       importControlPack?: (payload: { pack: string } | any) => Promise<{ inserted: number }>;
+
+      // Clients
+      listClients: () => Promise<Client[]>;
+      getClient: (clientId: string) => Promise<Client | null>;
+      createClient: (payload: { name: string }) => Promise<Client>;
+      updateClient: (payload: { id: string; name?: string }) => Promise<Client>;
+      deleteClient: (clientId: string) => Promise<Client>;
+      setupClientFramework: (payload: {
+        clientId: string;
+        industry?: string;
+        jurisdiction?: string;
+        isoAlignment?: boolean;
+      }) => Promise<{ hazardsImported: number; controlsImported: number; mappingsCreated: number }>;
 
       // Dashboard
       dashboardSummary: () => Promise<DashboardSummary>;

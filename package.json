@@ -5,7 +5,8 @@
   "main": "dist/main/electron/main.js",
   "type": "module",
   "scripts": {
-    "dev": "npm run build:all && concurrently \"vite\" \"wait-on http://localhost:5173 && electron .\"",
+    "dev:main": "tsc -w -p tsconfig.main.json",
+    "dev": "concurrently --raw \"vite\" \"wait-on http://localhost:5173 && electron .\"",
     "build:renderer": "vite build",
     "build:main": "tsc -p tsconfig.main.json",
     "build": "npm run build:renderer && npm run build:main",
@@ -14,7 +15,7 @@
     "prisma:seed": "tsx src/db/seed.ts",
     "typecheck": "tsc --noEmit",
     "electron:dev": "electron .",
-    "electron:build": "electron-builder",
+    "electron:build": "prisma generate && electron-builder",
     "postinstall": "electron-builder install-app-deps",
     "build:all": "npx tsc -p tsconfig.main.json && vite build",
     "setup": "npm install && npx prisma generate && npx prisma migrate dev && npx tsx src/db/seed.ts"
@@ -22,7 +23,6 @@
   "dependencies": {
     "@prisma/client": "^6.17.1",
     "@supabase/supabase-js": "^2.39.3",
-    "better-sqlite3": "^9.2.2",
     "date-fns": "^3.0.6",
     "dayjs": "^1.11.18",
     "docx": "^8.5.0",
@@ -35,14 +35,13 @@
     "recharts": "^2.10.3"
   },
   "devDependencies": {
-    "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^24.7.2",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
     "@vitejs/plugin-react": "^4.2.1",
     "autoprefixer": "^10.4.17",
     "concurrently": "^8.2.2",
-    "electron": "^28.2.0",
+    "electron": "^30.0.0",
     "electron-builder": "^24.9.1",
     "postcss": "^8.4.33",
     "prisma": "^6.17.1",
@@ -60,7 +59,8 @@
       "dist/**/*",
       "electron/**/*",
       "database/schema.sql",
-      "templates/**/*"
+      "templates/**/*",
+      "package.json"
     ],
     "directories": {
       "output": "release"
@@ -68,8 +68,14 @@
     "win": {
       "target": [
         "nsis",
-        "portable"
-      ]
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "artifactName": "${Safety Intelligence Engine}-Portable-${1.0}.exe"
     },
     "mac": {
       "target": [

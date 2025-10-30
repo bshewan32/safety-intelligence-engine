@@ -89,7 +89,21 @@ contextBridge.exposeInMainWorld('api', {
   dashboardSummary: () => 
     ipcRenderer.invoke('db:dashboardSummary'),
 
+  // Client Setup
+
+  listClients: () => ipcRenderer.invoke('db:listClients'),
+
+  getClient: (id) => ipcRenderer.invoke('db:getClient', id),
+
+  createClient: (payload) => ipcRenderer.invoke('db:createClient', payload),
+
+  updateClient: (payload) => ipcRenderer.invoke('db:updateClient', payload),
+  
+  deleteClient: (id) => ipcRenderer.invoke('db:deleteClient', id),
+
+  setupClientFramework: (payload) => ipcRenderer.invoke('db:setupClientFramework', payload),
+
   // Reports
   buildClient: (filters) => 
-    ipcRenderer.invoke('report:buildClient', filters),
+    ipcRenderer.invoke('report:db:buildClient', filters),
 });

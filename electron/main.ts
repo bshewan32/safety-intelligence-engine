@@ -1,10 +1,12 @@
 import { app, BrowserWindow, ipcMain } from 'electron';
-import path from 'path';
+import path from 'node:path';
 import { fileURLToPath } from 'url';
 import { handleIPC } from './ipc.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const portableDir = process.env.ELECTRON_USER_DATA_DIR || path.join(process.cwd(), "userdata");
+app.setPath("userData", portableDir);
 
 const isDev = process.env.NODE_ENV !== 'production';
 let mainWindow: BrowserWindow | null = null;
@@ -14,7 +16,7 @@ async function createWindow() {
     width: 1400,
     height: 900,
     webPreferences: {
-      preload: path.join(__dirname, '../../../electron/preload.cjs'), // ← Changed: go up 3 levels
+      preload: path.join(__dirname, '../../../electron/preload.cjs'), // â† Changed: go up 3 levels
       nodeIntegration: false,
       contextIsolation: true,
       sandbox: false,
