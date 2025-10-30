@@ -2,6 +2,7 @@ import { app, BrowserWindow, ipcMain } from 'electron';
 import path from 'node:path';
 import { fileURLToPath } from 'url';
 import { handleIPC } from './ipc.js';
+import { handleTrainingIPC } from './ipc-training.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -31,6 +32,7 @@ async function createWindow() {
   }
 
   handleIPC(ipcMain, mainWindow);
+  handleTrainingIPC(ipcMain); 
 }
 
 app.whenReady().then(createWindow);

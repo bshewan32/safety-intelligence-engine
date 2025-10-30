@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Building2, Plus, Search, Trash2, Edit2 } from 'lucide-react';
+import { Building2, Plus, Search, Trash2, FileSpreadsheet } from 'lucide-react';
 import { ClientSetupWizard } from './ClientSetupWizard';
+import { TrainingImporter } from '@/components/training/TrainingImporter';
 
 interface ClientData {
   id: string;
@@ -17,6 +18,7 @@ export function ClientList() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [showSetupWizard, setShowSetupWizard] = useState(false);
+  const [showTrainingImporter, setShowTrainingImporter] = useState(false);
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
 
   const loadClients = async () => {
@@ -60,6 +62,18 @@ export function ClientList() {
 
   const handleWizardComplete = () => {
     setShowSetupWizard(false);
+    loadClients();
+  };
+
+  const handleImportTraining = (clientId: string) => {
+    setSelectedClientId(clientId);
+    setShowTrainingImporter(true);
+  };
+
+  const handleImportComplete = () => {
+    setShowTrainingImporter(false);
+    setSelectedClientId(null);
+    // Optionally reload clients to update worker counts
     loadClients();
   };
 
@@ -151,23 +165,35 @@ export function ClientList() {
                   </div>
                 </div>
 
-                <div className="flex space-x-2 pt-4 border-t border-gray-200">
+                <div className="space-y-2 pt-4 border-t border-gray-200">
+                  {/* Import Training Button - NEW */}
                   <button
-                    onClick={() => {
-                      // TODO: Navigate to client detail view
-                      console.log('View client:', client.id);
-                    }}
-                    className="flex-1 px-3 py-2 text-sm bg-blue-50 text-blue-600 rounded hover:bg-blue-100 transition-colors"
+                    onClick={() => handleImportTraining(client.id)}
+                    className="w-full flex items-center justify-center space-x-2 px-3 py-2 text-sm bg-green-50 text-green-700 rounded hover:bg-green-100 transition-colors font-medium"
                   >
-                    View Details
+                    <FileSpreadsheet size={16} />
+                    <span>Import Training Records</span>
                   </button>
-                  <button
-                    onClick={() => handleDelete(client.id, client.name)}
-                    className="px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded transition-colors"
-                    title="Delete client"
-                  >
-                    <Trash2 size={16} />
-                  </button>
+
+                  {/* Existing Buttons */}
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={() => {
+                        // TODO: Navigate to client detail view
+                        console.log('View client:', client.id);
+                      }}
+                      className="flex-1 px-3 py-2 text-sm bg-blue-50 text-blue-600 rounded hover:bg-blue-100 transition-colors"
+                    >
+                      View Details
+                    </button>
+                    <button
+                      onClick={() => handleDelete(client.id, client.name)}
+                      className="px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded transition-colors"
+                      title="Delete client"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}
@@ -180,6 +206,18 @@ export function ClientList() {
         <ClientSetupWizard
           onClose={() => setShowSetupWizard(false)}
           onComplete={handleWizardComplete}
+        />
+      )}
+
+      {/* Training Importer Modal - NEW */}
+      {showTrainingImporter && selectedClientId && (
+        <TrainingImporter
+          clientId={selectedClientId}
+          onClose={() => {
+            setShowTrainingImporter(false);
+            setSelectedClientId(null);
+          }}
+          onComplete={handleImportComplete}
         />
       )}
     </div>

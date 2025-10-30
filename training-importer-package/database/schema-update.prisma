@@ -1,0 +1,21 @@
+// Add this model to your existing prisma/schema.prisma file
+
+model TrainingMapping {
+  id           String   @id @default(cuid())
+  trainingName String   // e.g., "Fall Protection Training"
+  controlId    String   // Link to Control
+  confidence   Int      @default(100) // User confirmed = 100, algorithm = 50-99
+  source       String   @default("algorithm") // "user" | "algorithm" | "ai"
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  control Control @relation(fields: [controlId], references: [id], onDelete: Cascade)
+
+  @@unique([trainingName, controlId])
+  @@index([trainingName])
+  @@index([controlId])
+}
+
+// Also add this relation to the Control model:
+// In your existing Control model, add:
+// trainingMappings TrainingMapping[]
