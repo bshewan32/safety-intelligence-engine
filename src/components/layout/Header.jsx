@@ -1,10 +1,16 @@
 import React from 'react';
 import { Bell, User } from 'lucide-react';
+import { ClientSelector } from './ClientSelector';
+import { useClient } from '../../context/ClientContext';
 
 function Header({ currentView }) {
+  const { activeClient } = useClient();
+
   const viewTitles = {
     dashboard: 'Dashboard',
     workers: 'Workers',
+    clients: 'Clients',
+    roles: 'Roles',
     hazards: 'Hazard Library',
     controls: 'Control Library',
     reports: 'Reports',
@@ -17,9 +23,15 @@ function Header({ currentView }) {
           <h2 className="text-2xl font-bold text-gray-900">
             {viewTitles[currentView] || 'Dashboard'}
           </h2>
+          {activeClient && (
+            <p className="text-sm text-gray-500 mt-1">
+              Viewing: <span className="font-medium text-blue-600">{activeClient.name}</span>
+            </p>
+          )}
         </div>
 
         <div className="flex items-center gap-4">
+          <ClientSelector />
           <button className="p-2 rounded-lg hover:bg-gray-100 relative">
             <Bell size={20} className="text-gray-600" />
             <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>

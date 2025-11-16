@@ -1,12 +1,13 @@
 import React from 'react';
-import { 
-  LayoutDashboard, 
-  Users, 
-  AlertTriangle, 
-  Shield, 
+import {
+  LayoutDashboard,
+  Users,
+  AlertTriangle,
+  Shield,
   FileText,
-  Settings, 
-  Building2
+  Settings,
+  Building2,
+  Briefcase
 } from 'lucide-react';
 
 function Sidebar({ currentView, onNavigate }) {
@@ -14,6 +15,7 @@ function Sidebar({ currentView, onNavigate }) {
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'clients', label: 'Clients', icon: Building2 },
     { id: 'workers', label: 'Workers', icon: Users },
+    { id: 'roles', label: 'Roles', icon: Briefcase },
     { id: 'hazards', label: 'Hazards', icon: AlertTriangle },
     { id: 'controls', label: 'Controls', icon: Shield },
     { id: 'reports', label: 'Reports', icon: FileText },

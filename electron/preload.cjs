@@ -3,7 +3,7 @@ const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('api', {
   // Workers
-  listWorkers: () => ipcRenderer.invoke('db:listWorkers'),
+  listWorkers: (clientId) => ipcRenderer.invoke('db:listWorkers', clientId),
   
   getWorker: (workerId) => 
     ipcRenderer.invoke('db:getWorker', workerId),
@@ -20,7 +20,11 @@ contextBridge.exposeInMainWorld('api', {
   addWorkerRole: (data) =>
      ipcRenderer.invoke('db:addWorkerRole', data),
 
-  listRoles:     () => ipcRenderer.invoke('db:listRoles'),
+  // Roles
+  listRoles: () => ipcRenderer.invoke('db:listRoles'),
+  createRole: (payload) => ipcRenderer.invoke('db:createRole', payload),
+  updateRole: (payload) => ipcRenderer.invoke('db:updateRole', payload),
+  deleteRole: (roleId) => ipcRenderer.invoke('db:deleteRole', roleId),
 
   // Assignment Engine
   recomputeWorker: (workerId) => 
@@ -86,8 +90,8 @@ contextBridge.exposeInMainWorld('api', {
     ipcRenderer.invoke('db:deleteControl', id),
 
   // Dashboard
-  dashboardSummary: () => 
-    ipcRenderer.invoke('db:dashboardSummary'),
+  dashboardSummary: (clientId) =>
+    ipcRenderer.invoke('db:dashboardSummary', clientId),
 
   // Client Setup
 
@@ -103,7 +107,14 @@ contextBridge.exposeInMainWorld('api', {
 
   setupClientFramework: (payload) => ipcRenderer.invoke('db:setupClientFramework', payload),
 
+  // Sites
+  createSite: (payload) => ipcRenderer.invoke('db:createSite', payload),
+  deleteSite: (siteId) => ipcRenderer.invoke('db:deleteSite', siteId),
+
+  // Worker Role Management
+  removeWorkerRole: (workerRoleId) => ipcRenderer.invoke('db:removeWorkerRole', workerRoleId),
+
   // Reports
-  buildClient: (filters) => 
+  buildClient: (filters) =>
     ipcRenderer.invoke('report:db:buildClient', filters),
 });

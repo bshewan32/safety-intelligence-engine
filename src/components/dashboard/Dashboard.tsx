@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { TrendingUp, AlertTriangle, CheckCircle, Clock } from 'lucide-react';
+import { useClient } from '../../context/ClientContext';
 
 export default function Dashboard() {
+  const { activeClient } = useClient();
+
   const [summary, setSummary] = useState({
     rbcs: 0,
     compliance: 0,
@@ -10,8 +13,13 @@ export default function Dashboard() {
   });
 
   useEffect(() => {
-    window.api.dashboardSummary().then(setSummary);
-  }, []);
+    loadDashboard();
+  }, [activeClient]); // Reload when client changes
+
+  const loadDashboard = async () => {
+    const data = await window.api.dashboardSummary(activeClient?.id);
+    setSummary(data);
+  };
 
   return (
     <div className="space-y-6">

@@ -25,9 +25,53 @@ export function handleIPC(ipc: IpcMain, win: BrowserWindow) {
     });
   });
 
+  // ========================================
+  // ROLES
+  // ========================================
+
   // List roles for dropdowns
   ipc.handle('db:listRoles', async () => {
     return await prisma.role.findMany({ orderBy: { name: 'asc' } });
+  });
+
+  // Create role
+  ipc.handle('db:createRole', async (_e, payload: { name: string; description?: string | null; activityPackage?: string | null }) => {
+    const { name, description, activityPackage } = payload || {};
+    if (!name?.trim()) throw new Error('Role name is required');
+
+    return await prisma.role.create({
+      data: {
+        name: name.trim(),
+        description: description || null,
+        activityPackage: activityPackage || null,
+      },
+    });
+  });
+
+  // Update role
+  ipc.handle('db:updateRole', async (_e, payload: { id: string; name: string; description?: string | null; activityPackage?: string | null }) => {
+    const { id, name, description, activityPackage } = payload || {};
+    if (!id) throw new Error('Role id is required');
+    if (!name?.trim()) throw new Error('Role name is required');
+
+    return await prisma.role.update({
+      where: { id },
+      data: {
+        name: name.trim(),
+        description: description || null,
+        activityPackage: activityPackage || null,
+      },
+    });
+  });
+
+  // Delete role
+  ipc.handle('db:deleteRole', async (_e, roleId: string) => {
+    if (!roleId) throw new Error('Role id is required');
+
+    // This will fail if there are workers with this role due to foreign key constraints
+    return await prisma.role.delete({
+      where: { id: roleId },
+    });
   });
 
   ipc.handle('db:getWorker', async (_e, workerId: string) => {
@@ -851,9 +895,16 @@ export function handleIPC(ipc: IpcMain, win: BrowserWindow) {
       return await prisma.client.findUnique({
         where: { id: clientId },
         include: {
-          sites: true,
+          sites: {
+            orderBy: { name: 'asc' }
+          },
           workerRoles: {
-            include: { worker: true, role: true }
+            include: {
+              worker: true,
+              role: true,
+              site: true
+            },
+            orderBy: { startAt: 'desc' }
           }
         }
       });
@@ -907,6 +958,52 @@ ipc.handle('db:createClient', async (_e, payload: { name: string }) => {
       return await prisma.client.delete({ where: { id: clientId } });
     } catch (err) {
       console.error('deleteClient failed', err);
+      throw err;
+    }
+  });
+
+  // ========================================
+  // SITES
+  // ========================================
+
+  // Create site
+  ipc.handle('db:createSite', async (_e, payload: { clientId: string; name: string }) => {
+    try {
+      const { clientId, name } = payload;
+      if (!clientId || !name?.trim()) {
+        throw new Error('Client ID and site name are required');
+      }
+
+      return await prisma.site.create({
+        data: {
+          clientId,
+          name: name.trim(),
+        },
+      });
+    } catch (err) {
+      console.error('createSite failed', err);
+      throw err;
+    }
+  });
+
+  // Delete site
+  ipc.handle('db:deleteSite', async (_e, siteId: string) => {
+    try {
+      if (!siteId) throw new Error('Site ID is required');
+      return await prisma.site.delete({ where: { id: siteId } });
+    } catch (err) {
+      console.error('deleteSite failed', err);
+      throw err;
+    }
+  });
+
+  // Remove worker role assignment
+  ipc.handle('db:removeWorkerRole', async (_e, workerRoleId: string) => {
+    try {
+      if (!workerRoleId) throw new Error('Worker role ID is required');
+      return await prisma.workerRole.delete({ where: { id: workerRoleId } });
+    } catch (err) {
+      console.error('removeWorkerRole failed', err);
       throw err;
     }
   });

@@ -217,6 +217,12 @@ export function handleTrainingIPC(ipc: IpcMain) {
           const { controlId } = trainingMatch;
           const { workerId } = workerMatch;
 
+          // Skip if either is null
+          if (!controlId || !workerId) {
+            skipped++;
+            continue;
+          }
+
           // Parse dates
           const issuedDate = new Date(row.issuedDate);
           const expiryDate = row.expiryDate ? new Date(row.expiryDate) : null;

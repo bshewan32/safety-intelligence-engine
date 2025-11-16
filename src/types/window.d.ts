@@ -154,13 +154,27 @@ declare global {
   interface Window {
     api: {
       // Workers
-      listWorkers: () => Promise<Worker[]>;
+      listWorkers: (clientId?: string) => Promise<Worker[]>;
       getWorker: (workerId: string) => Promise<Worker | null>;
       getWorkerWithRequiredControls: (workerId: string) => Promise<Worker | null>;
       upsertWorker: (worker: Partial<Worker>) => Promise<Worker>;
 
-      // NEW: Roles + Worker creation
-      listRoles: () => Promise<Array<{ id: string; name: string }>>;
+      // Roles Management
+      listRoles: () => Promise<Role[]>;
+      createRole: (payload: {
+        name: string;
+        description?: string | null;
+        activityPackage?: string | null;
+      }) => Promise<Role>;
+      updateRole: (payload: {
+        id: string;
+        name: string;
+        description?: string | null;
+        activityPackage?: string | null;
+      }) => Promise<Role>;
+      deleteRole: (roleId: string) => Promise<Role>;
+
+      // Worker creation
       createWorker: (payload: {
         firstName: string;
         lastName: string;
@@ -251,6 +265,13 @@ declare global {
         jurisdiction?: string;
         isoAlignment?: boolean;
       }) => Promise<{ hazardsImported: number; controlsImported: number; mappingsCreated: number }>;
+
+      // Sites
+      createSite: (payload: { clientId: string; name: string }) => Promise<Site>;
+      deleteSite: (siteId: string) => Promise<Site>;
+
+      // Worker Role Management
+      removeWorkerRole: (workerRoleId: string) => Promise<any>;
 
       // Dashboard
       dashboardSummary: () => Promise<DashboardSummary>;

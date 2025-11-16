@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Building2, Plus, Search, Trash2, FileSpreadsheet } from 'lucide-react';
 import { ClientSetupWizard } from './ClientSetupWizard';
+import { ClientDetail } from './ClientDetail';
 import { TrainingImporter } from '@/components/training/TrainingImporter';
 
 interface ClientData {
@@ -20,6 +21,7 @@ export function ClientList() {
   const [showSetupWizard, setShowSetupWizard] = useState(false);
   const [showTrainingImporter, setShowTrainingImporter] = useState(false);
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
+  const [viewingClientId, setViewingClientId] = useState<string | null>(null);
 
   const loadClients = async () => {
     setLoading(true);
@@ -76,6 +78,19 @@ export function ClientList() {
     // Optionally reload clients to update worker counts
     loadClients();
   };
+
+  // If viewing a client detail, show that instead
+  if (viewingClientId) {
+    return (
+      <ClientDetail
+        clientId={viewingClientId}
+        onBack={() => {
+          setViewingClientId(null);
+          loadClients(); // Reload to get updated counts
+        }}
+      />
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -178,10 +193,7 @@ export function ClientList() {
                   {/* Existing Buttons */}
                   <div className="flex space-x-2">
                     <button
-                      onClick={() => {
-                        // TODO: Navigate to client detail view
-                        console.log('View client:', client.id);
-                      }}
+                      onClick={() => setViewingClientId(client.id)}
                       className="flex-1 px-3 py-2 text-sm bg-blue-50 text-blue-600 rounded hover:bg-blue-100 transition-colors"
                     >
                       View Details

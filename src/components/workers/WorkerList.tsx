@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Users, Plus, Search } from 'lucide-react';
 import { WorkerPassport } from './WorkerPassport';
+import { useClient } from '../../context/ClientContext';
 
 type UIWorker = {
   id: string;
@@ -15,6 +16,7 @@ type UIWorker = {
 };
 
 export function WorkerList() {
+  const { activeClient } = useClient();
   const [workers, setWorkers] = useState<UIWorker[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -26,14 +28,15 @@ export function WorkerList() {
   const loadWorkers = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await window.api?.listWorkers?.();
+      // Pass activeClient.id to filter by client
+      const data = await window.api?.listWorkers?.(activeClient?.id);
       setWorkers((data || []) as UIWorker[]);
     } catch (error) {
       console.error('Failed to load workers:', error);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [activeClient]);
 
   useEffect(() => {
     loadWorkers();

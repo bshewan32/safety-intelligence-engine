@@ -10,8 +10,25 @@ export function handleIPC(ipc, win) {
     // ========================================
     // WORKERS
     // ========================================
-    ipc.handle("db:listWorkers", async () => {
+    ipc.handle("db:listWorkers", async (_e, clientId) => {
+        const where = {};
+
+        // Filter by client if provided
+        if (clientId) {
+            where.roles = {
+                some: {
+                    clientId,
+                    // Only active assignments
+                    OR: [
+                        { endAt: null },
+                        { endAt: { gt: new Date() } }
+                    ]
+                }
+            };
+        }
+
         return await prisma.worker.findMany({
+            where,
             include: {
                 role: true, // legacy single role (to be deprecated)
                 roles: { include: { role: true, client: true, site: true } },
@@ -928,17 +945,35 @@ export function handleIPC(ipc, win) {
     // ========================================
     // DASHBOARD
     // ========================================
-    ipc.handle("db:dashboardSummary", async () => {
-        const totalRequired = await prisma.requiredControl.count();
+    ipc.handle("db:dashboardSummary", async (_e, clientId) => {
+        // Build filter for client-specific data
+        const workerFilter = clientId ? {
+            worker: {
+                roles: {
+                    some: {
+                        clientId,
+                        OR: [{ endAt: null }, { endAt: { gt: new Date() } }]
+                    }
+                }
+            }
+        } : {};
+
+        const totalRequired = await prisma.requiredControl.count({
+            where: workerFilter
+        });
         // Operational readiness: includes Temporary fixes (field-ready)
         const operational = await prisma.requiredControl.count({
             where: {
+                ...workerFilter,
                 status: { in: ["Satisfied", "Temporary"] },
             },
         });
         // Audit readiness: permanent evidence only (audit-ready)
         const audit = await prisma.requiredControl.count({
-            where: { status: "Satisfied" },
+            where: {
+                ...workerFilter,
+                status: "Satisfied"
+            },
         });
         const operationalReadiness = totalRequired
             ? Math.round((operational / totalRequired) * 100)
@@ -946,26 +981,30 @@ export function handleIPC(ipc, win) {
         const auditReadiness = totalRequired
             ? Math.round((audit / totalRequired) * 100)
             : 100;
-        // Get latest KPI data
+        // Get latest KPI data (KPIs are global for now, could be client-specific later)
         const kpi = await prisma.kPI.findFirst({
             orderBy: { period: "desc" },
         });
-        // Count hazards with high residual risk
+        // Count hazards with high residual risk (hazards are global)
         const openHazards = await prisma.hazard.count({
             where: { postControlRisk: { gt: 5 } },
         });
-        // Count evidence expiring within 30 days
+        // Count evidence expiring within 30 days (filtered by client)
         const expiringCount = await prisma.evidence.count({
             where: {
                 expiryDate: {
                     lte: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
                 },
                 status: "Valid",
+                requiredControl: workerFilter
             },
         });
-        // Count temporary fixes separately (these need replacement with permanent evidence)
+        // Count temporary fixes separately (filtered by client)
         const tempFixCount = await prisma.requiredControl.count({
-            where: { status: "Temporary" },
+            where: {
+                ...workerFilter,
+                status: "Temporary"
+            },
         });
         return {
             operationalReadiness,
@@ -975,6 +1014,8 @@ export function handleIPC(ipc, win) {
             expiringSoon: expiringCount,
             trifr: kpi?.hoursWorked ? (kpi.incidents / kpi.hoursWorked) * 1000000 : 0,
             crvRate: kpi?.crvRate || 0,
+            rbcs: operationalReadiness, // RBCS = Operational Readiness
+            compliance: auditReadiness, // Compliance = Audit Readiness
         };
     });
     // ========================================
@@ -1005,9 +1046,16 @@ export function handleIPC(ipc, win) {
             return await prisma.client.findUnique({
                 where: { id: clientId },
                 include: {
-                    sites: true,
+                    sites: {
+                        orderBy: { name: 'asc' }
+                    },
                     workerRoles: {
-                        include: { worker: true, role: true },
+                        include: {
+                            worker: true,
+                            role: true,
+                            site: true
+                        },
+                        orderBy: { startAt: 'desc' }
                     },
                 },
             });
@@ -1056,6 +1104,52 @@ export function handleIPC(ipc, win) {
         }
         catch (err) {
             console.error("deleteClient failed", err);
+            throw err;
+        }
+    });
+    // ========================================
+    // SITES
+    // ========================================
+    // Create site
+    ipc.handle("db:createSite", async (_e, payload) => {
+        try {
+            const { clientId, name } = payload;
+            if (!clientId || !name?.trim()) {
+                throw new Error("Client ID and site name are required");
+            }
+            return await prisma.site.create({
+                data: {
+                    clientId,
+                    name: name.trim(),
+                },
+            });
+        }
+        catch (err) {
+            console.error("createSite failed", err);
+            throw err;
+        }
+    });
+    // Delete site
+    ipc.handle("db:deleteSite", async (_e, siteId) => {
+        try {
+            if (!siteId)
+                throw new Error("Site ID is required");
+            return await prisma.site.delete({ where: { id: siteId } });
+        }
+        catch (err) {
+            console.error("deleteSite failed", err);
+            throw err;
+        }
+    });
+    // Remove worker role assignment
+    ipc.handle("db:removeWorkerRole", async (_e, workerRoleId) => {
+        try {
+            if (!workerRoleId)
+                throw new Error("Worker role ID is required");
+            return await prisma.workerRole.delete({ where: { id: workerRoleId } });
+        }
+        catch (err) {
+            console.error("removeWorkerRole failed", err);
             throw err;
         }
     });

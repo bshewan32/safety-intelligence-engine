@@ -44,22 +44,49 @@ export class AssignmentEngine {
             console.log(`Worker ${workerId} has no roles - skipping`);
             return;
         }
-        // MVP Logic: role → hazard categories. Extend by merging overlay hazards below.
-        const roleHazardMap = {
-            Electrician: ['Electrical', 'Heights', 'Confined Space'],
-            Scaffolder: ['Heights', 'Manual Handling', 'Structural'],
-            Supervisor: ['Management', 'Electrical', 'Heights'],
-            'General Labourer': ['Manual Handling', 'General'],
-            Welder: ['Hot Work', 'Confined Space', 'PPE'],
-        };
-        const relevantCategories = Array.from(new Set(roleNames.flatMap(n => roleHazardMap[n] || [])));
-        if (relevantCategories.length === 0) {
-            console.log(`No hazard categories mapped for roles: ${roleNames.join(', ')}`);
+        // Extract hazard categories from role activityPackage (new approach)
+        // Fall back to legacy hardcoded mapping if activityPackage is not set
+        const relevantCategories = new Set();
+        for (const workerRole of worker.roles || []) {
+            const role = workerRole.role;
+            if (!role)
+                continue;
+            // Try to parse activityPackage JSON
+            if (role.activityPackage) {
+                try {
+                    const pkg = JSON.parse(role.activityPackage);
+                    if (Array.isArray(pkg.hazardCategories)) {
+                        pkg.hazardCategories.forEach(cat => relevantCategories.add(cat));
+                    }
+                }
+                catch (e) {
+                    console.warn(`Failed to parse activityPackage for role ${role.name}:`, e);
+                }
+            }
+        }
+        // Legacy fallback: if no categories found in activityPackage, use hardcoded map
+        if (relevantCategories.size === 0) {
+            console.log(`No hazard categories in activityPackage, using legacy mapping for roles: ${roleNames.join(', ')}`);
+            const roleHazardMap = {
+                Electrician: ['Electrical', 'Heights', 'Confined Space'],
+                Scaffolder: ['Heights', 'Manual Handling', 'Structural'],
+                Supervisor: ['Management', 'Electrical', 'Heights'],
+                'General Labourer': ['Manual Handling', 'General'],
+                Welder: ['Hot Work', 'Confined Space', 'PPE'],
+            };
+            roleNames.forEach(name => {
+                const cats = roleHazardMap[name] || [];
+                cats.forEach(cat => relevantCategories.add(cat));
+            });
+        }
+        if (relevantCategories.size === 0) {
+            console.log(`No hazard categories found for roles: ${roleNames.join(', ')}`);
             return;
         }
+        const relevantCategoriesArray = Array.from(relevantCategories);
         // Base hazards from role categories (include HazardControl with linked control)
         const roleHazards = await prisma.hazard.findMany({
-            where: { category: { in: relevantCategories } },
+            where: { category: { in: relevantCategoriesArray } },
             include: {
                 controls: {
                     include: { control: true },
