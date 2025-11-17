@@ -3,6 +3,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'url';
 import { handleIPC } from './ipc.js';
 import { handleTrainingIPC } from './ipc-training.js';
+import { registerClientSetupHandlers } from './ipc-client-setup-enhanced.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const portableDir = process.env.ELECTRON_USER_DATA_DIR || path.join(process.cwd(), "userdata");
@@ -30,7 +31,10 @@ async function createWindow() {
     handleIPC(ipcMain, mainWindow);
     handleTrainingIPC(ipcMain);
 }
-app.whenReady().then(createWindow);
+app.whenReady().then(() => {
+    createWindow();
+    registerClientSetupHandlers(ipcMain);
+});
 app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') {
         app.quit();

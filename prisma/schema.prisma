@@ -7,6 +7,92 @@ datasource db {
   url      = "file:./si.db"
 }
 
+model ClientHazard {
+  id          String   @id @default(cuid())
+  clientId    String
+  hazardId    String   // Reference to master/global hazard (for updates/sync)
+  
+  // Cloned fields from Hazard (can be customized per client)
+  code        String
+  name        String
+  description String?
+  category    String
+  
+  // Client-customizable risk scoring
+  preControlRisk  Int      @default(0)  // Risk BEFORE controls applied
+  postControlRisk Int      @default(0)  // Risk AFTER controls applied
+  
+  // Client-specific settings
+  isActive    Boolean  @default(true)   // Client can disable hazards that don't apply
+  customNotes String?                   // Client-specific notes about this hazard
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  client   Client                @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  controls ClientHazardControl[] // Controls mapped to this client hazard
+  
+  @@unique([clientId, hazardId])  // One instance per client per global hazard
+  @@unique([clientId, code])      // Unique codes within a client
+  @@index([clientId, isActive])
+  @@index([clientId, category])
+}
+
+model ClientControl {
+  id          String   @id @default(cuid())
+  clientId    String
+  controlId   String   // Reference to master/global control (for updates/sync)
+  
+  // Cloned fields from Control (can be customized per client)
+  code        String
+  title       String
+  type        String   // Training, Document, Verification, PPE, etc.
+  description String?
+  reference   String?  // e.g., "AS/NZS 4836"
+  validityDays Int?
+  
+  // Client-specific settings
+  isRequired      Boolean  @default(true)  // Client can mark controls as optional
+  customEvidence  String?                  // Client-specific evidence requirements
+  customNotes     String?                  // Client-specific implementation notes
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  client  Client                @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  hazards ClientHazardControl[] // Hazards this control is mapped to
+  
+  @@unique([clientId, controlId])  // One instance per client per global control
+  @@unique([clientId, code])       // Unique codes within a client
+  @@index([clientId, isRequired])
+  @@index([clientId, type])
+}
+
+model ClientHazardControl {
+  id              String   @id @default(cuid())
+  clientHazardId  String
+  clientControlId String
+  
+  // Control effectiveness metadata
+  isCritical          Boolean  @default(false)  // Is this a critical control for this hazard?
+  priority            Int      @default(0)      // Display/evaluation order
+  effectivenessRating String?                   // High, Medium, Low effectiveness
+  
+  // Client notes
+  implementationNotes String?  // How this control is implemented for this hazard
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  clientHazard  ClientHazard  @relation(fields: [clientHazardId], references: [id], onDelete: Cascade)
+  clientControl ClientControl @relation(fields: [clientControlId], references: [id], onDelete: Cascade)
+  
+  @@unique([clientHazardId, clientControlId])  // One mapping per hazard-control pair
+  @@index([clientHazardId])
+  @@index([clientControlId])
+}
+
+
 model Worker {
   id         String   @id @default(cuid())
   employeeId String   @unique
@@ -48,10 +134,24 @@ enum RoleSource {
 model Client {
   id          String       @id @default(cuid())
   name        String       @unique
+  
+  // NEW: Industry and jurisdiction metadata
+  industry        String?  // Electrical, Construction, Manufacturing, etc.
+  jurisdiction    String?  // VIC, NSW, QLD, etc.
+  isoAlignment    Boolean  @default(false)  // ISO 45001 aligned?
+  
   createdAt   DateTime     @default(now())
+  
+  // EXISTING relations
   sites       Site[]
   workerRoles WorkerRole[]
+  
+  // NEW relations
+  clientHazards   ClientHazard[]
+  clientControls  ClientControl[]
 }
+
+
 
 model Site {
   id        String   @id @default(cuid())

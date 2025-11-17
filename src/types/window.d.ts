@@ -266,6 +266,21 @@ declare global {
         isoAlignment?: boolean;
       }) => Promise<{ hazardsImported: number; controlsImported: number; mappingsCreated: number }>;
 
+      previewClientHazards: (payload: {
+        industry?: string;
+        jurisdiction?: string;
+        isoAlignment?: boolean;
+      }) => Promise<any>;
+
+      setupClientWithRiskUniverse: (payload: {
+        name: string;
+        industry?: string;
+        jurisdiction?: string;
+        isoAlignment?: boolean;
+        hazardCustomizations?: Array<any>;
+      }) => Promise<any>;
+
+
       // Sites
       createSite: (payload: { clientId: string; name: string }) => Promise<Site>;
       deleteSite: (siteId: string) => Promise<Site>;

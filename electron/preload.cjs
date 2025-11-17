@@ -107,6 +107,11 @@ contextBridge.exposeInMainWorld('api', {
 
   setupClientFramework: (payload) => ipcRenderer.invoke('db:setupClientFramework', payload),
 
+  previewClientHazards: (payload) => ipcRenderer.invoke('db:previewClientHazards', payload),
+
+  setupClientWithRiskUniverse: (payload) => ipcRenderer.invoke('db:setupClientWithRiskUniverse', payload),
+
+
   // Sites
   createSite: (payload) => ipcRenderer.invoke('db:createSite', payload),
   deleteSite: (siteId) => ipcRenderer.invoke('db:deleteSite', siteId),
