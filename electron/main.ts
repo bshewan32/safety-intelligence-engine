@@ -4,6 +4,10 @@ import { fileURLToPath } from 'url';
 import { handleIPC } from './ipc.js';
 import { handleTrainingIPC } from './ipc-training.js';
 import { registerClientSetupHandlers } from './ipc-client-setup-enhanced.js';
+import { registerRiskMatrixHandlers } from './ipc-risk-matrix.js';
+
+
+registerRiskMatrixHandlers();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);

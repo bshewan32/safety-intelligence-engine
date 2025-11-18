@@ -1,9 +1,13 @@
-// Add these type definitions to your existing src/types/window.d.ts file
 
 export interface Window {
   api: {
-    // ... your existing methods ...
-
+    
+    getClientRiskMatrix: (clientId: string) => Promise<RiskMatrix>;
+    updateClientHazard: (hazardId: string, updates: HazardUpdate) => Promise<ClientHazard>;
+    addControlToHazard: (data: AddControlData) => Promise<void>;
+    removeControlFromHazard: (mappingId: string) => Promise<void>;
+    getAvailableControls: (clientId: string) => Promise<ClientControl[]>;
+    
     // Training Importer Methods
     parseCSV: (filePath: string) => Promise<{
       headers: string[];
@@ -83,4 +87,75 @@ export interface Window {
       error?: string;
     }>;
   };
+}
+
+interface RiskMatrix {
+  client: {
+    id: string;
+    name: string;
+    industry: string;
+    jurisdiction: string;
+  };
+  summary: {
+    totalHazards: number;
+    activeHazards: number;
+    hazardsWithGaps: number;
+    overallCoverage: number;
+  };
+  hazards: RiskMatrixHazard[];
+}
+
+interface RiskMatrixHazard {
+  id: string;
+  code: string;
+  name: string;
+  description: string;
+  category: string;
+  originalRiskLevel: string;
+  adjustedRiskLevel: string;
+  preControlRisk: number;
+  postControlRisk: number;
+  isActive: boolean;
+  isNotApplicable: boolean;
+  clientNotes: string | null;
+  controls: HazardControl[];
+  controlCoverage: {
+    total: number;
+    active: number;
+    critical: number;
+    percentage: number;
+  };
+}
+
+interface HazardControl {
+  mappingId: string;
+  controlId: string;
+  code: string;
+  name: string;
+  type: string;
+  effectivenessRating: string | null;
+  isCriticalControl: boolean;
+  isActive: boolean;
+}
+
+interface HazardUpdate {
+  adjustedRiskLevel?: string;
+  isActive?: boolean;
+  isNotApplicable?: boolean;
+  clientNotes?: string;
+}
+
+interface AddControlData {
+  clientHazardId: string;
+  clientControlId: string;
+  isCriticalControl: boolean;
+  effectivenessRating?: string;
+}
+
+interface AvailableControl {
+   id: string;
+   clientId: string;
+   controlId: string;
+   isActive: boolean;
+   control: { id: string; code: string; name: string; type: string; category: string; };
 }

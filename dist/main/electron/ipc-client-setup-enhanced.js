@@ -1,21 +1,18 @@
-// ============================================
-// CLIENT SETUP WIZARD - ENHANCED IPC HANDLERS
-// ============================================
-// Add these handlers to your existing electron/ipc.ts file
-//
-// These handlers support the new 6-step client setup wizard with:
-// - Hazard pack preview
-// - Client-specific risk universe creation
-// - Risk customization
-// - Full import statistics
 import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
+function calculateRiskLevel(riskScore) {
+    if (riskScore >= 20)
+        return 'Critical';
+    if (riskScore >= 12)
+        return 'High';
+    if (riskScore >= 6)
+        return 'Medium';
+    return 'Low';
+}
 export function registerClientSetupHandlers(ipc) {
     // ============================================
     // PREVIEW HAZARDS FOR CLIENT
     // ============================================
-    // Returns what hazards and controls WOULD be imported based on selections
-    // Does NOT create anything - just a preview
     ipc.handle('db:previewClientHazards', async (_e, payload) => {
         try {
             const { industry, jurisdiction, isoAlignment } = payload;
@@ -159,7 +156,8 @@ export function registerClientSetupHandlers(ipc) {
                         preControlRisk: customRisk,
                         postControlRisk: customRisk, // Will be recalculated based on controls
                         isActive: true,
-                        customNotes: customization?.notes
+                        clientNotes: customization?.notes,
+                        originalRiskLevel: calculateRiskLevel(customRisk),
                     }
                 });
                 importedHazards.push({
@@ -180,7 +178,7 @@ export function registerClientSetupHandlers(ipc) {
                     }
                     controlSet.get(hc.control.id).hazards.push({
                         hazardId: hazard.id,
-                        isCritical: hc.isCritical,
+                        isCriticalControl: hc.isCritical,
                         priority: hc.priority
                     });
                 });
@@ -217,7 +215,7 @@ export function registerClientSetupHandlers(ipc) {
                         description: globalControl.description,
                         reference: globalControl.reference,
                         validityDays: globalControl.validityDays,
-                        isRequired: true
+                        isOptional: true
                     }
                 });
                 importedControls.push({
@@ -237,7 +235,7 @@ export function registerClientSetupHandlers(ipc) {
                         data: {
                             clientHazardId: importedHazard.clientHazard.id,
                             clientControlId: clientControl.id,
-                            isCritical: mapping.isCritical,
+                            isCriticalControl: mapping.isCriticalControl,
                             priority: mapping.priority
                         }
                     });
@@ -247,7 +245,7 @@ export function registerClientSetupHandlers(ipc) {
             // Step 8: Calculate post-control risk scores
             // For each ClientHazard, if it has critical controls, reduce risk
             for (const { clientHazard } of importedHazards) {
-                const criticalControlCount = mappings.filter(m => m.clientHazardId === clientHazard.id && m.isCritical).length;
+                const criticalControlCount = mappings.filter(m => m.clientHazardId === clientHazard.id && m.isCriticalControl).length;
                 // Simple risk reduction: each critical control reduces risk by 1 level (max)
                 const riskReduction = Math.min(criticalControlCount, 2);
                 const postControlRisk = Math.max(0, clientHazard.preControlRisk - riskReduction);
@@ -343,70 +341,3 @@ async function getISOControls() {
     }
     return controls;
 }
-// ============================================
-// TYPE DEFINITIONS FOR WINDOW.D.TS
-// ============================================
-/*
-Add these to your src/types/window.d.ts:
-
-interface ClientSetupAPI {
-  // Preview what will be imported
-  previewClientHazards: (payload: {
-    industry?: string;
-    jurisdiction?: string;
-    isoAlignment?: boolean;
-  }) => Promise<{
-    hazards: Array<{
-      id: string;
-      code: string;
-      name: string;
-      description: string | null;
-      category: string;
-      preControlRisk: number;
-      postControlRisk: number;
-      controlCount: number;
-    }>;
-    controls: any[];
-    stats: {
-      totalHazards: number;
-      totalControls: number;
-      categories: string[];
-      fromIndustry: number;
-      fromJurisdiction: number;
-      fromISO: number;
-    };
-  }>;
-
-  // Create client with full risk universe
-  setupClientWithRiskUniverse: (payload: {
-    name: string;
-    industry?: string;
-    jurisdiction?: string;
-    isoAlignment?: boolean;
-    hazardCustomizations?: Array<{
-      hazardId: string;
-      customRisk?: number;
-      isActive: boolean;
-      notes?: string;
-    }>;
-  }) => Promise<{
-    client: any;
-    stats: {
-      hazardsImported: number;
-      controlsImported: number;
-      mappingsCreated: number;
-      hazardsDisabled: number;
-      riskCustomizations: number;
-    };
-  }>;
-}
-
-// Merge into existing window.api interface
-interface Window {
-  api: {
-    // ... existing methods ...
-    previewClientHazards: ClientSetupAPI['previewClientHazards'];
-    setupClientWithRiskUniverse: ClientSetupAPI['setupClientWithRiskUniverse'];
-  }
-}
-*/ 

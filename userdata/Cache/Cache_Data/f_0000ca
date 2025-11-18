@@ -1,0 +1,156 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/risk-matrix/RiskMatrixTable.tsx");import __vite__cjsImport0_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=fa9e1c00"; const jsxDEV = __vite__cjsImport0_react_jsxDevRuntime["jsxDEV"];
+import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== "undefined" && self instanceof WorkerGlobalScope;
+let prevRefreshReg;
+let prevRefreshSig;
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react can't detect preamble. Something is wrong."
+    );
+  }
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("C:/Users/Bill.S/safety-intelligence-engine/src/components/risk-matrix/RiskMatrixTable.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+export default function RiskMatrixTable({ hazards, onUpdateHazard, onAddControl, onRemoveControl, clientId }) {
+  if (hazards.length === 0) {
+    return /* @__PURE__ */ jsxDEV("div", { className: "text-center py-12 bg-gray-50 rounded-lg", children: /* @__PURE__ */ jsxDEV("p", { className: "text-gray-600", children: "No hazards match your filters" }, void 0, false, {
+      fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/risk-matrix/RiskMatrixTable.tsx",
+      lineNumber: 36,
+      columnNumber: 9
+    }, this) }, void 0, false, {
+      fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/risk-matrix/RiskMatrixTable.tsx",
+      lineNumber: 35,
+      columnNumber: 7
+    }, this);
+  }
+  return /* @__PURE__ */ jsxDEV("div", { className: "space-y-4", children: hazards.map(
+    (hazard) => /* @__PURE__ */ jsxDEV("div", { className: "border rounded-lg p-4 hover:shadow-md transition-shadow", children: /* @__PURE__ */ jsxDEV("div", { className: "flex items-start justify-between", children: [
+      /* @__PURE__ */ jsxDEV("div", { className: "flex-1", children: [
+        /* @__PURE__ */ jsxDEV("div", { className: "flex items-center gap-3 mb-2", children: [
+          /* @__PURE__ */ jsxDEV("span", { className: "text-sm font-mono text-gray-500", children: hazard.code }, void 0, false, {
+            fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/risk-matrix/RiskMatrixTable.tsx",
+            lineNumber: 48,
+            columnNumber: 17
+          }, this),
+          /* @__PURE__ */ jsxDEV("h3", { className: "text-lg font-semibold", children: hazard.name }, void 0, false, {
+            fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/risk-matrix/RiskMatrixTable.tsx",
+            lineNumber: 49,
+            columnNumber: 17
+          }, this),
+          /* @__PURE__ */ jsxDEV("span", { className: `px-2 py-1 text-xs rounded ${hazard.adjustedRiskLevel === "Critical" ? "bg-red-100 text-red-800" : hazard.adjustedRiskLevel === "High" ? "bg-orange-100 text-orange-800" : hazard.adjustedRiskLevel === "Medium" ? "bg-yellow-100 text-yellow-800" : "bg-green-100 text-green-800"}`, children: hazard.adjustedRiskLevel }, void 0, false, {
+            fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/risk-matrix/RiskMatrixTable.tsx",
+            lineNumber: 50,
+            columnNumber: 17
+          }, this)
+        ] }, void 0, true, {
+          fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/risk-matrix/RiskMatrixTable.tsx",
+          lineNumber: 47,
+          columnNumber: 15
+        }, this),
+        /* @__PURE__ */ jsxDEV("p", { className: "text-sm text-gray-600 mb-3", children: hazard.description }, void 0, false, {
+          fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/risk-matrix/RiskMatrixTable.tsx",
+          lineNumber: 59,
+          columnNumber: 15
+        }, this),
+        /* @__PURE__ */ jsxDEV("div", { className: "flex items-center gap-4 text-sm", children: [
+          /* @__PURE__ */ jsxDEV("span", { className: "text-gray-600", children: [
+            "Controls: ",
+            hazard.controlCoverage.active,
+            " / ",
+            hazard.controlCoverage.total
+          ] }, void 0, true, {
+            fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/risk-matrix/RiskMatrixTable.tsx",
+            lineNumber: 63,
+            columnNumber: 17
+          }, this),
+          /* @__PURE__ */ jsxDEV("div", { className: "flex-1 max-w-xs bg-gray-200 rounded-full h-2", children: /* @__PURE__ */ jsxDEV(
+            "div",
+            {
+              className: `h-2 rounded-full ${hazard.controlCoverage.percentage === 100 ? "bg-green-500" : hazard.controlCoverage.percentage >= 50 ? "bg-yellow-500" : "bg-red-500"}`,
+              style: { width: `${hazard.controlCoverage.percentage}%` }
+            },
+            void 0,
+            false,
+            {
+              fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/risk-matrix/RiskMatrixTable.tsx",
+              lineNumber: 67,
+              columnNumber: 19
+            },
+            this
+          ) }, void 0, false, {
+            fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/risk-matrix/RiskMatrixTable.tsx",
+            lineNumber: 66,
+            columnNumber: 17
+          }, this),
+          /* @__PURE__ */ jsxDEV("span", { className: "text-gray-600", children: [
+            hazard.controlCoverage.percentage,
+            "%"
+          ] }, void 0, true, {
+            fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/risk-matrix/RiskMatrixTable.tsx",
+            lineNumber: 76,
+            columnNumber: 17
+          }, this)
+        ] }, void 0, true, {
+          fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/risk-matrix/RiskMatrixTable.tsx",
+          lineNumber: 62,
+          columnNumber: 15
+        }, this)
+      ] }, void 0, true, {
+        fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/risk-matrix/RiskMatrixTable.tsx",
+        lineNumber: 46,
+        columnNumber: 13
+      }, this),
+      /* @__PURE__ */ jsxDEV("div", { children: hazard.isNotApplicable ? /* @__PURE__ */ jsxDEV("span", { className: "px-3 py-1 bg-gray-100 text-gray-600 rounded text-sm", children: "N/A" }, void 0, false, {
+        fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/risk-matrix/RiskMatrixTable.tsx",
+        lineNumber: 83,
+        columnNumber: 13
+      }, this) : hazard.controlCoverage.percentage === 100 ? /* @__PURE__ */ jsxDEV("span", { className: "px-3 py-1 bg-green-100 text-green-800 rounded text-sm", children: "Complete" }, void 0, false, {
+        fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/risk-matrix/RiskMatrixTable.tsx",
+        lineNumber: 85,
+        columnNumber: 13
+      }, this) : /* @__PURE__ */ jsxDEV("span", { className: "px-3 py-1 bg-red-100 text-red-800 rounded text-sm", children: "Gap" }, void 0, false, {
+        fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/risk-matrix/RiskMatrixTable.tsx",
+        lineNumber: 87,
+        columnNumber: 13
+      }, this) }, void 0, false, {
+        fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/risk-matrix/RiskMatrixTable.tsx",
+        lineNumber: 81,
+        columnNumber: 13
+      }, this)
+    ] }, void 0, true, {
+      fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/risk-matrix/RiskMatrixTable.tsx",
+      lineNumber: 45,
+      columnNumber: 11
+    }, this) }, hazard.id, false, {
+      fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/risk-matrix/RiskMatrixTable.tsx",
+      lineNumber: 44,
+      columnNumber: 7
+    }, this)
+  ) }, void 0, false, {
+    fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/risk-matrix/RiskMatrixTable.tsx",
+    lineNumber: 42,
+    columnNumber: 5
+  }, this);
+}
+_c = RiskMatrixTable;
+var _c;
+$RefreshReg$(_c, "RiskMatrixTable");
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("C:/Users/Bill.S/safety-intelligence-engine/src/components/risk-matrix/RiskMatrixTable.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("C:/Users/Bill.S/safety-intelligence-engine/src/components/risk-matrix/RiskMatrixTable.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,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akI7QUFBQTtBQUFBO0FBQUE7QUFBQSxXQStDQTtBQUFBLEVBQ0QsS0FsREg7QUFBQTtBQUFBO0FBQUE7QUFBQSxTQW1EQTtBQUVKO0FBQUNDLEtBL0R1QnBCO0FBQWUsSUFBQW9CO0FBQUFDLGFBQUFELElBQUEiLCJuYW1lcyI6WyJSaXNrTWF0cml4VGFibGUiLCJoYXphcmRzIiwib25VcGRhdGVIYXphcmQiLCJvbkFkZENvbnRyb2wiLCJvblJlbW92ZUNvbnRyb2wiLCJjbGllbnRJZCIsImxlbmd0aCIsIm1hcCIsImhhemFyZCIsImNvZGUiLCJuYW1lIiwiYWRqdXN0ZWRSaXNrTGV2ZWwiLCJkZXNjcmlwdGlvbiIsImNvbnRyb2xDb3ZlcmFnZSIsImFjdGl2ZSIsInRvdGFsIiwicGVyY2VudGFnZSIsIndpZHRoIiwiaXNOb3RBcHBsaWNhYmxlIiwiaWQiLCJfYyIsIiRSZWZyZXNoUmVnJCJdLCJpZ25vcmVMaXN0IjpbXSwic291cmNlcyI6WyJSaXNrTWF0cml4VGFibGUudHN4Il0sInNvdXJjZXNDb250ZW50IjpbIi8vIHNyYy9jb21wb25lbnRzL3Jpc2stbWF0cml4L1Jpc2tNYXRyaXhUYWJsZS50c3hcclxuaW1wb3J0IFJlYWN0IGZyb20gJ3JlYWN0JztcclxuaW1wb3J0IHR5cGUgeyBSaXNrTWF0cml4SGF6YXJkLCBIYXphcmRVcGRhdGUgfSBmcm9tICcuLi8uLi90eXBlcy9yaXNrLW1hdHJpeCc7XHJcblxyXG5pbnRlcmZhY2UgUHJvcHMge1xyXG4gIGhhemFyZHM6IFJpc2tNYXRyaXhIYXphcmRbXTtcclxuICBvblVwZGF0ZUhhemFyZDogKGhhemFyZElkOiBzdHJpbmcsIHVwZGF0ZXM6IEhhemFyZFVwZGF0ZSkgPT4gdm9pZDtcclxuICBvbkFkZENvbnRyb2w6IChoYXphcmRJZDogc3RyaW5nLCBjb250cm9sSWQ6IHN0cmluZywgaXNDcml0aWNhbDogYm9vbGVhbikgPT4gdm9pZDtcclxuICBvblJlbW92ZUNvbnRyb2w6IChtYXBwaW5nSWQ6IHN0cmluZykgPT4gdm9pZDtcclxuICBjbGllbnRJZDogc3RyaW5nO1xyXG59XHJcblxyXG5leHBvcnQgZGVmYXVsdCBmdW5jdGlvbiBSaXNrTWF0cml4VGFibGUoeyBoYXphcmRzLCBvblVwZGF0ZUhhemFyZCwgb25BZGRDb250cm9sLCBvblJlbW92ZUNvbnRyb2wsIGNsaWVudElkIH06IFByb3BzKSB7XHJcbiAgaWYgKGhhemFyZHMubGVuZ3RoID09PSAwKSB7XHJcbiAgICByZXR1cm4gKFxyXG4gICAgICA8ZGl2IGNsYXNzTmFtZT1cInRleHQtY2VudGVyIHB5LTEyIGJnLWdyYXktNTAgcm91bmRlZC1sZ1wiPlxyXG4gICAgICAgIDxwIGNsYXNzTmFtZT1cInRleHQtZ3JheS02MDBcIj5ObyBoYXphcmRzIG1hdGNoIHlvdXIgZmlsdGVyczwvcD5cclxuICAgICAgPC9kaXY+XHJcbiAgICApO1xyXG4gIH1cclxuXHJcbiAgcmV0dXJuIChcclxuICAgIDxkaXYgY2xhc3NOYW1lPVwic3BhY2UteS00XCI+XHJcbiAgICAgIHtoYXphcmRzLm1hcChoYXphcmQgPT4gKFxyXG4gICAgICAgIDxkaXYga2V5PXtoYXphcmQuaWR9IGNsYXNzTmFtZT1cImJvcmRlciByb3VuZGVkLWxnIHAtNCBob3ZlcjpzaGFkb3ctbWQgdHJhbnNpdGlvbi1zaGFkb3dcIj5cclxuICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1zdGFydCBqdXN0aWZ5LWJldHdlZW5cIj5cclxuICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJmbGV4LTFcIj5cclxuICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXggaXRlbXMtY2VudGVyIGdhcC0zIG1iLTJcIj5cclxuICAgICAgICAgICAgICAgIDxzcGFuIGNsYXNzTmFtZT1cInRleHQtc20gZm9udC1tb25vIHRleHQtZ3JheS01MDBcIj57aGF6YXJkLmNvZGV9PC9zcGFuPlxyXG4gICAgICAgICAgICAgICAgPGgzIGNsYXNzTmFtZT1cInRleHQtbGcgZm9udC1zZW1pYm9sZFwiPntoYXphcmQubmFtZX08L2gzPlxyXG4gICAgICAgICAgICAgICAgPHNwYW4gY2xhc3NOYW1lPXtgcHgtMiBweS0xIHRleHQteHMgcm91bmRlZCAke1xyXG4gICAgICAgICAgICAgICAgICBoYXphcmQuYWRqdXN0ZWRSaXNrTGV2ZWwgPT09ICdDcml0aWNhbCcgPyAnYmctcmVkLTEwMCB0ZXh0LXJlZC04MDAnIDpcclxuICAgICAgICAgICAgICAgICAgaGF6YXJkLmFkanVzdGVkUmlza0xldmVsID09PSAnSGlnaCcgPyAnYmctb3JhbmdlLTEwMCB0ZXh0LW9yYW5nZS04MDAnIDpcclxuICAgICAgICAgICAgICAgICAgaGF6YXJkLmFkanVzdGVkUmlza0xldmVsID09PSAnTWVkaXVtJyA/ICdiZy15ZWxsb3ctMTAwIHRleHQteWVsbG93LTgwMCcgOlxyXG4gICAgICAgICAgICAgICAgICAnYmctZ3JlZW4tMTAwIHRleHQtZ3JlZW4tODAwJ1xyXG4gICAgICAgICAgICAgICAgfWB9PlxyXG4gICAgICAgICAgICAgICAgICB7aGF6YXJkLmFkanVzdGVkUmlza0xldmVsfVxyXG4gICAgICAgICAgICAgICAgPC9zcGFuPlxyXG4gICAgICAgICAgICAgIDwvZGl2PlxyXG4gICAgICAgICAgICAgIDxwIGNsYXNzTmFtZT1cInRleHQtc20gdGV4dC1ncmF5LTYwMCBtYi0zXCI+e2hhemFyZC5kZXNjcmlwdGlvbn08L3A+XHJcbiAgICAgICAgICAgICAgXHJcbiAgICAgICAgICAgICAgey8qIENvbnRyb2xzIHN1bW1hcnkgKi99XHJcbiAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJmbGV4IGl0ZW1zLWNlbnRlciBnYXAtNCB0ZXh0LXNtXCI+XHJcbiAgICAgICAgICAgICAgICA8c3BhbiBjbGFzc05hbWU9XCJ0ZXh0LWdyYXktNjAwXCI+XHJcbiAgICAgICAgICAgICAgICAgIENvbnRyb2xzOiB7aGF6YXJkLmNvbnRyb2xDb3ZlcmFnZS5hY3RpdmV9IC8ge2hhemFyZC5jb250cm9sQ292ZXJhZ2UudG90YWx9XHJcbiAgICAgICAgICAgICAgICA8L3NwYW4+XHJcbiAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXgtMSBtYXgtdy14cyBiZy1ncmF5LTIwMCByb3VuZGVkLWZ1bGwgaC0yXCI+XHJcbiAgICAgICAgICAgICAgICAgIDxkaXYgXHJcbiAgICAgICAgICAgICAgICAgICAgY2xhc3NOYW1lPXtgaC0yIHJvdW5kZWQtZnVsbCAke1xyXG4gICAgICAgICAgICAgICAgICAgICAgaGF6YXJkLmNvbnRyb2xDb3ZlcmFnZS5wZXJjZW50YWdlID09PSAxMDAgPyAnYmctZ3JlZW4tNTAwJyA6XHJcbiAgICAgICAgICAgICAgICAgICAgICBoYXphcmQuY29udHJvbENvdmVyYWdlLnBlcmNlbnRhZ2UgPj0gNTAgPyAnYmcteWVsbG93LTUwMCcgOlxyXG4gICAgICAgICAgICAgICAgICAgICAgJ2JnLXJlZC01MDAnXHJcbiAgICAgICAgICAgICAgICAgICAgfWB9XHJcbiAgICAgICAgICAgICAgICAgICAgc3R5bGU9e3sgd2lkdGg6IGAke2hhemFyZC5jb250cm9sQ292ZXJhZ2UucGVyY2VudGFnZX0lYCB9fVxyXG4gICAgICAgICAgICAgICAgICAvPlxyXG4gICAgICAgICAgICAgICAgPC9kaXY+XHJcbiAgICAgICAgICAgICAgICA8c3BhbiBjbGFzc05hbWU9XCJ0ZXh0LWdyYXktNjAwXCI+e2hhemFyZC5jb250cm9sQ292ZXJhZ2UucGVyY2VudGFnZX0lPC9zcGFuPlxyXG4gICAgICAgICAgICAgIDwvZGl2PlxyXG4gICAgICAgICAgICA8L2Rpdj5cclxuICAgICAgICAgICAgXHJcbiAgICAgICAgICAgIHsvKiBBY3Rpb25zICovfVxyXG4gICAgICAgICAgICA8ZGl2PlxyXG4gICAgICAgICAgICAgIHtoYXphcmQuaXNOb3RBcHBsaWNhYmxlID8gKFxyXG4gICAgICAgICAgICAgICAgPHNwYW4gY2xhc3NOYW1lPVwicHgtMyBweS0xIGJnLWdyYXktMTAwIHRleHQtZ3JheS02MDAgcm91bmRlZCB0ZXh0LXNtXCI+Ti9BPC9zcGFuPlxyXG4gICAgICAgICAgICAgICkgOiBoYXphcmQuY29udHJvbENvdmVyYWdlLnBlcmNlbnRhZ2UgPT09IDEwMCA/IChcclxuICAgICAgICAgICAgICAgIDxzcGFuIGNsYXNzTmFtZT1cInB4LTMgcHktMSBiZy1ncmVlbi0xMDAgdGV4dC1ncmVlbi04MDAgcm91bmRlZCB0ZXh0LXNtXCI+Q29tcGxldGU8L3NwYW4+XHJcbiAgICAgICAgICAgICAgKSA6IChcclxuICAgICAgICAgICAgICAgIDxzcGFuIGNsYXNzTmFtZT1cInB4LTMgcHktMSBiZy1yZWQtMTAwIHRleHQtcmVkLTgwMCByb3VuZGVkIHRleHQtc21cIj5HYXA8L3NwYW4+XHJcbiAgICAgICAgICAgICAgKX1cclxuICAgICAgICAgICAgPC9kaXY+XHJcbiAgICAgICAgICA8L2Rpdj5cclxuICAgICAgICA8L2Rpdj5cclxuICAgICAgKSl9XHJcbiAgICA8L2Rpdj5cclxuICApO1xyXG59Il0sImZpbGUiOiJDOi9Vc2Vycy9CaWxsLlMvc2FmZXR5LWludGVsbGlnZW5jZS1lbmdpbmUvc3JjL2NvbXBvbmVudHMvcmlzay1tYXRyaXgvUmlza01hdHJpeFRhYmxlLnRzeCJ9

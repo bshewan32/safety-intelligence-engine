@@ -3,6 +3,7 @@ import { Building2, Plus, Search, Trash2, FileSpreadsheet } from 'lucide-react';
 import { ClientSetupWizard } from './ClientSetupWizard';
 import { ClientDetail } from './ClientDetail';
 import { TrainingImporter } from '@/components/training/TrainingImporter';
+import ClientRiskMatrix from '@/pages/ClientRiskMatrix';
 
 interface ClientData {
   id: string;
@@ -22,6 +23,7 @@ export function ClientList() {
   const [showTrainingImporter, setShowTrainingImporter] = useState(false);
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
   const [viewingClientId, setViewingClientId] = useState<string | null>(null);
+  const [viewingRiskMatrixId, setViewingRiskMatrixId] = useState<string | null>(null);
 
   const loadClients = async () => {
     setLoading(true);
@@ -79,6 +81,20 @@ export function ClientList() {
     loadClients();
   };
 
+  const handleViewRiskMatrix = (clientId: string) => {
+    setViewingRiskMatrixId(clientId);
+  };
+
+  // If viewing risk matrix, show that instead
+  if (viewingRiskMatrixId) {
+    return (
+      <ClientRiskMatrix
+        clientId={viewingRiskMatrixId}
+        onBack={() => setViewingRiskMatrixId(null)}
+      />
+    );
+  }
+
   // If viewing a client detail, show that instead
   if (viewingClientId) {
     return (
@@ -88,6 +104,7 @@ export function ClientList() {
           setViewingClientId(null);
           loadClients(); // Reload to get updated counts
         }}
+        onViewRiskMatrix={handleViewRiskMatrix}
       />
     );
   }

@@ -8,86 +8,86 @@ datasource db {
 }
 
 model ClientHazard {
-  id          String   @id @default(cuid())
-  clientId    String
-  hazardId    String   // Reference to master/global hazard (for updates/sync)
+  id                String    @id @default(cuid())
+  clientId          String
+  hazardId          String
+  code              String
+  name              String
+  description       String?
+  category          String
   
-  // Cloned fields from Hazard (can be customized per client)
-  code        String
-  name        String
-  description String?
-  category    String
+  // Risk scoring
+  originalRiskLevel String              // ← ADD
+  adjustedRiskLevel String?             // ← ADD
+  preControlRisk    Int      @default(0)
+  postControlRisk   Int      @default(0)
   
-  // Client-customizable risk scoring
-  preControlRisk  Int      @default(0)  // Risk BEFORE controls applied
-  postControlRisk Int      @default(0)  // Risk AFTER controls applied
+  // Status
+  isActive          Boolean  @default(true)
+  isNotApplicable   Boolean  @default(false)  // ← ADD
+  clientNotes       String?                   // ← RENAME from customNotes
+  lastReviewedAt    DateTime?                 // ← ADD
   
-  // Client-specific settings
-  isActive    Boolean  @default(true)   // Client can disable hazards that don't apply
-  customNotes String?                   // Client-specific notes about this hazard
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
-  client   Client                @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  controls ClientHazardControl[] // Controls mapped to this client hazard
+  client   Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  controls ClientHazardControl[]
+  hazard   Hazard  @relation(fields: [hazardId], references: [id])  
   
-  @@unique([clientId, hazardId])  // One instance per client per global hazard
-  @@unique([clientId, code])      // Unique codes within a client
+  @@unique([clientId, hazardId])
+  @@unique([clientId, code])
   @@index([clientId, isActive])
   @@index([clientId, category])
 }
 
 model ClientControl {
-  id          String   @id @default(cuid())
-  clientId    String
-  controlId   String   // Reference to master/global control (for updates/sync)
+  id               String    @id @default(cuid())
+  clientId         String
+  controlId        String
+  code             String
+  title            String
+  type             String
+  description      String?
+  reference        String?
+  validityDays     Int?
   
-  // Cloned fields from Control (can be customized per client)
-  code        String
-  title       String
-  type        String   // Training, Document, Verification, PPE, etc.
-  description String?
-  reference   String?  // e.g., "AS/NZS 4836"
-  validityDays Int?
+  // Settings
+  isOptional       Boolean  @default(false)
+  isActive         Boolean  @default(true)    // ← ADD
+  customEvidence   String?
+  clientNotes      String?                    // ← RENAME from customNotes
   
-  // Client-specific settings
-  isRequired      Boolean  @default(true)  // Client can mark controls as optional
-  customEvidence  String?                  // Client-specific evidence requirements
-  customNotes     String?                  // Client-specific implementation notes
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
-  client  Client                @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  hazards ClientHazardControl[] // Hazards this control is mapped to
-  
-  @@unique([clientId, controlId])  // One instance per client per global control
-  @@unique([clientId, code])       // Unique codes within a client
-  @@index([clientId, isRequired])
+  client  Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  hazards ClientHazardControl[]
+  control Control @relation(fields: [controlId], references: [id])  
+
+  @@unique([clientId, controlId])
+  @@unique([clientId, code])
+  @@index([clientId, isActive])
   @@index([clientId, type])
 }
 
 model ClientHazardControl {
-  id              String   @id @default(cuid())
-  clientHazardId  String
-  clientControlId String
+  id                  String    @id @default(cuid())
+  clientHazardId      String
+  clientControlId     String
   
-  // Control effectiveness metadata
-  isCritical          Boolean  @default(false)  // Is this a critical control for this hazard?
-  priority            Int      @default(0)      // Display/evaluation order
-  effectivenessRating String?                   // High, Medium, Low effectiveness
+  isCriticalControl   Boolean  @default(false) 
+  priority            Int      @default(0)
+  effectivenessRating String?
+  implementationNotes String?
   
-  // Client notes
-  implementationNotes String?  // How this control is implemented for this hazard
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
 
   clientHazard  ClientHazard  @relation(fields: [clientHazardId], references: [id], onDelete: Cascade)
   clientControl ClientControl @relation(fields: [clientControlId], references: [id], onDelete: Cascade)
   
-  @@unique([clientHazardId, clientControlId])  // One mapping per hazard-control pair
+  @@unique([clientHazardId, clientControlId])
   @@index([clientHazardId])
   @@index([clientControlId])
 }
@@ -203,8 +203,8 @@ model Hazard {
   postControlRisk Int      @default(0)
   industryId      String?
   createdAt       DateTime @default(now())
-
   controls HazardControl[]
+  clientHazards ClientHazard[] 
 }
 
 model Control {
@@ -221,6 +221,7 @@ model Control {
   hazards  HazardControl[]
   required RequiredControl[]
   trainingMappings TrainingMapping[]
+  clientControls ClientControl[]
 }
 
 model HazardControl {
@@ -296,3 +297,4 @@ model TrainingMapping {
   @@index([trainingName])
   @@index([controlId])
 }
+

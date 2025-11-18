@@ -10,11 +10,13 @@ import {
   MapPin,
   Trash2,
   UserPlus,
+  LayoutGrid,
 } from 'lucide-react';
 
 interface ClientDetailProps {
   clientId: string;
   onBack: () => void;
+  onViewRiskMatrix?: (clientId: string) => void;
 }
 
 interface Client {
@@ -59,7 +61,7 @@ interface WorkerRoleWithDetails {
   } | null;
 }
 
-export function ClientDetail({ clientId, onBack }: ClientDetailProps) {
+export function ClientDetail({ clientId, onBack, onViewRiskMatrix }: ClientDetailProps) {
   const [client, setClient] = useState<Client | null>(null);
   const [loading, setLoading] = useState(true);
   const [editMode, setEditMode] = useState(false);
@@ -264,6 +266,19 @@ export function ClientDetail({ clientId, onBack }: ClientDetailProps) {
             </div>
           </div>
         </div>
+
+        {/* Action Buttons */}
+        {onViewRiskMatrix && (
+          <div className="mt-6 flex justify-end">
+            <button
+              onClick={() => onViewRiskMatrix(clientId)}
+              className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
+            >
+              <LayoutGrid size={20} />
+              <span>View Risk Matrix</span>
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Sites Section */}

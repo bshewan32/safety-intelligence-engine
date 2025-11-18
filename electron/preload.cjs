@@ -122,4 +122,12 @@ contextBridge.exposeInMainWorld('api', {
   // Reports
   buildClient: (filters) =>
     ipcRenderer.invoke('report:db:buildClient', filters),
+
+  // Risk Matrix
+  getClientRiskMatrix: (clientId) => ipcRenderer.invoke('db:getClientRiskMatrix', clientId),
+  updateClientHazard: (hazardId, updates) => ipcRenderer.invoke('db:updateClientHazard', hazardId, updates),
+  addControlToHazard: (data) => ipcRenderer.invoke('db:addControlToHazard', data),
+  removeControlFromHazard: (mappingId) => ipcRenderer.invoke('db:removeControlFromHazard', mappingId),
+  getAvailableControls: (clientId) => ipcRenderer.invoke('db:getAvailableControls', clientId),
+  
 });
