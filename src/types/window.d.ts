@@ -127,6 +127,7 @@ interface Site {
   client?: Client;
 }
 
+// UPDATED: Added optional fields for backward compatibility
 interface DashboardSummary {
   operationalReadiness: number;
   auditReadiness: number;
@@ -135,6 +136,9 @@ interface DashboardSummary {
   expiringSoon: number;
   trifr: number;
   crvRate: number;
+  // Optional aliases for backward compatibility
+  rbcs?: number;
+  compliance?: number;
 }
 
 interface FileData {
@@ -227,6 +231,95 @@ interface AvailableControl {
   };
 }
 
+interface Gap {
+  id: string;
+  workerId: string;
+  workerName: string;
+  controlId: string;
+  controlCode: string;
+  controlName: string;
+  controlType: string;
+  status: 'Required' | 'Overdue' | 'Expiring';
+  riskLevel: 'Critical' | 'High' | 'Medium' | 'Low';
+  dueDate: Date | string | null;
+  daysUntilDue: number | null;
+  hazards: string[];
+  priority: number;
+}
+
+interface GapSummary {
+  totalGaps: number;
+  criticalGaps: number;
+  highGaps: number;
+  mediumGaps: number;
+  lowGaps: number;
+  expiringWithin30Days: number;
+  overdue: number;
+}
+
+interface GapDetail {
+  workerId: string;
+  workerName: string;
+  controlCode: string;
+  controlName: string;
+  status: 'Required' | 'Overdue' | 'Expiring';
+  riskLevel: 'Critical' | 'High' | 'Medium' | 'Low';
+  daysUntilDue?: number;
+  dueDate?: Date | string | null;
+  expiryDate?: Date | string | null;
+}
+
+interface GapCoverage {
+  overall: number;
+  byCriticality: {
+    critical: number;
+    high: number;
+    medium: number;
+    low: number;
+  };
+}
+
+interface GapRecommendation {
+  type: string;
+  priority: 'critical' | 'high' | 'medium' | 'low';
+  title: string;
+  description: string;
+  affectedWorkers?: number;
+  actions: string[];
+  controls?: GapDetail[];
+}
+
+interface GapAnalysisResult {
+  summary: GapSummary;
+  gaps: GapDetail[];
+  coverage: GapCoverage;
+  recommendations: GapRecommendation[];
+}
+
+interface GapAnalysis {
+  summary: GapSummary;
+  gaps: Gap[];
+  coverage: {
+    overall: number;
+    byCriticality: {
+      critical: number;
+      high: number;
+      medium: number;
+      low: number;
+    };
+  };
+  recommendations: Recommendation[];
+}
+
+interface Recommendation {
+  id: string;
+  type: 'missing_control' | 'expiring_evidence' | 'overdue_control';
+  priority: number;
+  title: string;
+  description: string;
+  affectedWorkers: number;
+  actions: string[];
+}
 
 declare global {
   interface Window {
@@ -272,7 +365,7 @@ declare global {
         endAt?: string | Date;
         notes?: string;
       }) => Promise<any>;
-
+      
       // Assignment / Recompute
       // Accept either a string id or a payload with various identifiers
       recomputeWorker: (
@@ -302,18 +395,19 @@ declare global {
         notes?: string;
       }) => Promise<Evidence>;
 
+      
       // File Operations
       selectEvidence: () => Promise<FileData | null>;
       openEvidence: (filePath: string) => Promise<void>;
       bulkAddEvidence: (payload: {
-      controlId: string;
-      workerIds: string[];
-      issuedDate: string | Date;
-      expiryDate?: string | Date;
-      notes?: string;
-      filePath?: string;
-      sourcePath?: string;
-    }) => Promise<{ created: number; filePath: string | null }>;
+        controlId: string;
+        workerIds: string[];
+        issuedDate: string | Date;
+        expiryDate?: string | Date;
+        notes?: string;
+        filePath?: string;
+        sourcePath?: string;
+      }) => Promise<{ created: number; filePath: string | null }>;
 
       // Hazards
       listHazards: () => Promise<Hazard[]>;
@@ -358,7 +452,6 @@ declare global {
         hazardCustomizations?: Array<any>;
       }) => Promise<any>;
 
-
       // Sites
       createSite: (payload: { clientId: string; name: string }) => Promise<Site>;
       deleteSite: (siteId: string) => Promise<Site>;
@@ -367,12 +460,12 @@ declare global {
       removeWorkerRole: (workerRoleId: string) => Promise<any>;
 
       // Dashboard
-      dashboardSummary: () => Promise<DashboardSummary>;
+      dashboardSummary: (clientId?: string) => Promise<DashboardSummary>;
 
       // Reports
       buildClient: (filters: any) => Promise<any>;
 
-       getClientRiskMatrix: (clientId: string) => Promise<RiskMatrix>;
+      getClientRiskMatrix: (clientId: string) => Promise<RiskMatrix>;
       updateClientHazard: (
         hazardId: string,
         updates: HazardUpdate
@@ -382,7 +475,12 @@ declare global {
       removeControlFromHazard: (mappingId: string) => Promise<void>;
 
       getAvailableControls: (clientId: string) => Promise<AvailableControl[]>;
-      
+
+      // Gap Analysis - ADDED
+      analyzeGaps: (clientId?: string) => Promise<GapAnalysisResult>;
+      analyzeClientGaps: (clientId: string) => Promise<GapAnalysis>;
+      analyzeWorkerGaps: (workerId: string) => Promise<GapAnalysis>;
+      getGapSummary: (clientId?: string) => Promise<GapSummary>;
     };
   }
 }

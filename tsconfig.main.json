@@ -5,8 +5,8 @@
     "skipLibCheck": true,
     "target": "ES2022",
     "module": "ESNext",
-    "moduleResolution": "node",           // Changed from "bundler" - use "node" for Electron main process
-    "outDir": "dist/main",                 // ✅ Fixed: removed "/electron/main.js"
+    "moduleResolution": "node",           
+    "outDir": "dist/main",                
     "rootDir": ".",
     "strict": true,
     "esModuleInterop": true,

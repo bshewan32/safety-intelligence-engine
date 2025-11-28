@@ -505,7 +505,28 @@ function AssignWorkerModal({
         window.api.listWorkers(),
         window.api.listRoles(),
       ]);
-      setWorkers(workersData || []);
+
+      // Filter out workers who are already assigned to a different client
+      // Only show workers who:
+      // 1. Have no active client assignments, OR
+      // 2. Are already assigned to THIS client (so they can get additional roles)
+      const availableWorkers = (workersData || []).filter((worker) => {
+        if (!worker.roles || worker.roles.length === 0) {
+          return true; // No assignments, available
+        }
+
+        // Check if worker has any active assignments to OTHER clients
+        const hasOtherClientAssignment = worker.roles.some((role) => {
+          // Check if this role is for a different client and is currently active
+          const isOtherClient = role.clientId && role.clientId !== clientId;
+          const isActive = !role.endAt || new Date(role.endAt) > new Date();
+          return isOtherClient && isActive;
+        });
+
+        return !hasOtherClientAssignment; // Only available if no other client assignments
+      });
+
+      setWorkers(availableWorkers);
       setRoles(rolesData || []);
     } catch (error) {
       console.error('Failed to load data:', error);

@@ -7,24 +7,57 @@ import crypto from 'crypto';
 import { buildClientReport } from './report.js';
 import { prisma } from '../src/db/prisma.js';
 import { AssignmentEngine } from '../src/core/AssignmentEngine.js';
+
+
+
 export function handleIPC(ipc: IpcMain, win: BrowserWindow) {
 
   // ========================================
   // WORKERS
   // ========================================
   
-  ipc.handle('db:listWorkers', async () => {
-    return await prisma.worker.findMany({
-      include: {
-        role: true, // legacy single role (to be deprecated)
-        roles: { include: { role: true, client: true, site: true } },
-      },
-      orderBy: {
-        lastName: 'asc',
-      },
-    });
-  });
+  ipc.handle('db:listWorkers', async (_e, clientId?: string) => {
+  const whereClause = clientId ? {
+    roles: {
+      some: {
+        clientId,
+        OR: [
+          { endAt: null },
+          { endAt: { gt: new Date() } }
+        ]
+      }
+    }
+  } : {};
 
+  return await prisma.worker.findMany({
+    where: whereClause,
+    include: {
+      roles: {
+        include: {
+          role: true,
+          client: {
+            select: { id: true, name: true }
+          },
+          site: {
+            select: { id: true, name: true }
+          }
+        },
+        orderBy: { startAt: 'desc' }
+      },
+      required: {
+        include: {
+          control: true,
+          evidence: {
+            where: { status: 'Valid' },
+            orderBy: { issuedDate: 'desc' },
+            take: 1
+          }
+        }
+      }
+    },
+    orderBy: { lastName: 'asc' }
+  });
+});
   // ========================================
   // ROLES
   // ========================================
@@ -260,7 +293,264 @@ export function handleIPC(ipc: IpcMain, win: BrowserWindow) {
     }
   });
 
-  // ========================================
+// ========================================
+// GAP ANALYSIS ENGINE
+// ========================================
+
+  ipc.handle('db:analyzeGaps', async (_e, clientId?: string) => {
+  try {
+    // Build where clause for client filtering
+    const whereClause: any = {};
+    if (clientId) {
+      whereClause.roles = {
+        some: {
+          clientId,
+          OR: [
+            { endAt: null },
+            { endAt: { gt: new Date() } }
+          ]
+        }
+      };
+    }
+
+    // Get all workers with their required controls
+    const workers = await prisma.worker.findMany({
+      where: whereClause,
+      include: {
+        required: {
+          include: {
+            control: true,
+            evidence: {
+              orderBy: [
+                { issuedDate: 'desc' },
+                { createdAt: 'desc' }
+              ],
+              take: 1 // Only get latest evidence
+            }
+          }
+        }
+      }
+    });
+
+    // Analyze gaps
+    const gaps: any[] = [];
+    const expiringControls: any[] = [];
+    const overdueControls: any[] = [];
+    
+    const riskLevels = {
+      Critical: 0,
+      High: 0,
+      Medium: 0,
+      Low: 0
+    };
+
+    const now = new Date();
+    const thirtyDaysFromNow = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+
+    // Process each worker
+    for (const worker of workers) {
+      for (const rc of worker.required) {
+        const latestEvidence = rc.evidence[0];
+        
+        // Determine risk level based on control type
+        let riskLevel: 'Critical' | 'High' | 'Medium' | 'Low' = 'Medium';
+        if (rc.control.type === 'Licence' || rc.control.type === 'Induction') {
+          riskLevel = 'Critical';
+        } else if (rc.control.type === 'Training' || rc.control.type === 'Verification') {
+          riskLevel = 'High';
+        } else if (rc.control.type === 'Document') {
+          riskLevel = 'Medium';
+        } else {
+          riskLevel = 'Low';
+        }
+
+        // Check for gaps
+        if (rc.status === 'Required' || rc.status === 'Overdue') {
+          gaps.push({
+            workerId: worker.id,
+            workerName: `${worker.firstName} ${worker.lastName}`,
+            controlCode: rc.control.code,
+            controlName: rc.control.title,
+            status: rc.status,
+            riskLevel,
+            dueDate: rc.dueDate
+          });
+          riskLevels[riskLevel]++;
+        }
+
+        // Check for expiring evidence
+        if (latestEvidence && latestEvidence.expiryDate) {
+          const expiryDate = new Date(latestEvidence.expiryDate);
+          const daysUntilExpiry = Math.floor((expiryDate.getTime() - now.getTime()) / (24 * 60 * 60 * 1000));
+
+          if (expiryDate <= thirtyDaysFromNow && expiryDate > now) {
+            expiringControls.push({
+              workerId: worker.id,
+              workerName: `${worker.firstName} ${worker.lastName}`,
+              controlCode: rc.control.code,
+              controlName: rc.control.title,
+              status: 'Expiring',
+              riskLevel,
+              daysUntilDue: daysUntilExpiry,
+              expiryDate: latestEvidence.expiryDate
+            });
+            
+            // Also add to gaps list
+            gaps.push({
+              workerId: worker.id,
+              workerName: `${worker.firstName} ${worker.lastName}`,
+              controlCode: rc.control.code,
+              controlName: rc.control.title,
+              status: 'Expiring',
+              riskLevel,
+              daysUntilDue: daysUntilExpiry
+            });
+            riskLevels[riskLevel]++;
+          } else if (expiryDate < now) {
+            overdueControls.push({
+              workerId: worker.id,
+              workerName: `${worker.firstName} ${worker.lastName}`,
+              controlCode: rc.control.code,
+              controlName: rc.control.title,
+              status: 'Overdue',
+              riskLevel
+            });
+          }
+        }
+      }
+    }
+
+    // Calculate coverage by criticality
+    const allControls = workers.flatMap(w => w.required);
+    const criticalControls = allControls.filter(rc => {
+      const type = rc.control.type;
+      return type === 'Licence' || type === 'Induction';
+    });
+    const highControls = allControls.filter(rc => {
+      const type = rc.control.type;
+      return type === 'Training' || type === 'Verification';
+    });
+    const mediumControls = allControls.filter(rc => rc.control.type === 'Document');
+    const lowControls = allControls.filter(rc => {
+      const type = rc.control.type;
+      return type !== 'Licence' && type !== 'Induction' && 
+             type !== 'Training' && type !== 'Verification' && 
+             type !== 'Document';
+    });
+
+    const calculateCoverage = (controls: any[]) => {
+      if (controls.length === 0) return 100;
+      const satisfied = controls.filter(rc => rc.status === 'Satisfied' || rc.status === 'Temporary').length;
+      return Math.round((satisfied / controls.length) * 100);
+    };
+
+    const coverage = {
+      overall: allControls.length > 0 
+        ? Math.round((allControls.filter(rc => rc.status === 'Satisfied' || rc.status === 'Temporary').length / allControls.length) * 100)
+        : 100,
+      byCriticality: {
+        critical: calculateCoverage(criticalControls),
+        high: calculateCoverage(highControls),
+        medium: calculateCoverage(mediumControls),
+        low: calculateCoverage(lowControls)
+      }
+    };
+
+    // Generate recommendations
+    const recommendations: any[] = [];
+
+    if (expiringControls.length > 0) {
+      recommendations.push({
+        type: 'expiring_evidence',
+        priority: 'high',
+        title: `${expiringControls.length} Control${expiringControls.length > 1 ? 's' : ''} Expiring Within 30 Days`,
+        description: `${expiringControls.length} worker(s) have evidence expiring soon. Schedule renewals to maintain compliance.`,
+        affectedWorkers: expiringControls.length,
+        actions: [
+          'Schedule refresher training sessions',
+          'Send renewal reminders to affected workers',
+          'Review and update training schedules'
+        ],
+        controls: expiringControls
+      });
+    }
+
+    if (riskLevels.Critical > 0) {
+      recommendations.push({
+        type: 'critical_gaps',
+        priority: 'critical',
+        title: `${riskLevels.Critical} Critical Control${riskLevels.Critical > 1 ? 's' : ''} Missing`,
+        description: `Critical controls (licences, inductions) are missing. These must be addressed immediately.`,
+        affectedWorkers: gaps.filter(g => g.riskLevel === 'Critical').length,
+        actions: [
+          'Restrict workers from high-risk activities',
+          'Schedule immediate training/licensing',
+          'Review role assignments'
+        ]
+      });
+    }
+
+    if (riskLevels.High > 0) {
+      recommendations.push({
+        type: 'high_priority_gaps',
+        priority: 'high',
+        title: `${riskLevels.High} High-Priority Gap${riskLevels.High > 1 ? 's' : ''}`,
+        description: `High-priority controls (training, verifications) need attention.`,
+        affectedWorkers: gaps.filter(g => g.riskLevel === 'High').length,
+        actions: [
+          'Schedule training sessions',
+          'Conduct verification activities',
+          'Update worker competencies'
+        ]
+      });
+    }
+
+    if (coverage.overall < 80) {
+      recommendations.push({
+        type: 'low_coverage',
+        priority: 'medium',
+        title: `Overall Coverage Below Target (${coverage.overall}%)`,
+        description: `Target is 80% minimum. Review control assignments and evidence collection.`,
+        actions: [
+          'Audit evidence collection processes',
+          'Review control assignments',
+          'Implement temporary fixes where appropriate'
+        ]
+      });
+    }
+
+    // Build summary
+    const summary = {
+      totalGaps: gaps.length,
+      criticalGaps: riskLevels.Critical,
+      highGaps: riskLevels.High,
+      mediumGaps: riskLevels.Medium,
+      lowGaps: riskLevels.Low,
+      expiringWithin30Days: expiringControls.length,
+      overdue: overdueControls.length
+    };
+
+    return {
+      summary,
+      gaps,
+      coverage,
+      recommendations: recommendations.sort((a, b) => {
+        const priorityOrder = { critical: 0, high: 1, medium: 2, low: 3 };
+        return (priorityOrder[a.priority as keyof typeof priorityOrder] || 99) - 
+               (priorityOrder[b.priority as keyof typeof priorityOrder] || 99);
+      })
+    };
+
+  } catch (error) {
+    console.error('Gap analysis failed:', error);
+    throw error;
+  }
+});
+
+
+
+
+ // ========================================
   // BULK EVIDENCE UPLOAD
   // ========================================
 
@@ -806,66 +1096,95 @@ export function handleIPC(ipc: IpcMain, win: BrowserWindow) {
   });
 
   // ========================================
-  // DASHBOARD
-  // ========================================
+// DASHBOARD
+// ========================================
 
-  ipc.handle('db:dashboardSummary', async () => {
-    const totalRequired = await prisma.requiredControl.count();
+ipc.handle('db:dashboardSummary', async (_e, clientId?: string) => {
+  // Build filter for client-specific data
+  const workerFilter = clientId ? {
+    worker: {
+      roles: {
+        some: {
+          clientId,
+          OR: [
+            { endAt: null },
+            { endAt: { gt: new Date() } }
+          ]
+        }
+      }
+    }
+  } : {};
 
-    // Operational readiness: includes Temporary fixes (field-ready)
-    const operational = await prisma.requiredControl.count({
-      where: {
-        status: { in: ['Satisfied', 'Temporary'] },
-      },
-    });
-
-    // Audit readiness: permanent evidence only (audit-ready)
-    const audit = await prisma.requiredControl.count({
-      where: { status: 'Satisfied' },
-    });
-
-    const operationalReadiness = totalRequired 
-      ? Math.round((operational / totalRequired) * 100) 
-      : 100;
-    const auditReadiness = totalRequired 
-      ? Math.round((audit / totalRequired) * 100) 
-      : 100;
-
-    // Get latest KPI data
-    const kpi = await prisma.kPI.findFirst({
-      orderBy: { period: 'desc' },
-    });
-
-    // Count hazards with high residual risk
-    const openHazards = await prisma.hazard.count({
-      where: { postControlRisk: { gt: 5 } },
-    });
-
-    // Count evidence expiring within 30 days
-    const expiringCount = await prisma.evidence.count({
-      where: {
-        expiryDate: {
-          lte: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-        },
-        status: 'Valid',
-      },
-    });
-
-    // Count temporary fixes separately (these need replacement with permanent evidence)
-    const tempFixCount = await prisma.requiredControl.count({
-      where: { status: 'Temporary' },
-    });
-
-    return {
-      operationalReadiness,
-      auditReadiness,
-      tempFixCount,
-      openHazards,
-      expiringSoon: expiringCount,
-      trifr: kpi?.hoursWorked ? (kpi.incidents / kpi.hoursWorked) * 1000000 : 0,
-      crvRate: kpi?.crvRate || 0,
-    };
+  const totalRequired = await prisma.requiredControl.count({
+    where: workerFilter
   });
+
+  // Operational readiness: includes Temporary fixes (field-ready)
+  const operational = await prisma.requiredControl.count({
+    where: {
+      ...workerFilter,
+      status: { in: ['Satisfied', 'Temporary'] },
+    },
+  });
+
+  // Audit readiness: permanent evidence only (audit-ready)
+  const audit = await prisma.requiredControl.count({
+    where: {
+      ...workerFilter,
+      status: 'Satisfied'
+    },
+  });
+
+  const operationalReadiness = totalRequired 
+    ? Math.round((operational / totalRequired) * 100) 
+    : 100;
+  const auditReadiness = totalRequired 
+    ? Math.round((audit / totalRequired) * 100) 
+    : 100;
+
+  // Get latest KPI data (KPIs are global for now)
+  const kpi = await prisma.kPI.findFirst({
+    orderBy: { period: 'desc' },
+  });
+
+  // Count hazards with high residual risk (hazards are global)
+  const openHazards = await prisma.hazard.count({
+    where: { postControlRisk: { gt: 5 } },
+  });
+
+  // Count evidence expiring within 30 days (filtered by client)
+  const expiringCount = await prisma.evidence.count({
+    where: {
+      expiryDate: {
+        lte: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+      },
+      status: 'Valid',
+      requiredControl: workerFilter
+    },
+  });
+
+  // Count temporary fixes separately (filtered by client)
+  const tempFixCount = await prisma.requiredControl.count({
+    where: {
+      ...workerFilter,
+      status: 'Temporary'
+    },
+  });
+
+  return {
+    operationalReadiness,
+    auditReadiness,
+    tempFixCount,
+    openHazards,
+    expiringSoon: expiringCount,
+    trifr: kpi?.hoursWorked 
+      ? (kpi.incidents / kpi.hoursWorked) * 1000000 
+      : 0,
+    crvRate: kpi?.crvRate || 0,
+    rbcs: operationalReadiness,  // ADD THIS for Dashboard.tsx
+    compliance: auditReadiness,   // ADD THIS for Dashboard.tsx
+  };
+});
 
   // ========================================
   // CLIENTS

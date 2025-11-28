@@ -123,11 +123,18 @@ contextBridge.exposeInMainWorld('api', {
   buildClient: (filters) =>
     ipcRenderer.invoke('report:db:buildClient', filters),
 
+  // Widgets
+
+  analyzeGaps: (clientId) => ipcRenderer.invoke('db:analyzeGaps', clientId),
   // Risk Matrix
   getClientRiskMatrix: (clientId) => ipcRenderer.invoke('db:getClientRiskMatrix', clientId),
   updateClientHazard: (hazardId, updates) => ipcRenderer.invoke('db:updateClientHazard', hazardId, updates),
   addControlToHazard: (data) => ipcRenderer.invoke('db:addControlToHazard', data),
   removeControlFromHazard: (mappingId) => ipcRenderer.invoke('db:removeControlFromHazard', mappingId),
   getAvailableControls: (clientId) => ipcRenderer.invoke('db:getAvailableControls', clientId),
+  analyzeClientGaps: (clientId) => ipcRenderer.invoke('db:analyzeClientGaps', clientId),
+  analyzeWorkerGaps: (workerId) => ipcRenderer.invoke('db:analyzeWorkerGaps', workerId),
+  getGapSummary: (clientId) => ipcRenderer.invoke('db:getGapSummary', clientId),
   
 });
+  

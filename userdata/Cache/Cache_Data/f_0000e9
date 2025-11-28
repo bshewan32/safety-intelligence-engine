@@ -1,0 +1,292 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/dashboard/GapsummaryWidget.tsx");import __vite__cjsImport0_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=fa9e1c00"; const jsxDEV = __vite__cjsImport0_react_jsxDevRuntime["jsxDEV"];
+import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== "undefined" && self instanceof WorkerGlobalScope;
+let prevRefreshReg;
+let prevRefreshSig;
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react can't detect preamble. Something is wrong."
+    );
+  }
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("C:/Users/Bill.S/safety-intelligence-engine/src/components/dashboard/GapsummaryWidget.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+import { AlertTriangle, CheckCircle, Clock, TrendingUp } from "/node_modules/.vite/deps/lucide-react.js?v=fa9e1c00";
+export default function GapSummaryWidget({ summary, onViewAllGaps, onScheduleRenewals }) {
+  const hasGaps = summary.totalGaps > 0;
+  const hasCritical = summary.criticalGaps > 0;
+  const hasExpiring = summary.expiringWithin30Days > 0;
+  if (!hasGaps) {
+    return /* @__PURE__ */ jsxDEV("div", { className: "bg-white rounded-lg shadow p-6 border-2 border-green-200", children: [
+      /* @__PURE__ */ jsxDEV("div", { className: "flex items-center gap-3 mb-4", children: [
+        /* @__PURE__ */ jsxDEV(CheckCircle, { className: "text-green-600", size: 28 }, void 0, false, {
+          fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/dashboard/GapsummaryWidget.tsx",
+          lineNumber: 48,
+          columnNumber: 11
+        }, this),
+        /* @__PURE__ */ jsxDEV("h3", { className: "text-lg font-semibold text-gray-900", children: "No Safety Gaps Detected" }, void 0, false, {
+          fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/dashboard/GapsummaryWidget.tsx",
+          lineNumber: 49,
+          columnNumber: 11
+        }, this)
+      ] }, void 0, true, {
+        fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/dashboard/GapsummaryWidget.tsx",
+        lineNumber: 47,
+        columnNumber: 9
+      }, this),
+      /* @__PURE__ */ jsxDEV("p", { className: "text-green-700 mb-4", children: "All workers have required controls in place. Excellent work!" }, void 0, false, {
+        fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/dashboard/GapsummaryWidget.tsx",
+        lineNumber: 51,
+        columnNumber: 9
+      }, this),
+      /* @__PURE__ */ jsxDEV("div", { className: "flex items-center gap-2 text-sm text-gray-600", children: [
+        /* @__PURE__ */ jsxDEV(TrendingUp, { size: 16, className: "text-green-600" }, void 0, false, {
+          fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/dashboard/GapsummaryWidget.tsx",
+          lineNumber: 55,
+          columnNumber: 11
+        }, this),
+        /* @__PURE__ */ jsxDEV("span", { children: "Maintain compliance through regular reviews" }, void 0, false, {
+          fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/dashboard/GapsummaryWidget.tsx",
+          lineNumber: 56,
+          columnNumber: 11
+        }, this)
+      ] }, void 0, true, {
+        fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/dashboard/GapsummaryWidget.tsx",
+        lineNumber: 54,
+        columnNumber: 9
+      }, this)
+    ] }, void 0, true, {
+      fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/dashboard/GapsummaryWidget.tsx",
+      lineNumber: 46,
+      columnNumber: 7
+    }, this);
+  }
+  return /* @__PURE__ */ jsxDEV("div", { className: `bg-white rounded-lg shadow p-6 border-2 ${hasCritical ? "border-red-300" : hasExpiring ? "border-orange-300" : "border-yellow-300"}`, children: [
+    /* @__PURE__ */ jsxDEV("div", { className: "flex items-center gap-3 mb-4", children: [
+      /* @__PURE__ */ jsxDEV(
+        AlertTriangle,
+        {
+          className: hasCritical ? "text-red-600" : hasExpiring ? "text-orange-600" : "text-yellow-600",
+          size: 28
+        },
+        void 0,
+        false,
+        {
+          fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/dashboard/GapsummaryWidget.tsx",
+          lineNumber: 67,
+          columnNumber: 9
+        },
+        this
+      ),
+      /* @__PURE__ */ jsxDEV("h3", { className: "text-lg font-semibold text-gray-900", children: "Safety Gaps Detected" }, void 0, false, {
+        fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/dashboard/GapsummaryWidget.tsx",
+        lineNumber: 71,
+        columnNumber: 9
+      }, this)
+    ] }, void 0, true, {
+      fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/dashboard/GapsummaryWidget.tsx",
+      lineNumber: 66,
+      columnNumber: 7
+    }, this),
+    /* @__PURE__ */ jsxDEV("div", { className: "mb-4", children: [
+      /* @__PURE__ */ jsxDEV("div", { className: "text-3xl font-bold text-gray-900 mb-2", children: summary.totalGaps }, void 0, false, {
+        fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/dashboard/GapsummaryWidget.tsx",
+        lineNumber: 76,
+        columnNumber: 9
+      }, this),
+      /* @__PURE__ */ jsxDEV("div", { className: "text-sm text-gray-600", children: "Total Safety Gaps" }, void 0, false, {
+        fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/dashboard/GapsummaryWidget.tsx",
+        lineNumber: 77,
+        columnNumber: 9
+      }, this)
+    ] }, void 0, true, {
+      fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/dashboard/GapsummaryWidget.tsx",
+      lineNumber: 75,
+      columnNumber: 7
+    }, this),
+    /* @__PURE__ */ jsxDEV("div", { className: "space-y-2 mb-4", children: [
+      summary.criticalGaps > 0 && /* @__PURE__ */ jsxDEV("div", { className: "flex items-center justify-between p-2 bg-red-50 rounded", children: [
+        /* @__PURE__ */ jsxDEV("span", { className: "text-sm font-medium text-red-900", children: "Critical" }, void 0, false, {
+          fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/dashboard/GapsummaryWidget.tsx",
+          lineNumber: 84,
+          columnNumber: 13
+        }, this),
+        /* @__PURE__ */ jsxDEV("span", { className: "text-sm font-bold text-red-900", children: summary.criticalGaps }, void 0, false, {
+          fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/dashboard/GapsummaryWidget.tsx",
+          lineNumber: 85,
+          columnNumber: 13
+        }, this)
+      ] }, void 0, true, {
+        fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/dashboard/GapsummaryWidget.tsx",
+        lineNumber: 83,
+        columnNumber: 9
+      }, this),
+      summary.highGaps > 0 && /* @__PURE__ */ jsxDEV("div", { className: "flex items-center justify-between p-2 bg-orange-50 rounded", children: [
+        /* @__PURE__ */ jsxDEV("span", { className: "text-sm font-medium text-orange-900", children: "High" }, void 0, false, {
+          fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/dashboard/GapsummaryWidget.tsx",
+          lineNumber: 90,
+          columnNumber: 13
+        }, this),
+        /* @__PURE__ */ jsxDEV("span", { className: "text-sm font-bold text-orange-900", children: summary.highGaps }, void 0, false, {
+          fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/dashboard/GapsummaryWidget.tsx",
+          lineNumber: 91,
+          columnNumber: 13
+        }, this)
+      ] }, void 0, true, {
+        fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/dashboard/GapsummaryWidget.tsx",
+        lineNumber: 89,
+        columnNumber: 9
+      }, this),
+      summary.mediumGaps > 0 && /* @__PURE__ */ jsxDEV("div", { className: "flex items-center justify-between p-2 bg-yellow-50 rounded", children: [
+        /* @__PURE__ */ jsxDEV("span", { className: "text-sm font-medium text-yellow-900", children: "Medium" }, void 0, false, {
+          fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/dashboard/GapsummaryWidget.tsx",
+          lineNumber: 96,
+          columnNumber: 13
+        }, this),
+        /* @__PURE__ */ jsxDEV("span", { className: "text-sm font-bold text-yellow-900", children: summary.mediumGaps }, void 0, false, {
+          fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/dashboard/GapsummaryWidget.tsx",
+          lineNumber: 97,
+          columnNumber: 13
+        }, this)
+      ] }, void 0, true, {
+        fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/dashboard/GapsummaryWidget.tsx",
+        lineNumber: 95,
+        columnNumber: 9
+      }, this),
+      summary.lowGaps > 0 && /* @__PURE__ */ jsxDEV("div", { className: "flex items-center justify-between p-2 bg-blue-50 rounded", children: [
+        /* @__PURE__ */ jsxDEV("span", { className: "text-sm font-medium text-blue-900", children: "Low" }, void 0, false, {
+          fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/dashboard/GapsummaryWidget.tsx",
+          lineNumber: 102,
+          columnNumber: 13
+        }, this),
+        /* @__PURE__ */ jsxDEV("span", { className: "text-sm font-bold text-blue-900", children: summary.lowGaps }, void 0, false, {
+          fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/dashboard/GapsummaryWidget.tsx",
+          lineNumber: 103,
+          columnNumber: 13
+        }, this)
+      ] }, void 0, true, {
+        fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/dashboard/GapsummaryWidget.tsx",
+        lineNumber: 101,
+        columnNumber: 9
+      }, this)
+    ] }, void 0, true, {
+      fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/dashboard/GapsummaryWidget.tsx",
+      lineNumber: 81,
+      columnNumber: 7
+    }, this),
+    hasExpiring && /* @__PURE__ */ jsxDEV("div", { className: "flex items-center gap-2 p-3 bg-orange-50 border border-orange-200 rounded-lg mb-4", children: [
+      /* @__PURE__ */ jsxDEV(Clock, { className: "text-orange-600 flex-shrink-0", size: 18 }, void 0, false, {
+        fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/dashboard/GapsummaryWidget.tsx",
+        lineNumber: 111,
+        columnNumber: 11
+      }, this),
+      /* @__PURE__ */ jsxDEV("span", { className: "text-sm text-orange-900", children: [
+        /* @__PURE__ */ jsxDEV("strong", { children: summary.expiringWithin30Days }, void 0, false, {
+          fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/dashboard/GapsummaryWidget.tsx",
+          lineNumber: 113,
+          columnNumber: 13
+        }, this),
+        " control",
+        summary.expiringWithin30Days > 1 ? "s" : "",
+        " expiring within 30 days"
+      ] }, void 0, true, {
+        fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/dashboard/GapsummaryWidget.tsx",
+        lineNumber: 112,
+        columnNumber: 11
+      }, this)
+    ] }, void 0, true, {
+      fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/dashboard/GapsummaryWidget.tsx",
+      lineNumber: 110,
+      columnNumber: 7
+    }, this),
+    summary.overdue > 0 && /* @__PURE__ */ jsxDEV("div", { className: "flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-lg mb-4", children: [
+      /* @__PURE__ */ jsxDEV(AlertTriangle, { className: "text-red-600 flex-shrink-0", size: 18 }, void 0, false, {
+        fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/dashboard/GapsummaryWidget.tsx",
+        lineNumber: 121,
+        columnNumber: 11
+      }, this),
+      /* @__PURE__ */ jsxDEV("span", { className: "text-sm text-red-900", children: [
+        /* @__PURE__ */ jsxDEV("strong", { children: summary.overdue }, void 0, false, {
+          fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/dashboard/GapsummaryWidget.tsx",
+          lineNumber: 123,
+          columnNumber: 13
+        }, this),
+        " control",
+        summary.overdue > 1 ? "s" : "",
+        " overdue"
+      ] }, void 0, true, {
+        fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/dashboard/GapsummaryWidget.tsx",
+        lineNumber: 122,
+        columnNumber: 11
+      }, this)
+    ] }, void 0, true, {
+      fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/dashboard/GapsummaryWidget.tsx",
+      lineNumber: 120,
+      columnNumber: 7
+    }, this),
+    /* @__PURE__ */ jsxDEV("div", { className: "flex gap-2", children: [
+      /* @__PURE__ */ jsxDEV(
+        "button",
+        {
+          onClick: onViewAllGaps,
+          className: "flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium",
+          children: "View All Gaps"
+        },
+        void 0,
+        false,
+        {
+          fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/dashboard/GapsummaryWidget.tsx",
+          lineNumber: 130,
+          columnNumber: 9
+        },
+        this
+      ),
+      hasExpiring && /* @__PURE__ */ jsxDEV(
+        "button",
+        {
+          onClick: onScheduleRenewals,
+          className: "flex-1 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors text-sm font-medium",
+          children: "Schedule Renewals"
+        },
+        void 0,
+        false,
+        {
+          fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/dashboard/GapsummaryWidget.tsx",
+          lineNumber: 137,
+          columnNumber: 9
+        },
+        this
+      )
+    ] }, void 0, true, {
+      fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/dashboard/GapsummaryWidget.tsx",
+      lineNumber: 129,
+      columnNumber: 7
+    }, this)
+  ] }, void 0, true, {
+    fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/dashboard/GapsummaryWidget.tsx",
+    lineNumber: 63,
+    columnNumber: 5
+  }, this);
+}
+_c = GapSummaryWidget;
+var _c;
+$RefreshReg$(_c, "GapSummaryWidget");
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("C:/Users/Bill.S/safety-intelligence-engine/src/components/dashboard/GapsummaryWidget.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("C:/Users/Bill.S/safety-intelligence-engine/src/components/dashboard/GapsummaryWidget.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,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L0QsdUJBQUMsVUFBSyxXQUFVLHdCQUNkO0FBQUEsK0JBQUMsWUFBUVosa0JBQVFZLFdBQWpCO0FBQUE7QUFBQTtBQUFBO0FBQUEsZUFBeUI7QUFBQSxRQUFTO0FBQUEsUUFBU1osUUFBUVksVUFBVSxJQUFJLE1BQU07QUFBQSxRQUFHO0FBQUEsV0FENUU7QUFBQTtBQUFBO0FBQUE7QUFBQSxhQUVBO0FBQUEsU0FKRjtBQUFBO0FBQUE7QUFBQTtBQUFBLFdBS0E7QUFBQSxJQUlGLHVCQUFDLFNBQUksV0FBVSxjQUNiO0FBQUE7QUFBQSxRQUFDO0FBQUE7QUFBQSxVQUNDLFNBQVNYO0FBQUFBLFVBQ1QsV0FBVTtBQUFBLFVBQTRHO0FBQUE7QUFBQSxRQUZ4SDtBQUFBO0FBQUE7QUFBQTtBQUFBO0FBQUE7QUFBQTtBQUFBO0FBQUEsTUFLQTtBQUFBLE1BQ0NNLGVBQ0M7QUFBQSxRQUFDO0FBQUE7QUFBQSxVQUNDLFNBQVNMO0FBQUFBLFVBQ1QsV0FBVTtBQUFBLFVBQWdIO0FBQUE7QUFBQSxRQUY1SDtBQUFBO0FBQUE7QUFBQTtBQUFBO0FBQUE7QUFBQTtBQUFBO0FBQUEsTUFLQTtBQUFBLFNBYko7QUFBQTtBQUFBO0FBQUE7QUFBQSxXQWVBO0FBQUEsT0FqRkY7QUFBQTtBQUFBO0FBQUE7QUFBQSxTQWtGQTtBQUVKO0FBQUNXLEtBNUd1QmQ7QUFBZ0IsSUFBQWM7QUFBQUMsYUFBQUQsSUFBQSIsIm5hbWVzIjpbIkFsZXJ0VHJpYW5nbGUiLCJDaGVja0NpcmNsZSIsIkNsb2NrIiwiVHJlbmRpbmdVcCIsIkdhcFN1bW1hcnlXaWRnZXQiLCJzdW1tYXJ5Iiwib25WaWV3QWxsR2FwcyIsIm9uU2NoZWR1bGVSZW5ld2FscyIsImhhc0dhcHMiLCJ0b3RhbEdhcHMiLCJoYXNDcml0aWNhbCIsImNyaXRpY2FsR2FwcyIsImhhc0V4cGlyaW5nIiwiZXhwaXJpbmdXaXRoaW4zMERheXMiLCJoaWdoR2FwcyIsIm1lZGl1bUdhcHMiLCJsb3dHYXBzIiwib3ZlcmR1ZSIsIl9jIiwiJFJlZnJlc2hSZWckIl0sImlnbm9yZUxpc3QiOltdLCJzb3VyY2VzIjpbIkdhcHN1bW1hcnlXaWRnZXQudHN4Il0sInNvdXJjZXNDb250ZW50IjpbImltcG9ydCBSZWFjdCBmcm9tICdyZWFjdCc7XHJcbmltcG9ydCB7IEFsZXJ0VHJpYW5nbGUsIENoZWNrQ2lyY2xlLCBDbG9jaywgVHJlbmRpbmdVcCB9IGZyb20gJ2x1Y2lkZS1yZWFjdCc7XHJcblxyXG5pbnRlcmZhY2UgR2FwU3VtbWFyeSB7XHJcbiAgdG90YWxHYXBzOiBudW1iZXI7XHJcbiAgY3JpdGljYWxHYXBzOiBudW1iZXI7XHJcbiAgaGlnaEdhcHM6IG51bWJlcjtcclxuICBtZWRpdW1HYXBzOiBudW1iZXI7XHJcbiAgbG93R2FwczogbnVtYmVyO1xyXG4gIGV4cGlyaW5nV2l0aGluMzBEYXlzOiBudW1iZXI7XHJcbiAgb3ZlcmR1ZTogbnVtYmVyO1xyXG59XHJcblxyXG5pbnRlcmZhY2UgUHJvcHMge1xyXG4gIHN1bW1hcnk6IEdhcFN1bW1hcnk7XHJcbiAgb25WaWV3QWxsR2FwczogKCkgPT4gdm9pZDtcclxuICBvblNjaGVkdWxlUmVuZXdhbHM6ICgpID0+IHZvaWQ7XHJcbn1cclxuXHJcbmV4cG9ydCBkZWZhdWx0IGZ1bmN0aW9uIEdhcFN1bW1hcnlXaWRnZXQoeyBzdW1tYXJ5LCBvblZpZXdBbGxHYXBzLCBvblNjaGVkdWxlUmVuZXdhbHMgfTogUHJvcHMpIHtcclxuICBjb25zdCBoYXNHYXBzID0gc3VtbWFyeS50b3RhbEdhcHMgPiAwO1xyXG4gIGNvbnN0IGhhc0NyaXRpY2FsID0gc3VtbWFyeS5jcml0aWNhbEdhcHMgPiAwO1xyXG4gIGNvbnN0IGhhc0V4cGlyaW5nID0gc3VtbWFyeS5leHBpcmluZ1dpdGhpbjMwRGF5cyA+IDA7XHJcblxyXG4gIGlmICghaGFzR2Fwcykge1xyXG4gICAgcmV0dXJuIChcclxuICAgICAgPGRpdiBjbGFzc05hbWU9XCJiZy13aGl0ZSByb3VuZGVkLWxnIHNoYWRvdyBwLTYgYm9yZGVyLTIgYm9yZGVyLWdyZWVuLTIwMFwiPlxyXG4gICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1jZW50ZXIgZ2FwLTMgbWItNFwiPlxyXG4gICAgICAgICAgPENoZWNrQ2lyY2xlIGNsYXNzTmFtZT1cInRleHQtZ3JlZW4tNjAwXCIgc2l6ZT17Mjh9IC8+XHJcbiAgICAgICAgICA8aDMgY2xhc3NOYW1lPVwidGV4dC1sZyBmb250LXNlbWlib2xkIHRleHQtZ3JheS05MDBcIj5ObyBTYWZldHkgR2FwcyBEZXRlY3RlZDwvaDM+XHJcbiAgICAgICAgPC9kaXY+XHJcbiAgICAgICAgPHAgY2xhc3NOYW1lPVwidGV4dC1ncmVlbi03MDAgbWItNFwiPlxyXG4gICAgICAgICAgQWxsIHdvcmtlcnMgaGF2ZSByZXF1aXJlZCBjb250cm9scyBpbiBwbGFjZS4gRXhjZWxsZW50IHdvcmshXHJcbiAgICAgICAgPC9wPlxyXG4gICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1jZW50ZXIgZ2FwLTIgdGV4dC1zbSB0ZXh0LWdyYXktNjAwXCI+XHJcbiAgICAgICAgICA8VHJlbmRpbmdVcCBzaXplPXsxNn0gY2xhc3NOYW1lPVwidGV4dC1ncmVlbi02MDBcIiAvPlxyXG4gICAgICAgICAgPHNwYW4+TWFpbnRhaW4gY29tcGxpYW5jZSB0aHJvdWdoIHJlZ3VsYXIgcmV2aWV3czwvc3Bhbj5cclxuICAgICAgICA8L2Rpdj5cclxuICAgICAgPC9kaXY+XHJcbiAgICApO1xyXG4gIH1cclxuXHJcbiAgcmV0dXJuIChcclxuICAgIDxkaXYgY2xhc3NOYW1lPXtgYmctd2hpdGUgcm91bmRlZC1sZyBzaGFkb3cgcC02IGJvcmRlci0yICR7XHJcbiAgICAgIGhhc0NyaXRpY2FsID8gJ2JvcmRlci1yZWQtMzAwJyA6IGhhc0V4cGlyaW5nID8gJ2JvcmRlci1vcmFuZ2UtMzAwJyA6ICdib3JkZXIteWVsbG93LTMwMCdcclxuICAgIH1gfT5cclxuICAgICAgPGRpdiBjbGFzc05hbWU9XCJmbGV4IGl0ZW1zLWNlbnRlciBnYXAtMyBtYi00XCI+XHJcbiAgICAgICAgPEFsZXJ0VHJpYW5nbGUgXHJcbiAgICAgICAgICBjbGFzc05hbWU9e2hhc0NyaXRpY2FsID8gJ3RleHQtcmVkLTYwMCcgOiBoYXNFeHBpcmluZyA/ICd0ZXh0LW9yYW5nZS02MDAnIDogJ3RleHQteWVsbG93LTYwMCd9IFxyXG4gICAgICAgICAgc2l6ZT17Mjh9IFxyXG4gICAgICAgIC8+XHJcbiAgICAgICAgPGgzIGNsYXNzTmFtZT1cInRleHQtbGcgZm9udC1zZW1pYm9sZCB0ZXh0LWdyYXktOTAwXCI+U2FmZXR5IEdhcHMgRGV0ZWN0ZWQ8L2gzPlxyXG4gICAgICA8L2Rpdj5cclxuXHJcbiAgICAgIHsvKiBUb3RhbCBHYXBzICovfVxyXG4gICAgICA8ZGl2IGNsYXNzTmFtZT1cIm1iLTRcIj5cclxuICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cInRleHQtM3hsIGZvbnQtYm9sZCB0ZXh0LWdyYXktOTAwIG1iLTJcIj57c3VtbWFyeS50b3RhbEdhcHN9PC9kaXY+XHJcbiAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJ0ZXh0LXNtIHRleHQtZ3JheS02MDBcIj5Ub3RhbCBTYWZldHkgR2FwczwvZGl2PlxyXG4gICAgICA8L2Rpdj5cclxuXHJcbiAgICAgIHsvKiBCcmVha2Rvd24gYnkgUmlzayBMZXZlbCAqL31cclxuICAgICAgPGRpdiBjbGFzc05hbWU9XCJzcGFjZS15LTIgbWItNFwiPlxyXG4gICAgICAgIHtzdW1tYXJ5LmNyaXRpY2FsR2FwcyA+IDAgJiYgKFxyXG4gICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJmbGV4IGl0ZW1zLWNlbnRlciBqdXN0aWZ5LWJldHdlZW4gcC0yIGJnLXJlZC01MCByb3VuZGVkXCI+XHJcbiAgICAgICAgICAgIDxzcGFuIGNsYXNzTmFtZT1cInRleHQtc20gZm9udC1tZWRpdW0gdGV4dC1yZWQtOTAwXCI+Q3JpdGljYWw8L3NwYW4+XHJcbiAgICAgICAgICAgIDxzcGFuIGNsYXNzTmFtZT1cInRleHQtc20gZm9udC1ib2xkIHRleHQtcmVkLTkwMFwiPntzdW1tYXJ5LmNyaXRpY2FsR2Fwc308L3NwYW4+XHJcbiAgICAgICAgICA8L2Rpdj5cclxuICAgICAgICApfVxyXG4gICAgICAgIHtzdW1tYXJ5LmhpZ2hHYXBzID4gMCAmJiAoXHJcbiAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXggaXRlbXMtY2VudGVyIGp1c3RpZnktYmV0d2VlbiBwLTIgYmctb3JhbmdlLTUwIHJvdW5kZWRcIj5cclxuICAgICAgICAgICAgPHNwYW4gY2xhc3NOYW1lPVwidGV4dC1zbSBmb250LW1lZGl1bSB0ZXh0LW9yYW5nZS05MDBcIj5IaWdoPC9zcGFuPlxyXG4gICAgICAgICAgICA8c3BhbiBjbGFzc05hbWU9XCJ0ZXh0LXNtIGZvbnQtYm9sZCB0ZXh0LW9yYW5nZS05MDBcIj57c3VtbWFyeS5oaWdoR2Fwc308L3NwYW4+XHJcbiAgICAgICAgICA8L2Rpdj5cclxuICAgICAgICApfVxyXG4gICAgICAgIHtzdW1tYXJ5Lm1lZGl1bUdhcHMgPiAwICYmIChcclxuICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1jZW50ZXIganVzdGlmeS1iZXR3ZWVuIHAtMiBiZy15ZWxsb3ctNTAgcm91bmRlZFwiPlxyXG4gICAgICAgICAgICA8c3BhbiBjbGFzc05hbWU9XCJ0ZXh0LXNtIGZvbnQtbWVkaXVtIHRleHQteWVsbG93LTkwMFwiPk1lZGl1bTwvc3Bhbj5cclxuICAgICAgICAgICAgPHNwYW4gY2xhc3NOYW1lPVwidGV4dC1zbSBmb250LWJvbGQgdGV4dC15ZWxsb3ctOTAwXCI+e3N1bW1hcnkubWVkaXVtR2Fwc308L3NwYW4+XHJcbiAgICAgICAgICA8L2Rpdj5cclxuICAgICAgICApfVxyXG4gICAgICAgIHtzdW1tYXJ5Lmxvd0dhcHMgPiAwICYmIChcclxuICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1jZW50ZXIganVzdGlmeS1iZXR3ZWVuIHAtMiBiZy1ibHVlLTUwIHJvdW5kZWRcIj5cclxuICAgICAgICAgICAgPHNwYW4gY2xhc3NOYW1lPVwidGV4dC1zbSBmb250LW1lZGl1bSB0ZXh0LWJsdWUtOTAwXCI+TG93PC9zcGFuPlxyXG4gICAgICAgICAgICA8c3BhbiBjbGFzc05hbWU9XCJ0ZXh0LXNtIGZvbnQtYm9sZCB0ZXh0LWJsdWUtOTAwXCI+e3N1bW1hcnkubG93R2Fwc308L3NwYW4+XHJcbiAgICAgICAgICA8L2Rpdj5cclxuICAgICAgICApfVxyXG4gICAgICA8L2Rpdj5cclxuXHJcbiAgICAgIHsvKiBFeHBpcmluZyBXYXJuaW5nICovfVxyXG4gICAgICB7aGFzRXhwaXJpbmcgJiYgKFxyXG4gICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1jZW50ZXIgZ2FwLTIgcC0zIGJnLW9yYW5nZS01MCBib3JkZXIgYm9yZGVyLW9yYW5nZS0yMDAgcm91bmRlZC1sZyBtYi00XCI+XHJcbiAgICAgICAgICA8Q2xvY2sgY2xhc3NOYW1lPVwidGV4dC1vcmFuZ2UtNjAwIGZsZXgtc2hyaW5rLTBcIiBzaXplPXsxOH0gLz5cclxuICAgICAgICAgIDxzcGFuIGNsYXNzTmFtZT1cInRleHQtc20gdGV4dC1vcmFuZ2UtOTAwXCI+XHJcbiAgICAgICAgICAgIDxzdHJvbmc+e3N1bW1hcnkuZXhwaXJpbmdXaXRoaW4zMERheXN9PC9zdHJvbmc+IGNvbnRyb2x7c3VtbWFyeS5leHBpcmluZ1dpdGhpbjMwRGF5cyA+IDEgPyAncycgOiAnJ30gZXhwaXJpbmcgd2l0aGluIDMwIGRheXNcclxuICAgICAgICAgIDwvc3Bhbj5cclxuICAgICAgICA8L2Rpdj5cclxuICAgICAgKX1cclxuXHJcbiAgICAgIHsvKiBPdmVyZHVlIFdhcm5pbmcgKi99XHJcbiAgICAgIHtzdW1tYXJ5Lm92ZXJkdWUgPiAwICYmIChcclxuICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXggaXRlbXMtY2VudGVyIGdhcC0yIHAtMyBiZy1yZWQtNTAgYm9yZGVyIGJvcmRlci1yZWQtMjAwIHJvdW5kZWQtbGcgbWItNFwiPlxyXG4gICAgICAgICAgPEFsZXJ0VHJpYW5nbGUgY2xhc3NOYW1lPVwidGV4dC1yZWQtNjAwIGZsZXgtc2hyaW5rLTBcIiBzaXplPXsxOH0gLz5cclxuICAgICAgICAgIDxzcGFuIGNsYXNzTmFtZT1cInRleHQtc20gdGV4dC1yZWQtOTAwXCI+XHJcbiAgICAgICAgICAgIDxzdHJvbmc+e3N1bW1hcnkub3ZlcmR1ZX08L3N0cm9uZz4gY29udHJvbHtzdW1tYXJ5Lm92ZXJkdWUgPiAxID8gJ3MnIDogJyd9IG92ZXJkdWVcclxuICAgICAgICAgIDwvc3Bhbj5cclxuICAgICAgICA8L2Rpdj5cclxuICAgICAgKX1cclxuXHJcbiAgICAgIHsvKiBBY3Rpb24gQnV0dG9ucyAqL31cclxuICAgICAgPGRpdiBjbGFzc05hbWU9XCJmbGV4IGdhcC0yXCI+XHJcbiAgICAgICAgPGJ1dHRvblxyXG4gICAgICAgICAgb25DbGljaz17b25WaWV3QWxsR2Fwc31cclxuICAgICAgICAgIGNsYXNzTmFtZT1cImZsZXgtMSBweC00IHB5LTIgYmctYmx1ZS02MDAgdGV4dC13aGl0ZSByb3VuZGVkLWxnIGhvdmVyOmJnLWJsdWUtNzAwIHRyYW5zaXRpb24tY29sb3JzIHRleHQtc20gZm9udC1tZWRpdW1cIlxyXG4gICAgICAgID5cclxuICAgICAgICAgIFZpZXcgQWxsIEdhcHNcclxuICAgICAgICA8L2J1dHRvbj5cclxuICAgICAgICB7aGFzRXhwaXJpbmcgJiYgKFxyXG4gICAgICAgICAgPGJ1dHRvblxyXG4gICAgICAgICAgICBvbkNsaWNrPXtvblNjaGVkdWxlUmVuZXdhbHN9XHJcbiAgICAgICAgICAgIGNsYXNzTmFtZT1cImZsZXgtMSBweC00IHB5LTIgYmctb3JhbmdlLTYwMCB0ZXh0LXdoaXRlIHJvdW5kZWQtbGcgaG92ZXI6Ymctb3JhbmdlLTcwMCB0cmFuc2l0aW9uLWNvbG9ycyB0ZXh0LXNtIGZvbnQtbWVkaXVtXCJcclxuICAgICAgICAgID5cclxuICAgICAgICAgICAgU2NoZWR1bGUgUmVuZXdhbHNcclxuICAgICAgICAgIDwvYnV0dG9uPlxyXG4gICAgICAgICl9XHJcbiAgICAgIDwvZGl2PlxyXG4gICAgPC9kaXY+XHJcbiAgKTtcclxufSJdLCJmaWxlIjoiQzovVXNlcnMvQmlsbC5TL3NhZmV0eS1pbnRlbGxpZ2VuY2UtZW5naW5lL3NyYy9jb21wb25lbnRzL2Rhc2hib2FyZC9HYXBzdW1tYXJ5V2lkZ2V0LnRzeCJ9

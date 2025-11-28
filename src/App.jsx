@@ -7,6 +7,7 @@ import { ControlLibrary } from './components/controls/ControlLibrary';
 import { RoleLibrary } from './components/roles/RoleLibrary';
 import { ReportBuilder } from './components/reports/ReportBuilder';
 import { ClientList } from './components/clients/ClientList';
+import { ClientProvider } from './contexts/ClientContext';
 
 function App() {
   const [currentView, setCurrentView] = useState('dashboard');
