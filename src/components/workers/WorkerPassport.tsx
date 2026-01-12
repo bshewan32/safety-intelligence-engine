@@ -1,3 +1,6 @@
+// src/components/workers/WorkerPassport.tsx
+// Updated WorkerPassport with Gap Analysis Integration
+
 import React, { useState, useEffect, JSX } from 'react';
 import {
   ArrowLeft,
@@ -9,6 +12,9 @@ import {
   Calendar,
   RefreshCw,
 } from 'lucide-react';
+import { GapAnalysisSection } from './GapAnalysisSection';
+import { QuickFixModal } from './QuickFixModal';
+import { RequiredControlExplanation } from './RequiredControlExplanation';
 
 // Local view-model types (avoid clashing with global Prisma/Window types)
 
@@ -61,6 +67,16 @@ type WorkerVM = {
   required: RequiredControlVM[];
 };
 
+interface Gap {
+  id: string;
+  controlId: string;
+  controlCode: string;
+  controlName: string;
+  controlType: string;
+  status: 'Required' | 'Overdue' | 'Expiring';
+  riskLevel: 'Critical' | 'High' | 'Medium' | 'Low';
+}
+
 type WorkerPassportProps = {
   workerId: string;
   onBack: () => void;
@@ -70,9 +86,12 @@ export function WorkerPassport({ workerId, onBack }: WorkerPassportProps) {
   const [worker, setWorker] = useState<WorkerVM | null>(null);
   const [loading, setLoading] = useState(true);
   const [showTempFixModal, setShowTempFixModal] = useState(false);
+  const [showQuickFixModal, setShowQuickFixModal] = useState(false);
   const [selectedRequiredControl, setSelectedRequiredControl] = useState<string | null>(null);
+  const [selectedGap, setSelectedGap] = useState<Gap | null>(null);
   const [tempFixNotes, setTempFixNotes] = useState('');
   const [tempFixDays, setTempFixDays] = useState(7);
+  const [refreshKey, setRefreshKey] = useState(0); // Force re-render of gap analysis
 
   useEffect(() => {
     loadWorker();
@@ -101,6 +120,7 @@ export function WorkerPassport({ workerId, onBack }: WorkerPassportProps) {
     try {
       await window.api.recomputeWorker({ workerId });
       await loadWorker();
+      setRefreshKey(prev => prev + 1); // Refresh gap analysis
     } catch (error) {
       console.error('Failed to recompute:', error);
       alert('Failed to recompute controls');
@@ -133,6 +153,7 @@ export function WorkerPassport({ workerId, onBack }: WorkerPassportProps) {
       });
 
       await loadWorker();
+      setRefreshKey(prev => prev + 1); // Refresh gap analysis
     } catch (error) {
       console.error('Failed to add evidence:', error);
       alert('Failed to upload evidence');
@@ -160,6 +181,7 @@ export function WorkerPassport({ workerId, onBack }: WorkerPassportProps) {
       setTempFixNotes('');
       setTempFixDays(7);
       await loadWorker();
+      setRefreshKey(prev => prev + 1); // Refresh gap analysis
     } catch (error) {
       console.error('Failed to create temporary fix:', error);
       alert('Failed to create temporary fix');
@@ -169,6 +191,18 @@ export function WorkerPassport({ workerId, onBack }: WorkerPassportProps) {
   const openTempFixModal = (requiredControlId: string) => {
     setSelectedRequiredControl(requiredControlId);
     setShowTempFixModal(true);
+  };
+
+  const handleFixGap = (gap: Gap) => {
+    setSelectedGap(gap);
+    setShowQuickFixModal(true);
+  };
+
+  const handleQuickFixSuccess = async () => {
+    setShowQuickFixModal(false);
+    setSelectedGap(null);
+    await loadWorker();
+    setRefreshKey(prev => prev + 1); // Refresh gap analysis
   };
 
   const getStatusBadge = (status: RiskStatus, tempValidUntil?: string | Date | null) => {
@@ -277,10 +311,17 @@ export function WorkerPassport({ workerId, onBack }: WorkerPassportProps) {
         </div>
       </div>
 
+      {/* Gap Analysis Section - NEW! */}
+      <GapAnalysisSection 
+        key={refreshKey} 
+        workerId={workerId} 
+        onFixGap={handleFixGap} 
+      />
+
       {/* Required Controls Matrix */}
       <div className="bg-white rounded-lg shadow">
         <div className="p-6 border-b border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-900">Required Controls</h2>
+          <h2 className="text-lg font-semibold text-gray-900">All Required Controls</h2>
           <p className="text-sm text-gray-500 mt-1">Based on role assignment: {getDisplayRole(worker)}</p>
         </div>
 
@@ -291,40 +332,51 @@ export function WorkerPassport({ workerId, onBack }: WorkerPassportProps) {
             </div>
           ) : (
             worker.required.map((rc) => (
-              <div key={rc.id} className="p-6 hover:bg-gray-50 transition-colors">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-3">
-                      <span className="font-mono text-sm text-gray-500">{rc.control.code}</span>
-                      {getStatusBadge(rc.status, rc.tempValidUntil)}
-                    </div>
-                    <h3 className="font-medium text-gray-900 mt-2">{rc.control.title}</h3>
-                    <p className="text-sm text-gray-500 mt-1">Type: {rc.control.type}</p>
+            <div key={rc.id} className="p-6 hover:bg-gray-50 transition-colors">
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <div className="flex items-center space-x-3">
+                    <span className="font-mono text-sm text-gray-500">{rc.control.code}</span>
+                    {getStatusBadge(rc.status, rc.tempValidUntil)}
+                  </div>
+                  <h3 className="font-medium text-gray-900 mt-2">{rc.control.title}</h3>
+                  <p className="text-sm text-gray-500 mt-1">Type: {rc.control.type}</p>
 
-                    {rc.tempNotes && (
-                      <div className="mt-2 p-3 bg-amber-50 rounded-lg border border-amber-200">
-                        <p className="text-sm text-amber-800">
-                          <strong>Temp Fix Notes:</strong> {rc.tempNotes}
-                        </p>
-                      </div>
-                    )}
+                  {/* ✨ Only show explanation if sources exist */}
+                  {rc.sources && (
+                    <RequiredControlExplanation
+                      sources={rc.sources}
+                      controlCode={rc.control.code}
+                      controlName={rc.control.title}
+                      status={rc.status}
+                    />
+                  )}
+
+                  {rc.tempNotes && (
+                    <div className="mt-2 p-3 bg-amber-50 rounded-lg border border-amber-200">
+                      <p className="text-sm text-amber-800">
+                        <strong>Temp Fix Notes:</strong> {rc.tempNotes}
+                      </p>
+                    </div>
+                  )}
 
                     {/* Evidence List */}
                     {(rc.evidence?.length ?? 0) > 0 && (
                       <div className="mt-3 space-y-2">
                         {rc.evidence.map((ev) => (
-                          <div key={ev.id} className="flex items-center justify-between p-2 bg-gray-50 rounded border border-gray-200">
-                            <div className="flex items-center space-x-2">
-                              <FileText size={16} className="text-gray-400" />
-                              <span className="text-sm text-gray-700">{ev.originalName || ev.type}</span>
-                              {ev.expiryDate && (
-                                <span className="text-xs text-gray-500">Expires: {toDateLabel(ev.expiryDate)}</span>
-                              )}
-                            </div>
-                            {ev.filePath && (
-                              <button onClick={() => window.api.openEvidence(ev.filePath!)} className="text-sm text-blue-600 hover:text-blue-800">
-                                Open
-                              </button>
+                          <div key={ev.id} className="flex items-center space-x-2 text-sm">
+                            <FileText size={16} className="text-gray-400" />
+                            <span className="text-gray-700">{ev.originalName || ev.filePath}</span>
+                            {ev.issuedDate && (
+                              <span className="text-gray-500">
+                                <Calendar size={14} className="inline mr-1" />
+                                {toDateLabel(ev.issuedDate)}
+                              </span>
+                            )}
+                            {ev.expiryDate && (
+                              <span className="text-gray-500">
+                                → {toDateLabel(ev.expiryDate)}
+                              </span>
                             )}
                           </div>
                         ))}
@@ -332,28 +384,22 @@ export function WorkerPassport({ workerId, onBack }: WorkerPassportProps) {
                     )}
                   </div>
 
-                  {/* Actions */}
+                  {/* Action Buttons */}
                   <div className="flex flex-col space-y-2 ml-4">
-                    {(rc.status === 'Required' || rc.status === 'Temporary') && (
-                      <>
-                        <button
-                          onClick={() => handleAddEvidence(rc.id)}
-                          className="flex items-center space-x-2 px-3 py-1.5 text-sm bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
-                        >
-                          <Upload size={14} />
-                          <span>Add Evidence</span>
-                        </button>
-                        {rc.status === 'Required' && (
-                          <button
-                            onClick={() => openTempFixModal(rc.id)}
-                            className="flex items-center space-x-2 px-3 py-1.5 text-sm bg-amber-600 text-white rounded hover:bg-amber-700 transition-colors"
-                          >
-                            <Clock size={14} />
-                            <span>Temp Fix</span>
-                          </button>
-                        )}
-                      </>
-                    )}
+                    <button
+                      onClick={() => handleAddEvidence(rc.id)}
+                      className="px-3 py-1.5 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors flex items-center space-x-1"
+                    >
+                      <Upload size={14} />
+                      <span>Add Evidence</span>
+                    </button>
+                    <button
+                      onClick={() => openTempFixModal(rc.id)}
+                      className="px-3 py-1.5 text-sm bg-amber-600 text-white rounded hover:bg-amber-700 transition-colors flex items-center space-x-1"
+                    >
+                      <Clock size={14} />
+                      <span>Temp Fix</span>
+                    </button>
                   </div>
                 </div>
               </div>
@@ -362,56 +408,75 @@ export function WorkerPassport({ workerId, onBack }: WorkerPassportProps) {
         </div>
       </div>
 
-      {/* Temporary Fix Modal */}
+      {/* Temporary Fix Modal (Legacy - for non-gap controls) */}
       {showTempFixModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-            <h3 className="text-lg font-semibold mb-4">Create Temporary Fix</h3>
-
-            <div className="space-y-4">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
+            <div className="p-6 border-b border-gray-200">
+              <h2 className="text-lg font-semibold text-gray-900">Create Temporary Fix</h2>
+            </div>
+            <div className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Valid For (days)</label>
-                <input
-                  type="number"
-                  value={tempFixDays}
-                  onChange={(e) => setTempFixDays(Math.max(1, Math.min(7, parseInt(e.target.value || '0', 10))))}
-                  min={1}
-                  max={7}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-                />
-                <p className="text-xs text-gray-500 mt-1">Maximum 7 days for operational readiness</p>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Notes / Justification</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Notes
+                </label>
                 <textarea
                   value={tempFixNotes}
                   onChange={(e) => setTempFixNotes(e.target.value)}
-                  rows={4}
-                  placeholder="Explain why temporary fix is needed and plan for permanent evidence..."
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                  placeholder="Describe the temporary arrangement..."
+                  rows={3}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Valid For (Days)
+                </label>
+                <select
+                  value={tempFixDays}
+                  onChange={(e) => setTempFixDays(Number(e.target.value))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value={7}>7 days</option>
+                  <option value={14}>14 days</option>
+                  <option value={30}>30 days</option>
+                  <option value={60}>60 days</option>
+                  <option value={90}>90 days</option>
+                </select>
+              </div>
             </div>
-
-            <div className="flex justify-end space-x-3 mt-6">
+            <div className="p-6 border-t border-gray-200 flex justify-end space-x-2">
               <button
                 onClick={() => {
                   setShowTempFixModal(false);
                   setSelectedRequiredControl(null);
                   setTempFixNotes('');
-                  setTempFixDays(7);
                 }}
                 className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
               >
                 Cancel
               </button>
-              <button onClick={handleCreateTempFix} className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors">
-                Create Temporary Fix
+              <button
+                onClick={handleCreateTempFix}
+                className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors"
+              >
+                Create Fix
               </button>
             </div>
           </div>
         </div>
+      )}
+
+      {/* Quick Fix Modal (for gaps) */}
+      {showQuickFixModal && selectedGap && (
+        <QuickFixModal
+          gap={selectedGap}
+          onClose={() => {
+            setShowQuickFixModal(false);
+            setSelectedGap(null);
+          }}
+          onSuccess={handleQuickFixSuccess}
+        />
       )}
     </div>
   );

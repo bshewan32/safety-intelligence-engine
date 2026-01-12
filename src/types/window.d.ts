@@ -66,18 +66,35 @@ interface Evidence {
   createdAt: Date | string;
 }
 
+interface RequiredControlSource {
+  hazardId: string;
+  hazardName: string;
+  hazardCode: string;
+  severity: 'Critical' | 'High' | 'Medium' | 'Low';
+  role: string;
+  roleId: string;
+  isMandatory: boolean;
+}
+
 interface RequiredControl {
   id: string;
   workerId: string;
   controlId: string;
-  status: string; // 'Required'|'Satisfied'|'Overdue'|'Temporary' (if you formalize enums later)
+  status: string;
   dueDate?: Date | string | null;
+  
+  // ✨ NEW
+  sources?: string;  // JSON string
+  severity?: 'Critical' | 'High' | 'Medium' | 'Low';
+  
+  tempNotes?: string;
   tempValidUntil?: Date | string | null;
-  tempEvidenceId?: string | null;
-  tempNotes?: string | null;
+  tempCreatedAt?: Date | string | null;
+  
   control: Control;
-  evidence: Evidence[];
+  evidence?: Evidence[];
 }
+
 
 interface Worker {
   id: string;
@@ -243,7 +260,8 @@ interface Gap {
   riskLevel: 'Critical' | 'High' | 'Medium' | 'Low';
   dueDate: Date | string | null;
   daysUntilDue: number | null;
-  hazards: string[];
+  hazards: string[];     // ✨ NEW: Hazard names
+  sources?: RequiredControlSource[];  // ✨ NEW: Full source objects
   priority: number;
 }
 
@@ -329,6 +347,7 @@ declare global {
       getWorker: (workerId: string) => Promise<Worker | null>;
       getWorkerWithRequiredControls: (workerId: string) => Promise<Worker | null>;
       upsertWorker: (worker: Partial<Worker>) => Promise<Worker>;
+      deleteWorker: (workerId: string) => Promise<Worker>;
 
       // Roles Management
       listRoles: () => Promise<Role[]>;

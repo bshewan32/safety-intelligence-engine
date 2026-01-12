@@ -220,6 +220,21 @@ export function handleIPC(ipc: IpcMain, win: BrowserWindow) {
     return { success: true };
   });
 
+  // Delete worker
+  ipc.handle('db:deleteWorker', async (_e, workerId: string) => {
+    try {
+      if (!workerId) throw new Error('Worker ID is required');
+      
+      // Delete worker (cascade will handle related records)
+      return await prisma.worker.delete({ 
+        where: { id: workerId } 
+      });
+    } catch (err) {
+      console.error('deleteWorker failed', err);
+      throw err;
+    }
+  });
+
   ipc.handle('db:upsertWorker', async (_e, worker: any) => {
     if (worker.id) {
       // Update existing worker

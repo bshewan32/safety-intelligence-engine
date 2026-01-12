@@ -20,6 +20,9 @@ contextBridge.exposeInMainWorld('api', {
   addWorkerRole: (data) =>
      ipcRenderer.invoke('db:addWorkerRole', data),
 
+  deleteWorker: (workerId) => 
+  ipcRenderer.invoke('db:deleteWorker', workerId),
+
   // Roles
   listRoles: () => ipcRenderer.invoke('db:listRoles'),
   createRole: (payload) => ipcRenderer.invoke('db:createRole', payload),

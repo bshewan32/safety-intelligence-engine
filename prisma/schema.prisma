@@ -238,21 +238,33 @@ model HazardControl {
 }
 
 model RequiredControl {
-  id        String    @id @default(cuid())
-  workerId  String
-  controlId String
-  status    String // Required, Satisfied, Overdue
-  dueDate   DateTime?
-
-  tempValidUntil DateTime?
-  tempEvidenceId String?
-  tempNotes      String?
-
-  worker   Worker     @relation(fields: [workerId], references: [id], onDelete: Cascade)
-  control  Control    @relation(fields: [controlId], references: [id], onDelete: Cascade)
+  id         String   @id @default(cuid())
+  workerId   String
+  controlId  String
+  status     String
+  dueDate    DateTime?
+  
+  // ✨ NEW: Source tracking
+  sources    String?  // JSON: Array of source objects
+  severity   String?  // "Critical" | "High" | "Medium" | "Low"
+  
+  // Existing temp fix fields...
+  tempNotes       String?
+  tempValidUntil  DateTime?
+  tempCreatedAt   DateTime?
+  tempEvidenceId  String?    
+  
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  
+  worker  Worker  @relation(fields: [workerId], references: [id], onDelete: Cascade)
+  control Control @relation(fields: [controlId], references: [id], onDelete: Cascade)
   evidence Evidence[]
-
+  
   @@unique([workerId, controlId])
+  @@index([workerId])
+  @@index([controlId])
+  @@index([severity])  // ✨ NEW
 }
 
 model Evidence {

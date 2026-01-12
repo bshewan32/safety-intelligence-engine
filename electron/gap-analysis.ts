@@ -1,26 +1,11 @@
 // electron/gap-analysis.ts
-// Gap Analysis Engine - The Intelligence Layer
-// FIXED VERSION with proper Prisma types
+// UPDATED: Risk-aware with GapAnalysisEngine class export (maintains API compatibility)
 
-import { prisma } from '../src/db/prisma.js';
+import { PrismaClient } from '@prisma/client';
 
-export interface Gap {
-  id: string;
-  workerId: string;
-  workerName: string;
-  controlId: string;
-  controlCode: string;
-  controlName: string;
-  controlType: string;
-  status: 'Required' | 'Overdue' | 'Expiring';
-  riskLevel: 'Critical' | 'High' | 'Medium' | 'Low';
-  dueDate: Date | null;
-  daysUntilDue: number | null;
-  hazards: string[];
-  priority: number;
-}
+const prisma = new PrismaClient();
 
-export interface GapSummary {
+interface GapSummary {
   totalGaps: number;
   criticalGaps: number;
   highGaps: number;
@@ -30,22 +15,24 @@ export interface GapSummary {
   overdue: number;
 }
 
-export interface GapAnalysis {
-  summary: GapSummary;
-  gaps: Gap[];
-  coverage: {
-    overall: number;
-    byCriticality: {
-      critical: number;
-      high: number;
-      medium: number;
-      low: number;
-    };
-  };
-  recommendations: Recommendation[];
+interface Gap {
+  id: string;
+  workerId: string;
+  workerName: string;
+  controlId: string;
+  controlCode: string;
+  controlName: string;
+  controlType: string;
+  status: 'Required' | 'Overdue' | 'Expiring';
+  riskLevel: 'Critical' | 'High' | 'Medium' | 'Low';
+  dueDate: Date | string | null;
+  daysUntilDue: number | null;
+  hazards: string[];  // NEW: List of hazard names
+  sources?: any[];     // NEW: Full source objects
+  priority: number;
 }
 
-export interface Recommendation {
+interface Recommendation {
   id: string;
   type: 'missing_control' | 'expiring_evidence' | 'overdue_control';
   priority: number;
@@ -55,106 +42,213 @@ export interface Recommendation {
   actions: string[];
 }
 
-export class GapAnalysisEngine {
+interface Coverage {
+  overall: number;
+  byCriticality: {
+    critical: number;
+    high: number;
+    medium: number;
+    low: number;
+  };
+}
+
+interface GapAnalysisResult {
+  summary: GapSummary;
+  gaps: Gap[];
+  coverage: Coverage;
+  recommendations: Recommendation[];
+}
+
+/**
+ * Parse sources from RequiredControl to extract severity and hazards
+ */
+function parseControlSources(sources?: string | null) {
+  if (!sources) return { severity: 'Low', hazards: [] };
   
-  /**
-   * Analyze gaps for a specific client
-   */
-  static async analyzeClient(clientId: string): Promise<GapAnalysis> {
-    // Get all workers for this client with their required controls
-    const workers = await prisma.worker.findMany({
-      where: {
-        roles: {
-          some: {
-            clientId,
-            OR: [
-              { endAt: null },
-              { endAt: { gt: new Date() } }
-            ]
-          }
-        }
-      },
-      include: {
-        required: {
-          where: {
-            status: { in: ['Required', 'Overdue', 'Temporary'] }
-          },
-          include: {
-            control: true,
-            evidence: {
-              where: { status: 'Valid' },
-              orderBy: { issuedDate: 'desc' },
-              take: 1
-            }
-          }
-        }
-      }
+  try {
+    const parsed = JSON.parse(sources);
+    if (!Array.isArray(parsed)) return { severity: 'Low', hazards: [] };
+    
+    // Extract hazard names
+    const hazards = parsed.map((s: any) => s.hazardName).filter(Boolean);
+    
+    // Get highest severity
+    const severities = parsed.map((s: any) => s.severity).filter(Boolean);
+    const severity = ['Critical', 'High', 'Medium', 'Low'].find(level =>
+      severities.includes(level)
+    ) || 'Low';
+    
+    return { severity, hazards, sources: parsed };
+  } catch (e) {
+    console.error('Failed to parse control sources:', e);
+    return { severity: 'Low', hazards: [] };
+  }
+}
+
+/**
+ * Generate actionable recommendations based on gaps
+ */
+function generateRecommendations(gaps: Gap[], summary: GapSummary): Recommendation[] {
+  const recommendations: Recommendation[] = [];
+
+  // Critical gaps
+  if (summary.criticalGaps > 0) {
+    const criticalGaps = gaps.filter(g => g.riskLevel === 'Critical');
+    const uniqueWorkers = new Set(criticalGaps.map(g => g.workerId)).size;
+    
+    recommendations.push({
+      id: 'critical-gaps',
+      type: 'missing_control',
+      priority: 100,
+      title: `${summary.criticalGaps} Critical Safety Gap${summary.criticalGaps > 1 ? 's' : ''}`,
+      description: `${uniqueWorkers} worker${uniqueWorkers > 1 ? 's' : ''} cannot work safely due to missing critical controls`,
+      affectedWorkers: uniqueWorkers,
+      actions: [
+        'Review critical gaps immediately',
+        'Upload evidence or create temporary fixes',
+        'Consider restricting workers until resolved',
+      ],
     });
+  }
 
-    const gaps: Gap[] = [];
-    const now = new Date();
-    const thirtyDaysFromNow = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+  // Overdue controls
+  if (summary.overdue > 0) {
+    const overdueGaps = gaps.filter(g => g.status === 'Overdue');
+    const uniqueWorkers = new Set(overdueGaps.map(g => g.workerId)).size;
+    
+    recommendations.push({
+      id: 'overdue-controls',
+      type: 'overdue_control',
+      priority: 90,
+      title: `${summary.overdue} Overdue Control${summary.overdue > 1 ? 's' : ''}`,
+      description: `Evidence has expired for ${uniqueWorkers} worker${uniqueWorkers > 1 ? 's' : ''}`,
+      affectedWorkers: uniqueWorkers,
+      actions: [
+        'Schedule renewals for expired controls',
+        'Upload updated evidence',
+        'Review worker operational status',
+      ],
+    });
+  }
 
-    // Analyze each worker's required controls
-    for (const worker of workers) {
-      for (const rc of worker.required) {
-        // Check if this is a gap
-        const isGap = rc.status === 'Required' || rc.status === 'Overdue';
-        const latestEvidence = rc.evidence[0];
-        const isExpiring = latestEvidence?.expiryDate 
-          && new Date(latestEvidence.expiryDate) <= thirtyDaysFromNow;
+  // Expiring soon
+  if (summary.expiringWithin30Days > 0) {
+    const expiringGaps = gaps.filter(g => g.status === 'Expiring');
+    const uniqueWorkers = new Set(expiringGaps.map(g => g.workerId)).size;
+    
+    recommendations.push({
+      id: 'expiring-controls',
+      type: 'expiring_evidence',
+      priority: 70,
+      title: `${summary.expiringWithin30Days} Control${summary.expiringWithin30Days > 1 ? 's' : ''} Expiring Soon`,
+      description: `${uniqueWorkers} worker${uniqueWorkers > 1 ? 's' : ''} need${uniqueWorkers === 1 ? 's' : ''} renewal within 30 days`,
+      affectedWorkers: uniqueWorkers,
+      actions: [
+        'Schedule renewals before expiry',
+        'Send reminders to affected workers',
+        'Plan for potential operational impact',
+      ],
+    });
+  }
 
-        if (isGap || isExpiring) {
-          // Get hazards for this control
-          const hazardControls = await prisma.hazardControl.findMany({
-            where: { controlId: rc.control.id },
-            include: { hazard: true }
-          });
+  return recommendations.sort((a, b) => b.priority - a.priority);
+}
 
-          // Determine risk level from associated hazards
-          const riskLevel = this.determineRiskLevel(hazardControls);
-          
-          // Calculate days until due
-          let daysUntilDue: number | null = null;
-          if (rc.dueDate) {
-            daysUntilDue = Math.floor((new Date(rc.dueDate).getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-          } else if (latestEvidence?.expiryDate) {
-            daysUntilDue = Math.floor((new Date(latestEvidence.expiryDate).getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-          }
-
-          // Determine status
-          let status: 'Required' | 'Overdue' | 'Expiring';
-          if (rc.status === 'Overdue') {
-            status = 'Overdue';
-          } else if (isExpiring) {
-            status = 'Expiring';
-          } else {
-            status = 'Required';
-          }
-
-          gaps.push({
-            id: rc.id,
-            workerId: worker.id,
-            workerName: `${worker.firstName} ${worker.lastName}`,
-            controlId: rc.control.id,
-            controlCode: rc.control.code,
-            controlName: rc.control.title,
-            controlType: rc.control.type,
-            status,
-            riskLevel,
-            dueDate: rc.dueDate,
-            daysUntilDue,
-            hazards: hazardControls.map(hc => hc.hazard.name),
-            priority: this.calculatePriority(riskLevel, daysUntilDue, status)
-          });
-        }
+/**
+ * GapAnalysisEngine class - maintains API compatibility
+ */
+export class GapAnalysisEngine {
+  /**
+   * Analyze compliance gaps for a client or worker
+   */
+  static async analyzeClient(clientId?: string, workerId?: string): Promise<GapAnalysisResult> {
+    const where: any = {};
+    
+    if (workerId) {
+      where.workerId = workerId;
+    } else if (clientId) {
+      // Get all workers for this client
+      const workerRoles = await prisma.workerRole.findMany({
+        where: { clientId },
+        select: { workerId: true },
+      });
+      const workerIds = [...new Set(workerRoles.map(wr => wr.workerId))];
+      if (workerIds.length > 0) {
+        where.workerId = { in: workerIds };
       }
     }
 
-    // Sort gaps by priority (highest first)
+    // Get all required controls with gaps
+    const requiredControls = await prisma.requiredControl.findMany({
+      where: {
+        ...where,
+        status: { in: ['Required', 'Overdue', 'Expiring'] },
+      },
+      include: {
+        worker: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            employeeId: true,
+          },
+        },
+        control: {
+          select: {
+            id: true,
+            code: true,
+            title: true,
+            type: true,
+          },
+        },
+      },
+    });
+
+    // Build gaps with severity from sources
+    const gaps: Gap[] = requiredControls.map((rc) => {
+      const { severity, hazards, sources } = parseControlSources(rc.sources);
+      
+      let daysUntilDue: number | null = null;
+      if (rc.dueDate) {
+        const now = new Date();
+        const due = new Date(rc.dueDate);
+        daysUntilDue = Math.floor((due.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+      }
+
+      // Priority: Critical overdue = 100, Critical = 90, High overdue = 80, etc.
+      let priority = 50;
+      if (severity === 'Critical') {
+        priority = rc.status === 'Overdue' ? 100 : 90;
+      } else if (severity === 'High') {
+        priority = rc.status === 'Overdue' ? 80 : 70;
+      } else if (severity === 'Medium') {
+        priority = rc.status === 'Overdue' ? 60 : 50;
+      } else {
+        priority = rc.status === 'Overdue' ? 40 : 30;
+      }
+
+      return {
+        id: rc.id,
+        workerId: rc.worker.id,
+        workerName: `${rc.worker.firstName} ${rc.worker.lastName}`,
+        controlId: rc.control.id,
+        controlCode: rc.control.code,
+        controlName: rc.control.title,
+        controlType: rc.control.type,
+        status: rc.status as 'Required' | 'Overdue' | 'Expiring',
+        riskLevel: severity as 'Critical' | 'High' | 'Medium' | 'Low',
+        dueDate: rc.dueDate,
+        daysUntilDue,
+        hazards,       // NEW: Hazard names from sources
+        sources,        // NEW: Full source objects
+        priority,
+      };
+    });
+
+    // Sort by priority
     gaps.sort((a, b) => b.priority - a.priority);
 
-    // Calculate summary stats
+    // Calculate summary
     const summary: GapSummary = {
       totalGaps: gaps.length,
       criticalGaps: gaps.filter(g => g.riskLevel === 'Critical').length,
@@ -166,321 +260,78 @@ export class GapAnalysisEngine {
     };
 
     // Calculate coverage
-    const coverage = await this.calculateCoverage(clientId, gaps);
-
-    // Generate recommendations
-    const recommendations = this.generateRecommendations(gaps);
-
-    return {
-      summary,
-      gaps,
-      coverage,
-      recommendations
-    };
-  }
-
-  /**
-   * Analyze gaps for a specific worker
-   */
-  static async analyzeWorker(workerId: string): Promise<GapAnalysis> {
-    const worker = await prisma.worker.findUnique({
-      where: { id: workerId },
-      include: {
-        required: {
-          where: {
-            status: { in: ['Required', 'Overdue', 'Temporary'] }
-          },
-          include: {
-            control: true,
-            evidence: {
-              where: { status: 'Valid' },
-              orderBy: { issuedDate: 'desc' },
-              take: 1
-            }
-          }
-        }
-      }
-    });
-
-    if (!worker) {
-      throw new Error('Worker not found');
-    }
-
-    const gaps: Gap[] = [];
-    const now = new Date();
-    const thirtyDaysFromNow = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
-
-    for (const rc of worker.required) {
-      const isGap = rc.status === 'Required' || rc.status === 'Overdue';
-      const latestEvidence = rc.evidence[0];
-      const isExpiring = latestEvidence?.expiryDate 
-        && new Date(latestEvidence.expiryDate) <= thirtyDaysFromNow;
-
-      if (isGap || isExpiring) {
-        // Get hazards for this control
-        const hazardControls = await prisma.hazardControl.findMany({
-          where: { controlId: rc.control.id },
-          include: { hazard: true }
-        });
-
-        const riskLevel = this.determineRiskLevel(hazardControls);
-        
-        let daysUntilDue: number | null = null;
-        if (rc.dueDate) {
-          daysUntilDue = Math.floor((new Date(rc.dueDate).getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-        } else if (latestEvidence?.expiryDate) {
-          daysUntilDue = Math.floor((new Date(latestEvidence.expiryDate).getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-        }
-
-        let status: 'Required' | 'Overdue' | 'Expiring';
-        if (rc.status === 'Overdue') {
-          status = 'Overdue';
-        } else if (isExpiring) {
-          status = 'Expiring';
-        } else {
-          status = 'Required';
-        }
-
-        gaps.push({
-          id: rc.id,
-          workerId: worker.id,
-          workerName: `${worker.firstName} ${worker.lastName}`,
-          controlId: rc.control.id,
-          controlCode: rc.control.code,
-          controlName: rc.control.title,
-          controlType: rc.control.type,
-          status,
-          riskLevel,
-          dueDate: rc.dueDate,
-          daysUntilDue,
-          hazards: hazardControls.map(hc => hc.hazard.name),
-          priority: this.calculatePriority(riskLevel, daysUntilDue, status)
-        });
-      }
-    }
-
-    gaps.sort((a, b) => b.priority - a.priority);
-
-    const summary: GapSummary = {
-      totalGaps: gaps.length,
-      criticalGaps: gaps.filter(g => g.riskLevel === 'Critical').length,
-      highGaps: gaps.filter(g => g.riskLevel === 'High').length,
-      mediumGaps: gaps.filter(g => g.riskLevel === 'Medium').length,
-      lowGaps: gaps.filter(g => g.riskLevel === 'Low').length,
-      expiringWithin30Days: gaps.filter(g => g.status === 'Expiring').length,
-      overdue: gaps.filter(g => g.status === 'Overdue').length,
-    };
-
-    // For single worker, coverage is simpler
-    const totalRequired = worker.required.length;
+    const totalRequired = await prisma.requiredControl.count({ where });
     const satisfied = await prisma.requiredControl.count({
       where: {
-        workerId: worker.id,
-        status: 'Satisfied'
-      }
+        ...where,
+        status: { in: ['Satisfied', 'Temporary'] },
+      },
     });
-    
-    const coverage = {
+
+    // Coverage by criticality
+    const allRequired = await prisma.requiredControl.findMany({
+      where,
+      select: { id: true, status: true, sources: true, severity: true },
+    });
+
+    const countBySeverity = {
+      critical: { total: 0, satisfied: 0 },
+      high: { total: 0, satisfied: 0 },
+      medium: { total: 0, satisfied: 0 },
+      low: { total: 0, satisfied: 0 },
+    };
+
+    for (const rc of allRequired) {
+      // Use severity field if available, otherwise parse sources
+      let severity = rc.severity;
+      if (!severity && rc.sources) {
+        const { severity: parsedSeverity } = parseControlSources(rc.sources);
+        severity = parsedSeverity;
+      }
+      severity = severity || 'Low';
+      
+      const key = severity.toLowerCase() as 'critical' | 'high' | 'medium' | 'low';
+      if (countBySeverity[key]) {
+        countBySeverity[key].total++;
+        if (['Satisfied', 'Temporary'].includes(rc.status)) {
+          countBySeverity[key].satisfied++;
+        }
+      }
+    }
+
+    const coverage: Coverage = {
       overall: totalRequired > 0 ? Math.round((satisfied / totalRequired) * 100) : 100,
       byCriticality: {
-        critical: 100, // Simplified for now
-        high: 100,
-        medium: 100,
-        low: 100,
-      }
+        critical: countBySeverity.critical.total > 0
+          ? Math.round((countBySeverity.critical.satisfied / countBySeverity.critical.total) * 100)
+          : 100,
+        high: countBySeverity.high.total > 0
+          ? Math.round((countBySeverity.high.satisfied / countBySeverity.high.total) * 100)
+          : 100,
+        medium: countBySeverity.medium.total > 0
+          ? Math.round((countBySeverity.medium.satisfied / countBySeverity.medium.total) * 100)
+          : 100,
+        low: countBySeverity.low.total > 0
+          ? Math.round((countBySeverity.low.satisfied / countBySeverity.low.total) * 100)
+          : 100,
+      },
     };
 
-    const recommendations = this.generateRecommendations(gaps);
+    // Generate recommendations
+    const recommendations = generateRecommendations(gaps, summary);
 
     return {
       summary,
       gaps,
       coverage,
-      recommendations
+      recommendations,
     };
   }
 
   /**
-   * Determine risk level from hazard associations
+   * Analyze worker-specific gaps
    */
-  private static determineRiskLevel(hazardControls: any[]): 'Critical' | 'High' | 'Medium' | 'Low' {
-    if (hazardControls.length === 0) return 'Low';
-
-    // Get the highest risk from associated hazards
-    const maxRisk = Math.max(...hazardControls.map((hc: any) => hc.hazard.preControlRisk));
-
-    if (maxRisk >= 9) return 'Critical';
-    if (maxRisk >= 7) return 'High';
-    if (maxRisk >= 4) return 'Medium';
-    return 'Low';
-  }
-
-  /**
-   * Calculate priority score (1-100)
-   */
-  private static calculatePriority(
-    riskLevel: 'Critical' | 'High' | 'Medium' | 'Low',
-    daysUntilDue: number | null,
-    status: 'Required' | 'Overdue' | 'Expiring'
-  ): number {
-    // Base score by risk level
-    let score = 0;
-    switch (riskLevel) {
-      case 'Critical': score = 90; break;
-      case 'High': score = 70; break;
-      case 'Medium': score = 50; break;
-      case 'Low': score = 30; break;
-    }
-
-    // Boost for overdue
-    if (status === 'Overdue') {
-      score += 10;
-    }
-
-    // Boost for expiring soon
-    if (daysUntilDue !== null && daysUntilDue < 30) {
-      score += Math.max(0, 10 - Math.floor(daysUntilDue / 3));
-    }
-
-    return Math.min(100, score);
-  }
-
-  /**
-   * Calculate coverage statistics
-   */
-  private static async calculateCoverage(clientId: string, gaps: Gap[]): Promise<{
-    overall: number;
-    byCriticality: { critical: number; high: number; medium: number; low: number };
-  }> {
-    // Get total required controls for client
-    const totalRequired = await prisma.requiredControl.count({
-      where: {
-        worker: {
-          roles: {
-            some: {
-              clientId,
-              OR: [
-                { endAt: null },
-                { endAt: { gt: new Date() } }
-              ]
-            }
-          }
-        }
-      }
-    });
-
-    const satisfied = await prisma.requiredControl.count({
-      where: {
-        worker: {
-          roles: {
-            some: {
-              clientId,
-              OR: [
-                { endAt: null },
-                { endAt: { gt: new Date() } }
-              ]
-            }
-          }
-        },
-        status: 'Satisfied'
-      }
-    });
-
-    const overall = totalRequired > 0 ? Math.round((satisfied / totalRequired) * 100) : 100;
-
-    // Calculate by criticality (simplified approximation)
-    const criticalGaps = gaps.filter(g => g.riskLevel === 'Critical').length;
-    const highGaps = gaps.filter(g => g.riskLevel === 'High').length;
-    const mediumGaps = gaps.filter(g => g.riskLevel === 'Medium').length;
-    const lowGaps = gaps.filter(g => g.riskLevel === 'Low').length;
-
-    const totalByLevel = {
-      critical: Math.max(1, criticalGaps + Math.floor(satisfied / 4)),
-      high: Math.max(1, highGaps + Math.floor(satisfied / 4)),
-      medium: Math.max(1, mediumGaps + Math.floor(satisfied / 4)),
-      low: Math.max(1, lowGaps + Math.floor(satisfied / 4)),
-    };
-
-    return {
-      overall,
-      byCriticality: {
-        critical: Math.round(((totalByLevel.critical - criticalGaps) / totalByLevel.critical) * 100),
-        high: Math.round(((totalByLevel.high - highGaps) / totalByLevel.high) * 100),
-        medium: Math.round(((totalByLevel.medium - mediumGaps) / totalByLevel.medium) * 100),
-        low: Math.round(((totalByLevel.low - lowGaps) / totalByLevel.low) * 100),
-      }
-    };
-  }
-
-  /**
-   * Generate actionable recommendations
-   */
-  private static generateRecommendations(gaps: Gap[]): Recommendation[] {
-    const recommendations: Recommendation[] = [];
-
-    // Critical gaps recommendation
-    const criticalGaps = gaps.filter(g => g.riskLevel === 'Critical');
-    if (criticalGaps.length > 0) {
-      const uniqueWorkers = new Set(criticalGaps.map(g => g.workerId)).size;
-      recommendations.push({
-        id: 'critical-gaps',
-        type: 'missing_control',
-        priority: 100,
-        title: `${criticalGaps.length} Critical Safety Gaps Detected`,
-        description: `${uniqueWorkers} worker(s) have critical safety controls missing or expired. Immediate action required.`,
-        affectedWorkers: uniqueWorkers,
-        actions: [
-          'Review critical gaps immediately',
-          'Assign temporary fixes if needed',
-          'Schedule training or evidence collection',
-          'Consider work restrictions until resolved'
-        ]
-      });
-    }
-
-    // Expiring evidence recommendation
-    const expiring = gaps.filter(g => g.status === 'Expiring');
-    if (expiring.length > 0) {
-      const uniqueWorkers = new Set(expiring.map(g => g.workerId)).size;
-      recommendations.push({
-        id: 'expiring-evidence',
-        type: 'expiring_evidence',
-        priority: 80,
-        title: `${expiring.length} Controls Expiring Within 30 Days`,
-        description: `${uniqueWorkers} worker(s) have evidence expiring soon. Schedule renewals now to prevent gaps.`,
-        affectedWorkers: uniqueWorkers,
-        actions: [
-          'Schedule refresher training',
-          'Book assessment dates',
-          'Send renewal reminders to workers',
-          'Update calendar with renewal deadlines'
-        ]
-      });
-    }
-
-    // Overdue recommendation
-    const overdue = gaps.filter(g => g.status === 'Overdue');
-    if (overdue.length > 0) {
-      const uniqueWorkers = new Set(overdue.map(g => g.workerId)).size;
-      recommendations.push({
-        id: 'overdue-controls',
-        type: 'overdue_control',
-        priority: 95,
-        title: `${overdue.length} Overdue Controls`,
-        description: `${uniqueWorkers} worker(s) have overdue controls. These workers may need work restrictions.`,
-        affectedWorkers: uniqueWorkers,
-        actions: [
-          'Implement work restrictions if applicable',
-          'Contact workers to schedule updates',
-          'Apply temporary fixes if work must continue',
-          'Escalate to management if unresolved'
-        ]
-      });
-    }
-
-    // Sort by priority
-    recommendations.sort((a, b) => b.priority - a.priority);
-
-    return recommendations;
+  static async analyzeWorker(workerId: string): Promise<GapAnalysisResult> {
+    return this.analyzeClient(undefined, workerId);
   }
 }
