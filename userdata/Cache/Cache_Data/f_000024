@@ -1,0 +1,269 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/workers/WorkerStatusBadge.tsx");import __vite__cjsImport0_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=fa9e1c00"; const jsxDEV = __vite__cjsImport0_react_jsxDevRuntime["jsxDEV"];
+import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== "undefined" && self instanceof WorkerGlobalScope;
+let prevRefreshReg;
+let prevRefreshSig;
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react can't detect preamble. Something is wrong."
+    );
+  }
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("C:/Users/Bill.S/safety-intelligence-engine/src/components/workers/WorkerStatusBadge.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+import { CheckCircle, AlertTriangle, XCircle } from "/node_modules/.vite/deps/lucide-react.js?v=fa9e1c00";
+export function WorkerStatusBadge({
+  status,
+  requiredControls = [],
+  size = "md",
+  showReasoning = false
+}) {
+  const criticalGaps = [];
+  const highGaps = [];
+  for (const rc of requiredControls) {
+    if (["Satisfied", "Temporary"].includes(rc.status)) continue;
+    let severity = rc.severity;
+    if (!severity && rc.sources) {
+      try {
+        const sources = JSON.parse(rc.sources);
+        const severities = sources.map((s) => s.severity);
+        severity = ["Critical", "High", "Medium", "Low"].find(
+          (level) => severities.includes(level)
+        ) || "Low";
+      } catch (e) {
+        severity = "Low";
+      }
+    }
+    if (severity === "Critical") {
+      criticalGaps.push(rc);
+    } else if (severity === "High") {
+      highGaps.push(rc);
+    }
+  }
+  const getStatusConfig = () => {
+    if (status === "active") {
+      return {
+        label: "Active",
+        color: "bg-green-100 text-green-800",
+        icon: /* @__PURE__ */ jsxDEV(CheckCircle, { size: 16 }, void 0, false, {
+          fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/workers/WorkerStatusBadge.tsx",
+          lineNumber: 86,
+          columnNumber: 15
+        }, this),
+        borderColor: "border-green-200"
+      };
+    } else if (status === "restricted") {
+      return {
+        label: "Restricted",
+        color: "bg-red-100 text-red-800",
+        icon: /* @__PURE__ */ jsxDEV(AlertTriangle, { size: 16 }, void 0, false, {
+          fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/workers/WorkerStatusBadge.tsx",
+          lineNumber: 93,
+          columnNumber: 15
+        }, this),
+        borderColor: "border-red-200"
+      };
+    } else {
+      return {
+        label: "Inactive",
+        color: "bg-gray-100 text-gray-800",
+        icon: /* @__PURE__ */ jsxDEV(XCircle, { size: 16 }, void 0, false, {
+          fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/workers/WorkerStatusBadge.tsx",
+          lineNumber: 100,
+          columnNumber: 15
+        }, this),
+        borderColor: "border-gray-200"
+      };
+    }
+  };
+  const config = getStatusConfig();
+  const sizeClasses = {
+    sm: "px-2 py-0.5 text-xs",
+    md: "px-3 py-1 text-sm",
+    lg: "px-4 py-2 text-base"
+  };
+  return /* @__PURE__ */ jsxDEV("div", { children: [
+    /* @__PURE__ */ jsxDEV("div", { className: `inline-flex items-center space-x-1.5 rounded-full font-medium ${config.color} ${sizeClasses[size]}`, children: [
+      config.icon,
+      /* @__PURE__ */ jsxDEV("span", { children: config.label }, void 0, false, {
+        fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/workers/WorkerStatusBadge.tsx",
+        lineNumber: 120,
+        columnNumber: 9
+      }, this)
+    ] }, void 0, true, {
+      fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/workers/WorkerStatusBadge.tsx",
+      lineNumber: 118,
+      columnNumber: 7
+    }, this),
+    showReasoning && status === "restricted" && (criticalGaps.length > 0 || highGaps.length > 0) && /* @__PURE__ */ jsxDEV("div", { className: `mt-3 p-4 rounded-lg border-2 ${config.borderColor} bg-red-50`, children: /* @__PURE__ */ jsxDEV("div", { className: "flex items-start space-x-2", children: [
+      /* @__PURE__ */ jsxDEV(AlertTriangle, { className: "text-red-600 mt-0.5", size: 16 }, void 0, false, {
+        fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/workers/WorkerStatusBadge.tsx",
+        lineNumber: 127,
+        columnNumber: 13
+      }, this),
+      /* @__PURE__ */ jsxDEV("div", { className: "flex-1", children: [
+        /* @__PURE__ */ jsxDEV("h4", { className: "font-semibold text-sm text-red-900 mb-2", children: "Cannot Work - Missing Critical Controls" }, void 0, false, {
+          fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/workers/WorkerStatusBadge.tsx",
+          lineNumber: 129,
+          columnNumber: 15
+        }, this),
+        criticalGaps.length > 0 && /* @__PURE__ */ jsxDEV("div", { className: "space-y-1.5", children: [
+          /* @__PURE__ */ jsxDEV("p", { className: "text-xs font-medium text-red-800", children: [
+            criticalGaps.length,
+            " Critical Gap",
+            criticalGaps.length > 1 ? "s" : "",
+            ":"
+          ] }, void 0, true, {
+            fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/workers/WorkerStatusBadge.tsx",
+            lineNumber: 135,
+            columnNumber: 19
+          }, this),
+          criticalGaps.slice(0, 3).map(
+            (gap) => /* @__PURE__ */ jsxDEV("div", { className: "flex items-start space-x-2 text-sm", children: [
+              /* @__PURE__ */ jsxDEV("span", { className: "text-red-400", children: "•" }, void 0, false, {
+                fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/workers/WorkerStatusBadge.tsx",
+                lineNumber: 140,
+                columnNumber: 23
+              }, this),
+              /* @__PURE__ */ jsxDEV("div", { className: "flex-1", children: [
+                /* @__PURE__ */ jsxDEV("span", { className: "font-medium text-red-900", children: gap.control.code }, void 0, false, {
+                  fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/workers/WorkerStatusBadge.tsx",
+                  lineNumber: 142,
+                  columnNumber: 25
+                }, this),
+                /* @__PURE__ */ jsxDEV("span", { className: "text-red-700 ml-1", children: [
+                  "- ",
+                  gap.control.title
+                ] }, void 0, true, {
+                  fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/workers/WorkerStatusBadge.tsx",
+                  lineNumber: 143,
+                  columnNumber: 25
+                }, this),
+                /* @__PURE__ */ jsxDEV("span", { className: `ml-2 px-2 py-0.5 text-xs rounded ${gap.status === "Overdue" ? "bg-red-200 text-red-900" : "bg-red-100 text-red-800"}`, children: gap.status }, void 0, false, {
+                  fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/workers/WorkerStatusBadge.tsx",
+                  lineNumber: 144,
+                  columnNumber: 25
+                }, this)
+              ] }, void 0, true, {
+                fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/workers/WorkerStatusBadge.tsx",
+                lineNumber: 141,
+                columnNumber: 23
+              }, this)
+            ] }, gap.id, true, {
+              fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/workers/WorkerStatusBadge.tsx",
+              lineNumber: 139,
+              columnNumber: 15
+            }, this)
+          ),
+          criticalGaps.length > 3 && /* @__PURE__ */ jsxDEV("p", { className: "text-xs text-red-700 ml-4", children: [
+            "+",
+            criticalGaps.length - 3,
+            " more critical gap",
+            criticalGaps.length - 3 > 1 ? "s" : ""
+          ] }, void 0, true, {
+            fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/workers/WorkerStatusBadge.tsx",
+            lineNumber: 153,
+            columnNumber: 15
+          }, this)
+        ] }, void 0, true, {
+          fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/workers/WorkerStatusBadge.tsx",
+          lineNumber: 134,
+          columnNumber: 13
+        }, this),
+        highGaps.length >= 3 && /* @__PURE__ */ jsxDEV("div", { className: "mt-2 pt-2 border-t border-red-200", children: /* @__PURE__ */ jsxDEV("p", { className: "text-xs text-red-800", children: [
+          "Also ",
+          highGaps.length,
+          " high-severity gap",
+          highGaps.length > 1 ? "s" : "",
+          " requiring attention"
+        ] }, void 0, true, {
+          fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/workers/WorkerStatusBadge.tsx",
+          lineNumber: 162,
+          columnNumber: 19
+        }, this) }, void 0, false, {
+          fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/workers/WorkerStatusBadge.tsx",
+          lineNumber: 161,
+          columnNumber: 13
+        }, this),
+        /* @__PURE__ */ jsxDEV("div", { className: "mt-3 pt-3 border-t border-red-200", children: /* @__PURE__ */ jsxDEV("p", { className: "text-xs text-red-700", children: [
+          /* @__PURE__ */ jsxDEV("strong", { children: "Action Required:" }, void 0, false, {
+            fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/workers/WorkerStatusBadge.tsx",
+            lineNumber: 170,
+            columnNumber: 19
+          }, this),
+          " Upload evidence or create temporary fixes to restore operational status."
+        ] }, void 0, true, {
+          fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/workers/WorkerStatusBadge.tsx",
+          lineNumber: 169,
+          columnNumber: 17
+        }, this) }, void 0, false, {
+          fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/workers/WorkerStatusBadge.tsx",
+          lineNumber: 168,
+          columnNumber: 15
+        }, this)
+      ] }, void 0, true, {
+        fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/workers/WorkerStatusBadge.tsx",
+        lineNumber: 128,
+        columnNumber: 13
+      }, this)
+    ] }, void 0, true, {
+      fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/workers/WorkerStatusBadge.tsx",
+      lineNumber: 126,
+      columnNumber: 11
+    }, this) }, void 0, false, {
+      fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/workers/WorkerStatusBadge.tsx",
+      lineNumber: 125,
+      columnNumber: 7
+    }, this),
+    showReasoning && status === "active" && requiredControls.length > 0 && /* @__PURE__ */ jsxDEV("div", { className: "mt-3 p-3 rounded-lg bg-green-50 border border-green-200", children: /* @__PURE__ */ jsxDEV("div", { className: "flex items-start space-x-2", children: [
+      /* @__PURE__ */ jsxDEV(CheckCircle, { className: "text-green-600 mt-0.5", size: 16 }, void 0, false, {
+        fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/workers/WorkerStatusBadge.tsx",
+        lineNumber: 182,
+        columnNumber: 13
+      }, this),
+      /* @__PURE__ */ jsxDEV("div", { className: "flex-1", children: /* @__PURE__ */ jsxDEV("p", { className: "text-sm text-green-900", children: "All critical controls satisfied. Worker is cleared for assigned roles." }, void 0, false, {
+        fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/workers/WorkerStatusBadge.tsx",
+        lineNumber: 184,
+        columnNumber: 15
+      }, this) }, void 0, false, {
+        fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/workers/WorkerStatusBadge.tsx",
+        lineNumber: 183,
+        columnNumber: 13
+      }, this)
+    ] }, void 0, true, {
+      fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/workers/WorkerStatusBadge.tsx",
+      lineNumber: 181,
+      columnNumber: 11
+    }, this) }, void 0, false, {
+      fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/workers/WorkerStatusBadge.tsx",
+      lineNumber: 180,
+      columnNumber: 7
+    }, this)
+  ] }, void 0, true, {
+    fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/workers/WorkerStatusBadge.tsx",
+    lineNumber: 116,
+    columnNumber: 5
+  }, this);
+}
+_c = WorkerStatusBadge;
+var _c;
+$RefreshReg$(_c, "WorkerStatusBadge");
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("C:/Users/Bill.S/safety-intelligence-engine/src/components/workers/WorkerStatusBadge.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("C:/Users/Bill.S/safety-intelligence-engine/src/components/workers/WorkerStatusBadge.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,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V0FPQSxLQVJGO0FBQUE7QUFBQTtBQUFBO0FBQUEsV0FTQTtBQUFBLE9BekVKO0FBQUE7QUFBQTtBQUFBO0FBQUEsU0EyRUE7QUFFSjtBQUFDTyxLQXJKZXJDO0FBQWlCLElBQUFxQztBQUFBQyxhQUFBRCxJQUFBIiwibmFtZXMiOlsiQ2hlY2tDaXJjbGUiLCJBbGVydFRyaWFuZ2xlIiwiWENpcmNsZSIsIldvcmtlclN0YXR1c0JhZGdlIiwic3RhdHVzIiwicmVxdWlyZWRDb250cm9scyIsInNpemUiLCJzaG93UmVhc29uaW5nIiwiY3JpdGljYWxHYXBzIiwiaGlnaEdhcHMiLCJyYyIsImluY2x1ZGVzIiwic2V2ZXJpdHkiLCJzb3VyY2VzIiwiSlNPTiIsInBhcnNlIiwic2V2ZXJpdGllcyIsIm1hcCIsInMiLCJmaW5kIiwibGV2ZWwiLCJlIiwicHVzaCIsImdldFN0YXR1c0NvbmZpZyIsImxhYmVsIiwiY29sb3IiLCJpY29uIiwiYm9yZGVyQ29sb3IiLCJjb25maWciLCJzaXplQ2xhc3NlcyIsInNtIiwibWQiLCJsZyIsImxlbmd0aCIsInNsaWNlIiwiZ2FwIiwiY29udHJvbCIsImNvZGUiLCJ0aXRsZSIsImlkIiwiX2MiLCIkUmVmcmVzaFJlZyQiXSwiaWdub3JlTGlzdCI6W10sInNvdXJjZXMiOlsiV29ya2VyU3RhdHVzQmFkZ2UudHN4Il0sInNvdXJjZXNDb250ZW50IjpbIi8vIHNyYy9jb21wb25lbnRzL3dvcmtlcnMvV29ya2VyU3RhdHVzQmFkZ2UudHN4XHJcbi8vIEVuaGFuY2VkIHN0YXR1cyBiYWRnZSB3aXRoIHJlc3RyaWN0aW9uIHJlYXNvbmluZ1xyXG5cclxuaW1wb3J0IFJlYWN0IGZyb20gJ3JlYWN0JztcclxuaW1wb3J0IHsgQ2hlY2tDaXJjbGUsIEFsZXJ0VHJpYW5nbGUsIFhDaXJjbGUgfSBmcm9tICdsdWNpZGUtcmVhY3QnO1xyXG5cclxuaW50ZXJmYWNlIFJlcXVpcmVkQ29udHJvbCB7XHJcbiAgaWQ6IHN0cmluZztcclxuICBzdGF0dXM6IHN0cmluZztcclxuICBzZXZlcml0eT86IHN0cmluZztcclxuICBzb3VyY2VzPzogc3RyaW5nO1xyXG4gIGNvbnRyb2w6IHtcclxuICAgIGNvZGU6IHN0cmluZztcclxuICAgIHRpdGxlOiBzdHJpbmc7XHJcbiAgfTtcclxufVxyXG5cclxuaW50ZXJmYWNlIFdvcmtlclN0YXR1c0JhZGdlUHJvcHMge1xyXG4gIHN0YXR1czogc3RyaW5nO1xyXG4gIHJlcXVpcmVkQ29udHJvbHM/OiBSZXF1aXJlZENvbnRyb2xbXTtcclxuICBzaXplPzogJ3NtJyB8ICdtZCcgfCAnbGcnO1xyXG4gIHNob3dSZWFzb25pbmc/OiBib29sZWFuO1xyXG59XHJcblxyXG5leHBvcnQgZnVuY3Rpb24gV29ya2VyU3RhdHVzQmFkZ2UoeyBcclxuICBzdGF0dXMsIFxyXG4gIHJlcXVpcmVkQ29udHJvbHMgPSBbXSxcclxuICBzaXplID0gJ21kJyxcclxuICBzaG93UmVhc29uaW5nID0gZmFsc2VcclxufTogV29ya2VyU3RhdHVzQmFkZ2VQcm9wcykge1xyXG4gIFxyXG4gIC8vIEFuYWx5emUgZ2FwcyB0byBmaW5kIHJlc3RyaWN0aW9uIHJlYXNvbnNcclxuICBjb25zdCBjcml0aWNhbEdhcHM6IFJlcXVpcmVkQ29udHJvbFtdID0gW107XHJcbiAgY29uc3QgaGlnaEdhcHM6IFJlcXVpcmVkQ29udHJvbFtdID0gW107XHJcbiAgXHJcbiAgZm9yIChjb25zdCByYyBvZiByZXF1aXJlZENvbnRyb2xzKSB7XHJcbiAgICBpZiAoWydTYXRpc2ZpZWQnLCAnVGVtcG9yYXJ5J10uaW5jbHVkZXMocmMuc3RhdHVzKSkgY29udGludWU7XHJcbiAgICBcclxuICAgIGxldCBzZXZlcml0eSA9IHJjLnNldmVyaXR5O1xyXG4gICAgXHJcbiAgICAvLyBQYXJzZSBzb3VyY2VzIGlmIG5lZWRlZCB0byBnZXQgc2V2ZXJpdHlcclxuICAgIGlmICghc2V2ZXJpdHkgJiYgcmMuc291cmNlcykge1xyXG4gICAgICB0cnkge1xyXG4gICAgICAgIGNvbnN0IHNvdXJjZXMgPSBKU09OLnBhcnNlKHJjLnNvdXJjZXMpO1xyXG4gICAgICAgIGNvbnN0IHNldmVyaXRpZXMgPSBzb3VyY2VzLm1hcCgoczogYW55KSA9PiBzLnNldmVyaXR5KTtcclxuICAgICAgICBzZXZlcml0eSA9IFsnQ3JpdGljYWwnLCAnSGlnaCcsICdNZWRpdW0nLCAnTG93J10uZmluZChsZXZlbCA9PlxyXG4gICAgICAgICAgc2V2ZXJpdGllcy5pbmNsdWRlcyhsZXZlbClcclxuICAgICAgICApIHx8ICdMb3cnO1xyXG4gICAgICB9IGNhdGNoIChlKSB7XHJcbiAgICAgICAgc2V2ZXJpdHkgPSAnTG93JztcclxuICAgICAgfVxyXG4gICAgfVxyXG4gICAgXHJcbiAgICBpZiAoc2V2ZXJpdHkgPT09ICdDcml0aWNhbCcpIHtcclxuICAgICAgY3JpdGljYWxHYXBzLnB1c2gocmMpO1xyXG4gICAgfSBlbHNlIGlmIChzZXZlcml0eSA9PT0gJ0hpZ2gnKSB7XHJcbiAgICAgIGhpZ2hHYXBzLnB1c2gocmMpO1xyXG4gICAgfVxyXG4gIH1cclxuXHJcbiAgLy8gU3RhdHVzIGRpc3BsYXkgbG9naWNcclxuICBjb25zdCBnZXRTdGF0dXNDb25maWcgPSAoKSA9PiB7XHJcbiAgICBpZiAoc3RhdHVzID09PSAnYWN0aXZlJykge1xyXG4gICAgICByZXR1cm4ge1xyXG4gICAgICAgIGxhYmVsOiAnQWN0aXZlJyxcclxuICAgICAgICBjb2xvcjogJ2JnLWdyZWVuLTEwMCB0ZXh0LWdyZWVuLTgwMCcsXHJcbiAgICAgICAgaWNvbjogPENoZWNrQ2lyY2xlIHNpemU9ezE2fSAvPixcclxuICAgICAgICBib3JkZXJDb2xvcjogJ2JvcmRlci1ncmVlbi0yMDAnXHJcbiAgICAgIH07XHJcbiAgICB9IGVsc2UgaWYgKHN0YXR1cyA9PT0gJ3Jlc3RyaWN0ZWQnKSB7XHJcbiAgICAgIHJldHVybiB7XHJcbiAgICAgICAgbGFiZWw6ICdSZXN0cmljdGVkJyxcclxuICAgICAgICBjb2xvcjogJ2JnLXJlZC0xMDAgdGV4dC1yZWQtODAwJyxcclxuICAgICAgICBpY29uOiA8QWxlcnRUcmlhbmdsZSBzaXplPXsxNn0gLz4sXHJcbiAgICAgICAgYm9yZGVyQ29sb3I6ICdib3JkZXItcmVkLTIwMCdcclxuICAgICAgfTtcclxuICAgIH0gZWxzZSB7XHJcbiAgICAgIHJldHVybiB7XHJcbiAgICAgICAgbGFiZWw6ICdJbmFjdGl2ZScsXHJcbiAgICAgICAgY29sb3I6ICdiZy1ncmF5LTEwMCB0ZXh0LWdyYXktODAwJyxcclxuICAgICAgICBpY29uOiA8WENpcmNsZSBzaXplPXsxNn0gLz4sXHJcbiAgICAgICAgYm9yZGVyQ29sb3I6ICdib3JkZXItZ3JheS0yMDAnXHJcbiAgICAgIH07XHJcbiAgICB9XHJcbiAgfTtcclxuXHJcbiAgY29uc3QgY29uZmlnID0gZ2V0U3RhdHVzQ29uZmlnKCk7XHJcbiAgXHJcbiAgLy8gU2l6ZSBjbGFzc2VzXHJcbiAgY29uc3Qgc2l6ZUNsYXNzZXMgPSB7XHJcbiAgICBzbTogJ3B4LTIgcHktMC41IHRleHQteHMnLFxyXG4gICAgbWQ6ICdweC0zIHB5LTEgdGV4dC1zbScsXHJcbiAgICBsZzogJ3B4LTQgcHktMiB0ZXh0LWJhc2UnXHJcbiAgfTtcclxuXHJcbiAgcmV0dXJuIChcclxuICAgIDxkaXY+XHJcbiAgICAgIHsvKiBTdGF0dXMgQmFkZ2UgKi99XHJcbiAgICAgIDxkaXYgY2xhc3NOYW1lPXtgaW5saW5lLWZsZXggaXRlbXMtY2VudGVyIHNwYWNlLXgtMS41IHJvdW5kZWQtZnVsbCBmb250LW1lZGl1bSAke2NvbmZpZy5jb2xvcn0gJHtzaXplQ2xhc3Nlc1tzaXplXX1gfT5cclxuICAgICAgICB7Y29uZmlnLmljb259XHJcbiAgICAgICAgPHNwYW4+e2NvbmZpZy5sYWJlbH08L3NwYW4+XHJcbiAgICAgIDwvZGl2PlxyXG5cclxuICAgICAgey8qIFJlc3RyaWN0aW9uIFJlYXNvbmluZyAqL31cclxuICAgICAge3Nob3dSZWFzb25pbmcgJiYgc3RhdHVzID09PSAncmVzdHJpY3RlZCcgJiYgKGNyaXRpY2FsR2Fwcy5sZW5ndGggPiAwIHx8IGhpZ2hHYXBzLmxlbmd0aCA+IDApICYmIChcclxuICAgICAgICA8ZGl2IGNsYXNzTmFtZT17YG10LTMgcC00IHJvdW5kZWQtbGcgYm9yZGVyLTIgJHtjb25maWcuYm9yZGVyQ29sb3J9IGJnLXJlZC01MGB9PlxyXG4gICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJmbGV4IGl0ZW1zLXN0YXJ0IHNwYWNlLXgtMlwiPlxyXG4gICAgICAgICAgICA8QWxlcnRUcmlhbmdsZSBjbGFzc05hbWU9XCJ0ZXh0LXJlZC02MDAgbXQtMC41XCIgc2l6ZT17MTZ9IC8+XHJcbiAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleC0xXCI+XHJcbiAgICAgICAgICAgICAgPGg0IGNsYXNzTmFtZT1cImZvbnQtc2VtaWJvbGQgdGV4dC1zbSB0ZXh0LXJlZC05MDAgbWItMlwiPlxyXG4gICAgICAgICAgICAgICAgQ2Fubm90IFdvcmsgLSBNaXNzaW5nIENyaXRpY2FsIENvbnRyb2xzXHJcbiAgICAgICAgICAgICAgPC9oND5cclxuICAgICAgICAgICAgICBcclxuICAgICAgICAgICAgICB7Y3JpdGljYWxHYXBzLmxlbmd0aCA+IDAgJiYgKFxyXG4gICAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJzcGFjZS15LTEuNVwiPlxyXG4gICAgICAgICAgICAgICAgICA8cCBjbGFzc05hbWU9XCJ0ZXh0LXhzIGZvbnQtbWVkaXVtIHRleHQtcmVkLTgwMFwiPlxyXG4gICAgICAgICAgICAgICAgICAgIHtjcml0aWNhbEdhcHMubGVuZ3RofSBDcml0aWNhbCBHYXB7Y3JpdGljYWxHYXBzLmxlbmd0aCA+IDEgPyAncycgOiAnJ306XHJcbiAgICAgICAgICAgICAgICAgIDwvcD5cclxuICAgICAgICAgICAgICAgICAge2NyaXRpY2FsR2Fwcy5zbGljZSgwLCAzKS5tYXAoZ2FwID0+IChcclxuICAgICAgICAgICAgICAgICAgICA8ZGl2IGtleT17Z2FwLmlkfSBjbGFzc05hbWU9XCJmbGV4IGl0ZW1zLXN0YXJ0IHNwYWNlLXgtMiB0ZXh0LXNtXCI+XHJcbiAgICAgICAgICAgICAgICAgICAgICA8c3BhbiBjbGFzc05hbWU9XCJ0ZXh0LXJlZC00MDBcIj7igKI8L3NwYW4+XHJcbiAgICAgICAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXgtMVwiPlxyXG4gICAgICAgICAgICAgICAgICAgICAgICA8c3BhbiBjbGFzc05hbWU9XCJmb250LW1lZGl1bSB0ZXh0LXJlZC05MDBcIj57Z2FwLmNvbnRyb2wuY29kZX08L3NwYW4+XHJcbiAgICAgICAgICAgICAgICAgICAgICAgIDxzcGFuIGNsYXNzTmFtZT1cInRleHQtcmVkLTcwMCBtbC0xXCI+LSB7Z2FwLmNvbnRyb2wudGl0bGV9PC9zcGFuPlxyXG4gICAgICAgICAgICAgICAgICAgICAgICA8c3BhbiBjbGFzc05hbWU9e2BtbC0yIHB4LTIgcHktMC41IHRleHQteHMgcm91bmRlZCAke1xyXG4gICAgICAgICAgICAgICAgICAgICAgICAgIGdhcC5zdGF0dXMgPT09ICdPdmVyZHVlJyA/ICdiZy1yZWQtMjAwIHRleHQtcmVkLTkwMCcgOiAnYmctcmVkLTEwMCB0ZXh0LXJlZC04MDAnXHJcbiAgICAgICAgICAgICAgICAgICAgICAgIH1gfT5cclxuICAgICAgICAgICAgICAgICAgICAgICAgICB7Z2FwLnN0YXR1c31cclxuICAgICAgICAgICAgICAgICAgICAgICAgPC9zcGFuPlxyXG4gICAgICAgICAgICAgICAgICAgICAgPC9kaXY+XHJcbiAgICAgICAgICAgICAgICAgICAgPC9kaXY+XHJcbiAgICAgICAgICAgICAgICAgICkpfVxyXG4gICAgICAgICAgICAgICAgICB7Y3JpdGljYWxHYXBzLmxlbmd0aCA+IDMgJiYgKFxyXG4gICAgICAgICAgICAgICAgICAgIDxwIGNsYXNzTmFtZT1cInRleHQteHMgdGV4dC1yZWQtNzAwIG1sLTRcIj5cclxuICAgICAgICAgICAgICAgICAgICAgICt7Y3JpdGljYWxHYXBzLmxlbmd0aCAtIDN9IG1vcmUgY3JpdGljYWwgZ2Fwe2NyaXRpY2FsR2Fwcy5sZW5ndGggLSAzID4gMSA/ICdzJyA6ICcnfVxyXG4gICAgICAgICAgICAgICAgICAgIDwvcD5cclxuICAgICAgICAgICAgICAgICAgKX1cclxuICAgICAgICAgICAgICAgIDwvZGl2PlxyXG4gICAgICAgICAgICAgICl9XHJcbiAgICAgICAgICAgICAgXHJcbiAgICAgICAgICAgICAge2hpZ2hHYXBzLmxlbmd0aCA+PSAzICYmIChcclxuICAgICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwibXQtMiBwdC0yIGJvcmRlci10IGJvcmRlci1yZWQtMjAwXCI+XHJcbiAgICAgICAgICAgICAgICAgIDxwIGNsYXNzTmFtZT1cInRleHQteHMgdGV4dC1yZWQtODAwXCI+XHJcbiAgICAgICAgICAgICAgICAgICAgQWxzbyB7aGlnaEdhcHMubGVuZ3RofSBoaWdoLXNldmVyaXR5IGdhcHtoaWdoR2Fwcy5sZW5ndGggPiAxID8gJ3MnIDogJyd9IHJlcXVpcmluZyBhdHRlbnRpb25cclxuICAgICAgICAgICAgICAgICAgPC9wPlxyXG4gICAgICAgICAgICAgICAgPC9kaXY+XHJcbiAgICAgICAgICAgICAgKX1cclxuXHJcbiAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJtdC0zIHB0LTMgYm9yZGVyLXQgYm9yZGVyLXJlZC0yMDBcIj5cclxuICAgICAgICAgICAgICAgIDxwIGNsYXNzTmFtZT1cInRleHQteHMgdGV4dC1yZWQtNzAwXCI+XHJcbiAgICAgICAgICAgICAgICAgIDxzdHJvbmc+QWN0aW9uIFJlcXVpcmVkOjwvc3Ryb25nPiBVcGxvYWQgZXZpZGVuY2Ugb3IgY3JlYXRlIHRlbXBvcmFyeSBmaXhlcyB0byByZXN0b3JlIG9wZXJhdGlvbmFsIHN0YXR1cy5cclxuICAgICAgICAgICAgICAgIDwvcD5cclxuICAgICAgICAgICAgICA8L2Rpdj5cclxuICAgICAgICAgICAgPC9kaXY+XHJcbiAgICAgICAgICA8L2Rpdj5cclxuICAgICAgICA8L2Rpdj5cclxuICAgICAgKX1cclxuXHJcbiAgICAgIHsvKiBBY3RpdmUgU3RhdHVzIERldGFpbHMgKi99XHJcbiAgICAgIHtzaG93UmVhc29uaW5nICYmIHN0YXR1cyA9PT0gJ2FjdGl2ZScgJiYgcmVxdWlyZWRDb250cm9scy5sZW5ndGggPiAwICYmIChcclxuICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cIm10LTMgcC0zIHJvdW5kZWQtbGcgYmctZ3JlZW4tNTAgYm9yZGVyIGJvcmRlci1ncmVlbi0yMDBcIj5cclxuICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1zdGFydCBzcGFjZS14LTJcIj5cclxuICAgICAgICAgICAgPENoZWNrQ2lyY2xlIGNsYXNzTmFtZT1cInRleHQtZ3JlZW4tNjAwIG10LTAuNVwiIHNpemU9ezE2fSAvPlxyXG4gICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXgtMVwiPlxyXG4gICAgICAgICAgICAgIDxwIGNsYXNzTmFtZT1cInRleHQtc20gdGV4dC1ncmVlbi05MDBcIj5cclxuICAgICAgICAgICAgICAgIEFsbCBjcml0aWNhbCBjb250cm9scyBzYXRpc2ZpZWQuIFdvcmtlciBpcyBjbGVhcmVkIGZvciBhc3NpZ25lZCByb2xlcy5cclxuICAgICAgICAgICAgICA8L3A+XHJcbiAgICAgICAgICAgIDwvZGl2PlxyXG4gICAgICAgICAgPC9kaXY+XHJcbiAgICAgICAgPC9kaXY+XHJcbiAgICAgICl9XHJcbiAgICA8L2Rpdj5cclxuICApO1xyXG59Il0sImZpbGUiOiJDOi9Vc2Vycy9CaWxsLlMvc2FmZXR5LWludGVsbGlnZW5jZS1lbmdpbmUvc3JjL2NvbXBvbmVudHMvd29ya2Vycy9Xb3JrZXJTdGF0dXNCYWRnZS50c3gifQ==

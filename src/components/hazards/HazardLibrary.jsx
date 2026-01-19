@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Plus, Import, Wrench, X, ArrowLeftRight, Minus, Flag } from 'lucide-react';
+import { Plus, Search, Import, ArrowLeftRight, Edit2 } from 'lucide-react';  // Add Edit2
 
 const riskStyles = {
   Critical: 'border-l-4 border-red-500',
@@ -20,7 +20,7 @@ export function HazardLibrary() {
   const [q, setQ] = useState('');
   const [showAdd, setShowAdd] = useState(false);
   const [showImport, setShowImport] = useState(false);
-
+  const [editingHazard, setEditingHazard] = useState(null);
   const [mapperOpen, setMapperOpen] = useState(false);
   const [mapperHazard, setMapperHazard] = useState(null); // { id, code, name }
 
@@ -54,6 +54,11 @@ export function HazardLibrary() {
   function mapControls(hazard) {
     setMapperHazard(hazard);
     setMapperOpen(true);
+  }
+
+  function editHazard(hazard) {
+  setEditingHazard(hazard);
+  setShowAdd(true);
   }
 
   return (
@@ -107,15 +112,31 @@ export function HazardLibrary() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filtered.map((h) => (
             <div key={h.id || h.code} className={`bg-white rounded-lg shadow p-6 ${riskStyles[h.risk || 'Medium'] || 'border'}`}>
-              <h4 className="font-semibold text-gray-900 mb-1">{h.name}</h4>
+              {/* Header with Edit button */}
+              <div className="flex items-start justify-between mb-2">
+                <h4 className="font-semibold text-gray-900">{h.name}</h4>
+                <button
+                  onClick={() => editHazard(h)}
+                  className="p-1.5 hover:bg-gray-100 rounded transition-colors"
+                  title="Edit hazard"
+                >
+                  <Edit2 size={16} className="text-gray-600" />
+                </button>
+              </div>
+              
               <p className="text-xs text-gray-500 mb-1">{h.category || '—'}</p>
               <p className="text-sm text-gray-600 mb-4 line-clamp-2">{h.description || '—'}</p>
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-gray-500">{h.code}</span>
+              
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-xs font-mono text-gray-500">{h.code}</span>
                 <span className={riskBadge[h.risk || 'Medium']}>{h.risk || 'Medium'}</span>
               </div>
-              <div className="pt-4 flex justify-end">
-                <button onClick={() => mapControls(h)} className="flex items-center gap-2 px-3 py-1.5 text-sm border rounded hover:bg-gray-50" title="Map controls for this hazard">
+              
+              <div className="pt-4 border-t flex justify-end">
+                <button 
+                  onClick={() => mapControls(h)} 
+                  className="flex items-center gap-2 px-3 py-1.5 text-sm border rounded hover:bg-gray-50"
+                >
                   <ArrowLeftRight size={16} /> Map Controls
                 </button>
               </div>
@@ -124,7 +145,19 @@ export function HazardLibrary() {
         </div>
       )}
 
-      {showAdd && <AddHazardModal onClose={() => setShowAdd(false)} onAdded={onAdded} />}
+     {showAdd && (
+      <AddHazardModal 
+        hazard={editingHazard}
+        onClose={() => { 
+          setShowAdd(false); 
+          setEditingHazard(null);
+        }} 
+        onAdded={(updated) => {
+          onAdded(updated);
+          setEditingHazard(null);
+        }} 
+      />
+    )}
 
       {mapperOpen && mapperHazard && (
         <HazardControlMapperModal
@@ -160,13 +193,19 @@ function EmptyState({ onAdd, onImport }) {
   );
 }
 
-function AddHazardModal({ onClose, onAdded }) {
+// Updated AddHazardModal component for HazardLibrary.jsx
+// Replace the existing AddHazardModal component
+
+function AddHazardModal({ hazard, onClose, onAdded }) {
+  const isEdit = !!hazard;
+  
   const [form, setForm] = useState({
-    name: '',
-    code: '',
-    category: '',
-    risk: 'Medium',
-    description: ''
+    name: hazard?.name || '',
+    code: hazard?.code || '',
+    category: hazard?.category || '',
+    risk: hazard?.risk || 'Medium',
+    riskValue: hazard?.preControlRisk || 7,
+    description: hazard?.description || ''
   });
   const [saving, setSaving] = useState(false);
 
@@ -174,50 +213,177 @@ function AddHazardModal({ onClose, onAdded }) {
     setForm(prev => ({ ...prev, [k]: v }));
   }
 
+  // Risk level options with numeric values
+  const riskLevels = [
+    { label: 'Critical', value: 20, range: '15-25', color: 'bg-red-50 border-red-200 text-red-800', description: 'Severe injury or death likely' },
+    { label: 'High', value: 12, range: '10-14', color: 'bg-orange-50 border-orange-200 text-orange-800', description: 'Serious injury possible' },
+    { label: 'Medium', value: 7, range: '5-9', color: 'bg-yellow-50 border-yellow-200 text-yellow-800', description: 'Moderate injury possible' },
+    { label: 'Low', value: 3, range: '1-4', color: 'bg-blue-50 border-blue-200 text-blue-800', description: 'Minor injury at worst' },
+  ];
+
+  function handleRiskChange(level) {
+    set('risk', level.label);
+    set('riskValue', level.value);
+  }
+
   async function save() {
+    if (!form.name.trim() || !form.code.trim()) {
+      alert('Name and Code are required');
+      return;
+    }
+
     setSaving(true);
     try {
-      const created = await window.api?.createHazard?.(form);
-      if (created) onAdded(created);
+      const payload = {
+        name: form.name.trim(),
+        code: form.code.trim(),
+        category: form.category.trim(),
+        risk: form.risk,
+        description: form.description.trim()
+      };
+
+      let result;
+      if (isEdit) {
+        result = await window.api?.updateHazard?.({ id: hazard.id, ...payload });
+      } else {
+        result = await window.api?.createHazard?.(payload);
+      }
+
+      if (result) onAdded(result);
     } finally {
       setSaving(false);
     }
   }
 
+  const selectedRisk = riskLevels.find(r => r.label === form.risk) || riskLevels[2];
+
   return (
     <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow w-[520px] p-5 space-y-3">
-        <h3 className="text-lg font-semibold">Add Hazard</h3>
-        <div className="grid grid-cols-2 gap-3">
+      <div className="bg-white rounded-lg shadow-xl w-[600px] max-h-[90vh] overflow-y-auto p-6 space-y-4">
+        <h3 className="text-xl font-semibold">
+          {isEdit ? 'Edit Hazard' : 'Add Hazard'}
+        </h3>
+
+        {/* Name and Code */}
+        <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs text-gray-600">Name</label>
-            <input className="w-full border rounded px-2 py-1.5" value={form.name} onChange={e=>set('name', e.target.value)} />
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Name <span className="text-red-500">*</span>
+            </label>
+            <input 
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+              value={form.name} 
+              onChange={e => set('name', e.target.value)}
+              placeholder="e.g., Arc Flash"
+            />
           </div>
           <div>
-            <label className="block text-xs text-gray-600">Code</label>
-            <input className="w-full border rounded px-2 py-1.5" value={form.code} onChange={e=>set('code', e.target.value)} />
-          </div>
-          <div>
-            <label className="block text-xs text-gray-600">Category</label>
-            <input className="w-full border rounded px-2 py-1.5" value={form.category} onChange={e=>set('category', e.target.value)} placeholder="e.g., Electrical, Heights" />
-          </div>
-          <div>
-            <label className="block text-xs text-gray-600">Risk</label>
-            <select className="w-full border rounded px-2 py-1.5" value={form.risk} onChange={e=>set('risk', e.target.value)}>
-              <option>Critical</option>
-              <option>High</option>
-              <option>Medium</option>
-              <option>Low</option>
-            </select>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Code <span className="text-red-500">*</span>
+            </label>
+            <input 
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono" 
+              value={form.code} 
+              onChange={e => set('code', e.target.value)}
+              placeholder="e.g., ELEC-001"
+            />
           </div>
         </div>
+
+        {/* Category */}
         <div>
-          <label className="block text-xs text-gray-600">Description</label>
-          <textarea rows={4} className="w-full border rounded px-2 py-1.5" value={form.description} onChange={e=>set('description', e.target.value)} />
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Category
+          </label>
+          <input 
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+            value={form.category} 
+            onChange={e => set('category', e.target.value)} 
+            placeholder="e.g., Electrical, Heights, Confined Space"
+          />
+          <p className="text-xs text-gray-500 mt-1">
+            Category determines which roles this hazard applies to
+          </p>
         </div>
-        <div className="flex justify-end gap-2 pt-2">
-          <button className="px-3 py-1.5 border rounded" onClick={onClose}>Cancel</button>
-          <button disabled={saving} className="px-3 py-1.5 bg-black text-white rounded" onClick={save}>{saving ? 'Saving…' : 'Save'}</button>
+
+        {/* Risk Level Picker */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Pre-Control Risk Level <span className="text-red-500">*</span>
+          </label>
+          <p className="text-xs text-gray-600 mb-3">
+            Risk level before controls are applied. This determines which controls are Critical vs Medium.
+          </p>
+          
+          <div className="space-y-2">
+            {riskLevels.map((level) => (
+              <button
+                key={level.label}
+                type="button"
+                onClick={() => handleRiskChange(level)}
+                className={`w-full text-left p-4 rounded-lg border-2 transition-all ${
+                  selectedRisk.label === level.label
+                    ? level.color + ' border-current'
+                    : 'bg-white border-gray-200 hover:border-gray-300'
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-3">
+                      <div className={`w-4 h-4 rounded-full border-2 ${
+                        selectedRisk.label === level.label 
+                          ? 'border-current bg-current' 
+                          : 'border-gray-300'
+                      }`}>
+                        {selectedRisk.label === level.label && (
+                          <div className="w-full h-full rounded-full bg-white scale-50"></div>
+                        )}
+                      </div>
+                      <span className="font-semibold text-base">{level.label}</span>
+                      <span className="text-xs font-mono text-gray-500">
+                        Risk Score: {level.value} (range {level.range})
+                      </span>
+                    </div>
+                    <p className="text-sm text-gray-600 ml-7 mt-1">
+                      {level.description}
+                    </p>
+                  </div>
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Description */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Description
+          </label>
+          <textarea 
+            rows={3} 
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+            value={form.description} 
+            onChange={e => set('description', e.target.value)}
+            placeholder="Describe the hazard and when it occurs..."
+          />
+        </div>
+
+        {/* Buttons */}
+        <div className="flex justify-end gap-3 pt-4 border-t">
+          <button 
+            className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors" 
+            onClick={onClose}
+            disabled={saving}
+          >
+            Cancel
+          </button>
+          <button 
+            disabled={saving} 
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50" 
+            onClick={save}
+          >
+            {saving ? 'Saving…' : (isEdit ? 'Update Hazard' : 'Create Hazard')}
+          </button>
         </div>
       </div>
     </div>

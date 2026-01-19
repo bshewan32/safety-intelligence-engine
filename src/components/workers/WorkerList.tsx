@@ -184,19 +184,21 @@ export function WorkerList() {
     }
   };
 
+  
   // If a worker is selected, show their passport
-  if (selectedWorkerId) {
-    return (
-      <WorkerPassport 
-        workerId={selectedWorkerId} 
-        onBack={() => {
-          setSelectedWorkerId(null);
-          // Reload gaps after returning from passport
-          refreshGaps();
-        }} 
-      />
-    );
-  }
+if (selectedWorkerId) {
+  return (
+    <WorkerPassport 
+      workerId={selectedWorkerId} 
+      onBack={() => {
+        setSelectedWorkerId(null);
+        // ✨ Reload both workers AND gaps after returning from passport
+        loadWorkers();
+        refreshGaps();
+      }} 
+    />
+  );
+}
 
   // Otherwise show the list
   return (

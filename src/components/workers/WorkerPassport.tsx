@@ -15,6 +15,7 @@ import {
 import { GapAnalysisSection } from './GapAnalysisSection';
 import { QuickFixModal } from './QuickFixModal';
 import { RequiredControlExplanation } from './RequiredControlExplanation';
+import { WorkerStatusBadge } from './WorkerStatusBadge';
 
 // Local view-model types (avoid clashing with global Prisma/Window types)
 
@@ -39,6 +40,7 @@ type ControlVM = {
 };
 
 type RequiredControlVM = {
+  sources: any;
   id: string;
   status: RiskStatus;
   dueDate?: string | Date | null;
@@ -270,31 +272,41 @@ export function WorkerPassport({ workerId, onBack }: WorkerPassportProps) {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="bg-white rounded-lg shadow p-6">
-        <div className="flex items-start justify-between">
-          <div className="flex items-start space-x-4">
-            <button onClick={onBack} className="mt-1 p-2 hover:bg-gray-100 rounded-lg transition-colors">
-              <ArrowLeft size={20} />
-            </button>
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">
-                {worker.firstName} {worker.lastName}
-              </h1>
-              <p className="text-sm text-gray-500 mt-1">
-                {worker.employeeId} • {getDisplayRole(worker)}
-              </p>
-              <p className="text-sm text-gray-500">{worker.email || '—'}</p>
+     {/* Header */}
+    <div className="bg-white rounded-lg shadow p-6">
+      <div className="flex items-start justify-between">
+        <div className="flex items-start space-x-4">
+          <button onClick={onBack} className="mt-1 p-2 hover:bg-gray-100 rounded-lg transition-colors">
+            <ArrowLeft size={20} />
+          </button>
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">
+              {worker.firstName} {worker.lastName}
+            </h1>
+            <p className="text-sm text-gray-500 mt-1">
+              {worker.employeeId} • {getDisplayRole(worker)}
+            </p>
+            <p className="text-sm text-gray-500">{worker.email || '—'}</p>
+            
+            {/* ✨ NEW: Worker Status Badge with Reasoning */}
+            <div className="mt-3">
+              <WorkerStatusBadge 
+                status={worker.status}
+                requiredControls={worker.required || []}
+                size="md"
+                showReasoning={true}
+              />
             </div>
           </div>
-          <button
-            onClick={handleRecompute}
-            className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            <RefreshCw size={16} />
-            <span>Recompute Controls</span>
-          </button>
         </div>
+        <button
+          onClick={handleRecompute}
+          className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+        >
+          <RefreshCw size={16} />
+          <span>Recompute Controls</span>
+        </button>
+      </div>
 
         {/* Compliance Metrics */}
         <div className="grid grid-cols-2 gap-4 mt-6">

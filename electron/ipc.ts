@@ -830,21 +830,22 @@ export function handleIPC(ipc: IpcMain, win: BrowserWindow) {
 
   // Helpers for risk label/score conversion
   const riskLabelToScore = (label?: string): number => {
-    switch ((label || '').toLowerCase()) {
-      case 'critical': return 9;
-      case 'high': return 7;
-      case 'medium': return 4;
-      case 'low': return 2;
-      default: return 4; // sensible default
-    }
-  };
-  const riskScoreToLabel = (score?: number): 'Critical'|'High'|'Medium'|'Low' => {
-    const s = typeof score === 'number' ? score : 4;
-    if (s >= 9) return 'Critical';
-    if (s >= 7) return 'High';
-    if (s >= 4) return 'Medium';
-    return 'Low';
-  };
+  switch ((label || '').toLowerCase()) {
+    case 'critical': return 20;  // ✅ 15-25 range
+    case 'high': return 12;      // ✅ 10-14 range
+    case 'medium': return 7;     // ✅ 5-9 range
+    case 'low': return 3;        // ✅ 1-4 range
+    default: return 7;           // Default to Medium
+  }
+};
+
+const riskScoreToLabel = (score?: number): 'Critical'|'High'|'Medium'|'Low' => {
+  const s = typeof score === 'number' ? score : 7;
+  if (s >= 15) return 'Critical';  // ✅ 15-25
+  if (s >= 10) return 'High';      // ✅ 10-14
+  if (s >= 5) return 'Medium';     // ✅ 5-9
+  return 'Low';                    // ✅ 1-4
+};
 
   // List hazards
   ipc.handle('db:listHazards', async () => {
@@ -876,6 +877,33 @@ export function handleIPC(ipc: IpcMain, win: BrowserWindow) {
       throw err;
     }
   });
+
+  // Update hazard
+ipc.handle('db:updateHazard', async (_e, data) => {
+  try {
+    const { id, risk, ...rest } = data || {};
+    
+    if (!id) throw new Error('Hazard ID is required for update');
+    
+    const updateData: any = { ...rest };
+    
+    // If risk is provided, convert to numeric score
+    if (risk) {
+      updateData.preControlRisk = riskLabelToScore(risk);
+      updateData.postControlRisk = updateData.preControlRisk;
+    }
+    
+    const updated = await prisma.hazard.update({
+      where: { id },
+      data: updateData,
+    });
+    
+    return { ...updated, risk: riskScoreToLabel(updated.preControlRisk) };
+  } catch (err) {
+    console.error('updateHazard failed', err);
+    throw err;
+  }
+});
 
   // Import hazard pack (stub seeds by kind)
   ipc.handle('db:importHazardPack', async (_e, { kind }) => {

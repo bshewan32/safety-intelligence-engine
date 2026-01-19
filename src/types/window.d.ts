@@ -431,6 +431,7 @@ declare global {
       // Hazards
       listHazards: () => Promise<Hazard[]>;
       createHazard?: (data: Partial<Hazard> & { risk?: RiskLabel }) => Promise<Hazard>;
+      updateHazard: (data: { id: string } & Partial<Hazard>) => Promise<Hazard>; 
       importHazardPack?: (payload: { kind: string }) => Promise<Hazard[]>;
 
       // Hazard ↔ Control mapper (NEW types for renderer)
