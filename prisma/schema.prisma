@@ -108,7 +108,8 @@ model Worker {
 
   role     Role?             @relation("WorkerPrimaryRole", fields: [roleId], references: [id])
   required RequiredControl[]
-  roles    WorkerRole[] // NEW: multi-role assignments
+  roles    WorkerRole[] 
+  documentEvidence DocumentEvidence[]
 }
 
 model Role {
@@ -142,13 +143,12 @@ model Client {
   
   createdAt   DateTime     @default(now())
   
-  // EXISTING relations
   sites       Site[]
   workerRoles WorkerRole[]
   
-  // NEW relations
   clientHazards   ClientHazard[]
   clientControls  ClientControl[]
+  documents     Document[] 
 }
 
 
@@ -222,6 +222,9 @@ model Control {
   required RequiredControl[]
   trainingMappings TrainingMapping[]
   clientControls ClientControl[]
+  documentEvidence     DocumentEvidence[]          
+  documentMappings     DocumentMapping[]           
+  documentControlMappings DocumentControlMapping[] 
 }
 
 model HazardControl {
@@ -310,3 +313,121 @@ model TrainingMapping {
   @@index([controlId])
 }
 
+// ============================================
+// DOCUMENT MODEL
+// ============================================
+
+
+model Document {
+  id            String    @id @default(cuid())
+  name          String
+  type          String
+  
+  filePath      String
+  checksum      String?
+  fileSize      Int?
+  mimeType      String?
+  
+  clientId      String?
+  version       String?
+  author        String?
+  approver      String?
+  
+  issuedDate    DateTime  @default(now())
+  expiryDate    DateTime?
+  reviewDate    DateTime?
+  
+  status        String    @default("Active")
+  isTemplate    Boolean   @default(false)
+  
+  metadata      String?
+  notes         String?
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  uploadedBy    String?
+  
+  client              Client?                  @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  documentEvidence    DocumentEvidence[]
+  controlMappings     DocumentControlMapping[]
+  
+  @@index([clientId])
+  @@index([type])
+  @@index([status])
+  @@index([issuedDate])
+  @@index([expiryDate])
+}
+
+model DocumentEvidence {
+  id                String    @id @default(cuid())
+  documentId        String
+  controlId         String
+  workerId          String?
+  
+  issuedDate        DateTime  @default(now())
+  expiryDate        DateTime?
+  status            String    @default("Valid")
+  
+  verifiedBy        String?
+  verifiedAt        DateTime?
+  rejectionReason   String?
+  
+  notes             String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  
+  document  Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  control   Control  @relation(fields: [controlId], references: [id], onDelete: Cascade)
+  worker    Worker?  @relation(fields: [workerId], references: [id], onDelete: Cascade)
+  
+  @@unique([documentId, controlId, workerId])
+  @@index([documentId])
+  @@index([controlId])
+  @@index([workerId])
+  @@index([status])
+}
+
+model DocumentMapping {
+  id           String   @id @default(cuid())
+  
+  documentName String
+  documentType String
+  controlId    String
+  
+  confidence   Int      @default(100)
+  source       String   @default("algorithm")
+  
+  matchMethod  String?
+  matchScore   Int?
+  
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  control Control @relation(fields: [controlId], references: [id], onDelete: Cascade)
+  
+  @@unique([documentName, documentType, controlId])
+  @@index([documentName])
+  @@index([documentType])
+  @@index([controlId])
+}
+
+model DocumentControlMapping {
+  id           String   @id @default(cuid())
+  documentId   String
+  controlId    String
+  
+  isMandatory  Boolean  @default(false)
+  relevance    String?  @default("Primary")
+  
+  notes        String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  mappedBy     String?
+  
+  document Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  control  Control  @relation(fields: [controlId], references: [id], onDelete: Cascade)
+  
+  @@unique([documentId, controlId])
+  @@index([documentId])
+  @@index([controlId])
+}

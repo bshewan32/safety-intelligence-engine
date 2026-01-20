@@ -11,7 +11,11 @@ import {
   Trash2,
   UserPlus,
   LayoutGrid,
+  FileText,
 } from 'lucide-react';
+import { DocumentImporter } from '@/components/documents/document-importer';
+
+
 
 interface ClientDetailProps {
   clientId: string;
@@ -74,6 +78,8 @@ export function ClientDetail({ clientId, onBack, onViewRiskMatrix }: ClientDetai
 
   // Worker assignment
   const [showAssignWorker, setShowAssignWorker] = useState(false);
+  const [showImporter, setShowImporter] = useState(false);
+
 
   useEffect(() => {
     loadClient();
@@ -241,6 +247,16 @@ export function ClientDetail({ clientId, onBack, onViewRiskMatrix }: ClientDetai
               <p className="text-sm text-gray-500 mt-1">
                 Created {new Date(client.createdAt).toLocaleDateString()}
               </p>
+                  <div className="mt-4">
+                  <button
+                    onClick={() => setShowImporter(true)}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg flex items-center gap-2"
+                  >
+                    <FileText size={20} />
+                    Import Document Index
+                  </button>
+                </div>
+
             </div>
           </div>
         </div>
@@ -471,9 +487,21 @@ export function ClientDetail({ clientId, onBack, onViewRiskMatrix }: ClientDetai
           }}
         />
       )}
+            {showImporter && (
+        <DocumentImporter
+          onClose={() => setShowImporter(false)}
+          onComplete={() => {
+            setShowImporter(false);
+            loadClient();
+          }}
+          clientId={client.id}
+        />
+      )}
+
     </div>
   );
 }
+
 
 // Worker Assignment Modal Component
 function AssignWorkerModal({

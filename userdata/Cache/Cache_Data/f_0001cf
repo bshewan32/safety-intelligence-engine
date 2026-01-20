@@ -1,0 +1,433 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/documents/ReviewStep.tsx");import __vite__cjsImport0_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=fa9e1c00"; const Fragment = __vite__cjsImport0_react_jsxDevRuntime["Fragment"]; const jsxDEV = __vite__cjsImport0_react_jsxDevRuntime["jsxDEV"];
+import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== "undefined" && self instanceof WorkerGlobalScope;
+let prevRefreshReg;
+let prevRefreshSig;
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react can't detect preamble. Something is wrong."
+    );
+  }
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("C:/Users/Bill.S/safety-intelligence-engine/src/components/documents/ReviewStep.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+import { CheckCircle, FileText, AlertCircle, Loader } from "/node_modules/.vite/deps/lucide-react.js?v=fa9e1c00";
+export function ReviewStep({
+  documentMatches,
+  parsedRows,
+  onImport,
+  onBack,
+  importing
+}) {
+  const totalDocuments = parsedRows.length;
+  const matched = documentMatches.filter((dm) => dm.controlId !== null).length;
+  const unmatched = totalDocuments - matched;
+  return /* @__PURE__ */ jsxDEV("div", { className: "space-y-6", children: [
+    /* @__PURE__ */ jsxDEV("div", { children: [
+      /* @__PURE__ */ jsxDEV("h3", { className: "text-lg font-semibold text-gray-900 mb-2", children: "Review & Import" }, void 0, false, {
+        fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/documents/ReviewStep.tsx",
+        lineNumber: 46,
+        columnNumber: 9
+      }, this),
+      /* @__PURE__ */ jsxDEV("p", { className: "text-gray-600 text-sm", children: "Review the final import summary before proceeding." }, void 0, false, {
+        fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/documents/ReviewStep.tsx",
+        lineNumber: 49,
+        columnNumber: 9
+      }, this)
+    ] }, void 0, true, {
+      fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/documents/ReviewStep.tsx",
+      lineNumber: 45,
+      columnNumber: 7
+    }, this),
+    /* @__PURE__ */ jsxDEV("div", { className: "grid grid-cols-3 gap-4", children: [
+      /* @__PURE__ */ jsxDEV("div", { className: "bg-blue-50 border border-blue-200 rounded-lg p-4", children: /* @__PURE__ */ jsxDEV("div", { className: "flex items-center justify-between", children: [
+        /* @__PURE__ */ jsxDEV("div", { children: [
+          /* @__PURE__ */ jsxDEV("p", { className: "text-sm text-blue-600", children: "Total Documents" }, void 0, false, {
+            fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/documents/ReviewStep.tsx",
+            lineNumber: 59,
+            columnNumber: 15
+          }, this),
+          /* @__PURE__ */ jsxDEV("p", { className: "text-2xl font-bold text-blue-900", children: totalDocuments }, void 0, false, {
+            fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/documents/ReviewStep.tsx",
+            lineNumber: 60,
+            columnNumber: 15
+          }, this)
+        ] }, void 0, true, {
+          fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/documents/ReviewStep.tsx",
+          lineNumber: 58,
+          columnNumber: 13
+        }, this),
+        /* @__PURE__ */ jsxDEV(FileText, { className: "text-blue-600", size: 32 }, void 0, false, {
+          fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/documents/ReviewStep.tsx",
+          lineNumber: 62,
+          columnNumber: 13
+        }, this)
+      ] }, void 0, true, {
+        fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/documents/ReviewStep.tsx",
+        lineNumber: 57,
+        columnNumber: 11
+      }, this) }, void 0, false, {
+        fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/documents/ReviewStep.tsx",
+        lineNumber: 56,
+        columnNumber: 9
+      }, this),
+      /* @__PURE__ */ jsxDEV("div", { className: "bg-green-50 border border-green-200 rounded-lg p-4", children: /* @__PURE__ */ jsxDEV("div", { className: "flex items-center justify-between", children: [
+        /* @__PURE__ */ jsxDEV("div", { children: [
+          /* @__PURE__ */ jsxDEV("p", { className: "text-sm text-green-600", children: "Matched to Controls" }, void 0, false, {
+            fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/documents/ReviewStep.tsx",
+            lineNumber: 69,
+            columnNumber: 15
+          }, this),
+          /* @__PURE__ */ jsxDEV("p", { className: "text-2xl font-bold text-green-900", children: matched }, void 0, false, {
+            fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/documents/ReviewStep.tsx",
+            lineNumber: 70,
+            columnNumber: 15
+          }, this)
+        ] }, void 0, true, {
+          fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/documents/ReviewStep.tsx",
+          lineNumber: 68,
+          columnNumber: 13
+        }, this),
+        /* @__PURE__ */ jsxDEV(CheckCircle, { className: "text-green-600", size: 32 }, void 0, false, {
+          fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/documents/ReviewStep.tsx",
+          lineNumber: 72,
+          columnNumber: 13
+        }, this)
+      ] }, void 0, true, {
+        fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/documents/ReviewStep.tsx",
+        lineNumber: 67,
+        columnNumber: 11
+      }, this) }, void 0, false, {
+        fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/documents/ReviewStep.tsx",
+        lineNumber: 66,
+        columnNumber: 9
+      }, this),
+      /* @__PURE__ */ jsxDEV("div", { className: "bg-gray-50 border border-gray-200 rounded-lg p-4", children: /* @__PURE__ */ jsxDEV("div", { className: "flex items-center justify-between", children: [
+        /* @__PURE__ */ jsxDEV("div", { children: [
+          /* @__PURE__ */ jsxDEV("p", { className: "text-sm text-gray-600", children: "Unmatched" }, void 0, false, {
+            fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/documents/ReviewStep.tsx",
+            lineNumber: 79,
+            columnNumber: 15
+          }, this),
+          /* @__PURE__ */ jsxDEV("p", { className: "text-2xl font-bold text-gray-900", children: unmatched }, void 0, false, {
+            fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/documents/ReviewStep.tsx",
+            lineNumber: 80,
+            columnNumber: 15
+          }, this)
+        ] }, void 0, true, {
+          fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/documents/ReviewStep.tsx",
+          lineNumber: 78,
+          columnNumber: 13
+        }, this),
+        /* @__PURE__ */ jsxDEV(AlertCircle, { className: "text-gray-600", size: 32 }, void 0, false, {
+          fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/documents/ReviewStep.tsx",
+          lineNumber: 82,
+          columnNumber: 13
+        }, this)
+      ] }, void 0, true, {
+        fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/documents/ReviewStep.tsx",
+        lineNumber: 77,
+        columnNumber: 11
+      }, this) }, void 0, false, {
+        fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/documents/ReviewStep.tsx",
+        lineNumber: 76,
+        columnNumber: 9
+      }, this)
+    ] }, void 0, true, {
+      fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/documents/ReviewStep.tsx",
+      lineNumber: 55,
+      columnNumber: 7
+    }, this),
+    /* @__PURE__ */ jsxDEV("div", { className: "border rounded-lg", children: [
+      /* @__PURE__ */ jsxDEV("div", { className: "bg-gray-50 px-4 py-3 border-b", children: /* @__PURE__ */ jsxDEV("h4", { className: "font-medium text-gray-900", children: "Import Preview" }, void 0, false, {
+        fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/documents/ReviewStep.tsx",
+        lineNumber: 90,
+        columnNumber: 11
+      }, this) }, void 0, false, {
+        fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/documents/ReviewStep.tsx",
+        lineNumber: 89,
+        columnNumber: 9
+      }, this),
+      /* @__PURE__ */ jsxDEV("div", { className: "divide-y max-h-96 overflow-y-auto", children: parsedRows.map((row, idx) => {
+        const match = documentMatches[idx];
+        const hasMatch = match?.controlId !== null;
+        return /* @__PURE__ */ jsxDEV("div", { className: "p-4 hover:bg-gray-50", children: /* @__PURE__ */ jsxDEV("div", { className: "flex items-start justify-between", children: /* @__PURE__ */ jsxDEV("div", { className: "flex-1", children: [
+          /* @__PURE__ */ jsxDEV("div", { className: "flex items-center space-x-2 mb-1", children: [
+            /* @__PURE__ */ jsxDEV("span", { className: "font-medium text-gray-900", children: row.documentName }, void 0, false, {
+              fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/documents/ReviewStep.tsx",
+              lineNumber: 102,
+              columnNumber: 23
+            }, this),
+            /* @__PURE__ */ jsxDEV("span", { className: "px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded", children: row.documentType }, void 0, false, {
+              fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/documents/ReviewStep.tsx",
+              lineNumber: 105,
+              columnNumber: 23
+            }, this),
+            row.version && /* @__PURE__ */ jsxDEV("span", { className: "px-2 py-0.5 bg-gray-100 text-gray-600 text-xs rounded", children: row.version }, void 0, false, {
+              fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/documents/ReviewStep.tsx",
+              lineNumber: 109,
+              columnNumber: 23
+            }, this)
+          ] }, void 0, true, {
+            fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/documents/ReviewStep.tsx",
+            lineNumber: 101,
+            columnNumber: 21
+          }, this),
+          /* @__PURE__ */ jsxDEV("p", { className: "text-xs text-gray-500", children: row.filePath }, void 0, false, {
+            fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/documents/ReviewStep.tsx",
+            lineNumber: 114,
+            columnNumber: 21
+          }, this),
+          hasMatch ? /* @__PURE__ */ jsxDEV("div", { className: "flex items-center space-x-2 mt-2", children: [
+            /* @__PURE__ */ jsxDEV(CheckCircle, { size: 14, className: "text-green-600" }, void 0, false, {
+              fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/documents/ReviewStep.tsx",
+              lineNumber: 117,
+              columnNumber: 25
+            }, this),
+            /* @__PURE__ */ jsxDEV("span", { className: "text-sm text-green-700", children: [
+              "→ ",
+              match.controlTitle
+            ] }, void 0, true, {
+              fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/documents/ReviewStep.tsx",
+              lineNumber: 118,
+              columnNumber: 25
+            }, this),
+            /* @__PURE__ */ jsxDEV("span", { className: "text-xs text-gray-500", children: [
+              "(",
+              match.confidence,
+              "% confidence)"
+            ] }, void 0, true, {
+              fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/documents/ReviewStep.tsx",
+              lineNumber: 121,
+              columnNumber: 25
+            }, this)
+          ] }, void 0, true, {
+            fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/documents/ReviewStep.tsx",
+            lineNumber: 116,
+            columnNumber: 21
+          }, this) : /* @__PURE__ */ jsxDEV("div", { className: "flex items-center space-x-2 mt-2", children: [
+            /* @__PURE__ */ jsxDEV(AlertCircle, { size: 14, className: "text-gray-400" }, void 0, false, {
+              fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/documents/ReviewStep.tsx",
+              lineNumber: 127,
+              columnNumber: 25
+            }, this),
+            /* @__PURE__ */ jsxDEV("span", { className: "text-sm text-gray-500", children: "No control mapping" }, void 0, false, {
+              fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/documents/ReviewStep.tsx",
+              lineNumber: 128,
+              columnNumber: 25
+            }, this)
+          ] }, void 0, true, {
+            fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/documents/ReviewStep.tsx",
+            lineNumber: 126,
+            columnNumber: 21
+          }, this)
+        ] }, void 0, true, {
+          fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/documents/ReviewStep.tsx",
+          lineNumber: 100,
+          columnNumber: 19
+        }, this) }, void 0, false, {
+          fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/documents/ReviewStep.tsx",
+          lineNumber: 99,
+          columnNumber: 17
+        }, this) }, idx, false, {
+          fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/documents/ReviewStep.tsx",
+          lineNumber: 98,
+          columnNumber: 15
+        }, this);
+      }) }, void 0, false, {
+        fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/documents/ReviewStep.tsx",
+        lineNumber: 92,
+        columnNumber: 9
+      }, this)
+    ] }, void 0, true, {
+      fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/documents/ReviewStep.tsx",
+      lineNumber: 88,
+      columnNumber: 7
+    }, this),
+    /* @__PURE__ */ jsxDEV("div", { className: "bg-blue-50 border border-blue-200 rounded-lg p-4", children: [
+      /* @__PURE__ */ jsxDEV("h4", { className: "font-medium text-blue-900 mb-2", children: "What will happen:" }, void 0, false, {
+        fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/documents/ReviewStep.tsx",
+        lineNumber: 143,
+        columnNumber: 9
+      }, this),
+      /* @__PURE__ */ jsxDEV("ul", { className: "space-y-1 text-sm text-blue-800", children: [
+        /* @__PURE__ */ jsxDEV("li", { children: [
+          "✓ ",
+          totalDocuments,
+          " Document records will be created"
+        ] }, void 0, true, {
+          fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/documents/ReviewStep.tsx",
+          lineNumber: 145,
+          columnNumber: 11
+        }, this),
+        /* @__PURE__ */ jsxDEV("li", { children: [
+          "✓ ",
+          matched,
+          " Document-Control mappings will be saved"
+        ] }, void 0, true, {
+          fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/documents/ReviewStep.tsx",
+          lineNumber: 146,
+          columnNumber: 11
+        }, this),
+        /* @__PURE__ */ jsxDEV("li", { children: "✓ Mappings will be learned for future imports" }, void 0, false, {
+          fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/documents/ReviewStep.tsx",
+          lineNumber: 147,
+          columnNumber: 11
+        }, this),
+        unmatched > 0 && /* @__PURE__ */ jsxDEV("li", { className: "text-yellow-700", children: [
+          "⚠ ",
+          unmatched,
+          " documents will be imported without control mappings"
+        ] }, void 0, true, {
+          fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/documents/ReviewStep.tsx",
+          lineNumber: 149,
+          columnNumber: 11
+        }, this)
+      ] }, void 0, true, {
+        fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/documents/ReviewStep.tsx",
+        lineNumber: 144,
+        columnNumber: 9
+      }, this)
+    ] }, void 0, true, {
+      fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/documents/ReviewStep.tsx",
+      lineNumber: 142,
+      columnNumber: 7
+    }, this),
+    unmatched > 0 && /* @__PURE__ */ jsxDEV("div", { className: "bg-yellow-50 border border-yellow-200 rounded-lg p-4", children: /* @__PURE__ */ jsxDEV("div", { className: "flex items-start space-x-3", children: [
+      /* @__PURE__ */ jsxDEV(AlertCircle, { className: "text-yellow-600 flex-shrink-0 mt-0.5", size: 20 }, void 0, false, {
+        fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/documents/ReviewStep.tsx",
+        lineNumber: 160,
+        columnNumber: 13
+      }, this),
+      /* @__PURE__ */ jsxDEV("div", { children: [
+        /* @__PURE__ */ jsxDEV("p", { className: "font-medium text-yellow-900", children: "Some documents are unmatched" }, void 0, false, {
+          fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/documents/ReviewStep.tsx",
+          lineNumber: 162,
+          columnNumber: 15
+        }, this),
+        /* @__PURE__ */ jsxDEV("p", { className: "text-sm text-yellow-700 mt-1", children: [
+          unmatched,
+          " document",
+          unmatched !== 1 ? "s" : "",
+          " will be imported without control mappings. You can assign controls manually after import."
+        ] }, void 0, true, {
+          fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/documents/ReviewStep.tsx",
+          lineNumber: 163,
+          columnNumber: 15
+        }, this)
+      ] }, void 0, true, {
+        fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/documents/ReviewStep.tsx",
+        lineNumber: 161,
+        columnNumber: 13
+      }, this)
+    ] }, void 0, true, {
+      fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/documents/ReviewStep.tsx",
+      lineNumber: 159,
+      columnNumber: 11
+    }, this) }, void 0, false, {
+      fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/documents/ReviewStep.tsx",
+      lineNumber: 158,
+      columnNumber: 7
+    }, this),
+    /* @__PURE__ */ jsxDEV("div", { className: "flex justify-between pt-4 border-t", children: [
+      /* @__PURE__ */ jsxDEV(
+        "button",
+        {
+          onClick: onBack,
+          disabled: importing,
+          className: "px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50",
+          children: "Back"
+        },
+        void 0,
+        false,
+        {
+          fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/documents/ReviewStep.tsx",
+          lineNumber: 174,
+          columnNumber: 9
+        },
+        this
+      ),
+      /* @__PURE__ */ jsxDEV(
+        "button",
+        {
+          onClick: onImport,
+          disabled: importing,
+          className: "px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 flex items-center space-x-2",
+          children: importing ? /* @__PURE__ */ jsxDEV(Fragment, { children: [
+            /* @__PURE__ */ jsxDEV(Loader, { className: "animate-spin", size: 20 }, void 0, false, {
+              fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/documents/ReviewStep.tsx",
+              lineNumber: 188,
+              columnNumber: 15
+            }, this),
+            /* @__PURE__ */ jsxDEV("span", { children: "Importing..." }, void 0, false, {
+              fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/documents/ReviewStep.tsx",
+              lineNumber: 189,
+              columnNumber: 15
+            }, this)
+          ] }, void 0, true, {
+            fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/documents/ReviewStep.tsx",
+            lineNumber: 187,
+            columnNumber: 11
+          }, this) : /* @__PURE__ */ jsxDEV(Fragment, { children: [
+            /* @__PURE__ */ jsxDEV(CheckCircle, { size: 20 }, void 0, false, {
+              fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/documents/ReviewStep.tsx",
+              lineNumber: 193,
+              columnNumber: 15
+            }, this),
+            /* @__PURE__ */ jsxDEV("span", { children: [
+              "Import ",
+              totalDocuments,
+              " Documents"
+            ] }, void 0, true, {
+              fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/documents/ReviewStep.tsx",
+              lineNumber: 194,
+              columnNumber: 15
+            }, this)
+          ] }, void 0, true, {
+            fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/documents/ReviewStep.tsx",
+            lineNumber: 192,
+            columnNumber: 11
+          }, this)
+        },
+        void 0,
+        false,
+        {
+          fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/documents/ReviewStep.tsx",
+          lineNumber: 181,
+          columnNumber: 9
+        },
+        this
+      )
+    ] }, void 0, true, {
+      fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/documents/ReviewStep.tsx",
+      lineNumber: 173,
+      columnNumber: 7
+    }, this)
+  ] }, void 0, true, {
+    fileName: "C:/Users/Bill.S/safety-intelligence-engine/src/components/documents/ReviewStep.tsx",
+    lineNumber: 44,
+    columnNumber: 5
+  }, this);
+}
+_c = ReviewStep;
+var _c;
+$RefreshReg$(_c, "ReviewStep");
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("C:/Users/Bill.S/safety-intelligence-engine/src/components/documents/ReviewStep.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("C:/Users/Bill.S/safety-intelligence-engine/src/components/documents/ReviewStep.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJtYXBwaW5ncyI6IkFBMEJRLFNBNklJLFVBN0lKOzs7Ozs7Ozs7Ozs7Ozs7O0FBekJSLFNBQVNBLGFBQWFDLFVBQVVDLGFBQWFDLGNBQWM7QUFXcEQsZ0JBQVNDLFdBQVc7QUFBQSxFQUN6QkM7QUFBQUEsRUFDQUM7QUFBQUEsRUFDQUM7QUFBQUEsRUFDQUM7QUFBQUEsRUFDQUM7QUFDZSxHQUFHO0FBQ2xCLFFBQU1DLGlCQUFpQkosV0FBV0s7QUFDbEMsUUFBTUMsVUFBVVAsZ0JBQWdCUSxPQUFPLENBQUNDLE9BQU9BLEdBQUdDLGNBQWMsSUFBSSxFQUFFSjtBQUN0RSxRQUFNSyxZQUFZTixpQkFBaUJFO0FBRW5DLFNBQ0UsdUJBQUMsU0FBSSxXQUFVLGFBQ2I7QUFBQSwyQkFBQyxTQUNDO0FBQUEsNkJBQUMsUUFBRyxXQUFVLDRDQUEyQywrQkFBekQ7QUFBQTtBQUFBO0FBQUE7QUFBQSxhQUVBO0FBQUEsTUFDQSx1QkFBQyxPQUFFLFdBQVUseUJBQXdCLGtFQUFyQztBQUFBO0FBQUE7QUFBQTtBQUFBLGFBRUE7QUFBQSxTQU5GO0FBQUE7QUFBQTtBQUFBO0FBQUEsV0FPQTtBQUFBLElBR0EsdUJBQUMsU0FBSSxXQUFVLDBCQUNiO0FBQUEsNkJBQUMsU0FBSSxXQUFVLG9EQUNiLGlDQUFDLFNBQUksV0FBVSxxQ0FDYjtBQUFBLCtCQUFDLFNBQ0M7QUFBQSxpQ0FBQyxPQUFFLFdBQVUseUJBQXdCLCtCQUFyQztBQUFBO0FBQUE7QUFBQTtBQUFBLGlCQUFvRDtBQUFBLFVBQ3BELHVCQUFDLE9BQUUsV0FBVSxvQ0FBb0NGLDRCQUFqRDtBQUFBO0FBQUE7QUFBQTtBQUFBLGlCQUFnRTtBQUFBLGFBRmxFO0FBQUE7QUFBQTtBQUFBO0FBQUEsZUFHQTtBQUFBLFFBQ0EsdUJBQUMsWUFBUyxXQUFVLGlCQUFnQixNQUFNLE1BQTFDO0FBQUE7QUFBQTtBQUFBO0FBQUEsZUFBNkM7QUFBQSxXQUwvQztBQUFBO0FBQUE7QUFBQTtBQUFBLGFBTUEsS0FQRjtBQUFBO0FBQUE7QUFBQTtBQUFBLGFBUUE7QUFBQSxNQUVBLHVCQUFDLFNBQUksV0FBVSxzREFDYixpQ0FBQyxTQUFJLFdBQVUscUNBQ2I7QUFBQSwrQkFBQyxTQUNDO0FBQUEsaUNBQUMsT0FBRSxXQUFVLDBCQUF5QixtQ0FBdEM7QUFBQTtBQUFBO0FBQUE7QUFBQSxpQkFBeUQ7QUFBQSxVQUN6RCx1QkFBQyxPQUFFLFdBQVUscUNBQXFDRSxxQkFBbEQ7QUFBQTtBQUFBO0FBQUE7QUFBQSxpQkFBMEQ7QUFBQSxhQUY1RDtBQUFBO0FBQUE7QUFBQTtBQUFBLGVBR0E7QUFBQSxRQUNBLHVCQUFDLGVBQVksV0FBVSxrQkFBaUIsTUFBTSxNQUE5QztBQUFBO0FBQUE7QUFBQTtBQUFBLGVBQWlEO0FBQUEsV0FMbkQ7QUFBQTtBQUFBO0FBQUE7QUFBQSxhQU1BLEtBUEY7QUFBQTtBQUFBO0FBQUE7QUFBQSxhQVFBO0FBQUEsTUFFQSx1QkFBQyxTQUFJLFdBQVUsb0RBQ2IsaUNBQUMsU0FBSSxXQUFVLHFDQUNiO0FBQUEsK0JBQUMsU0FDQztBQUFBLGlDQUFDLE9BQUUsV0FBVSx5QkFBd0IseUJBQXJDO0FBQUE7QUFBQTtBQUFBO0FBQUEsaUJBQThDO0FBQUEsVUFDOUMsdUJBQUMsT0FBRSxXQUFVLG9DQUFvQ0ksdUJBQWpEO0FBQUE7QUFBQTtBQUFBO0FBQUEsaUJBQTJEO0FBQUEsYUFGN0Q7QUFBQTtBQUFBO0FBQUE7QUFBQSxlQUdBO0FBQUEsUUFDQSx1QkFBQyxlQUFZLFdBQVUsaUJBQWdCLE1BQU0sTUFBN0M7QUFBQTtBQUFBO0FBQUE7QUFBQSxlQUFnRDtBQUFBLFdBTGxEO0FBQUE7QUFBQTtBQUFBO0FBQUEsYUFNQSxLQVBGO0FBQUE7QUFBQTtBQUFBO0FBQUEsYUFRQTtBQUFBLFNBN0JGO0FBQUE7QUFBQTtBQUFBO0FBQUEsV0E4QkE7QUFBQSxJQUdBLHVCQUFDLFNBQUksV0FBVSxxQkFDYjtBQUFBLDZCQUFDLFNBQUksV0FBVSxpQ0FDYixpQ0FBQyxRQUFHLFdBQVUsNkJBQTRCLDhCQUExQztBQUFBO0FBQUE7QUFBQTtBQUFBLGFBQXdELEtBRDFEO0FBQUE7QUFBQTtBQUFBO0FBQUEsYUFFQTtBQUFBLE1BQ0EsdUJBQUMsU0FBSSxXQUFVLHFDQUNaVixxQkFBV1csSUFBSSxDQUFDQyxLQUFLQyxRQUFRO0FBQzVCLGNBQU1DLFFBQVFmLGdCQUFnQmMsR0FBRztBQUNqQyxjQUFNRSxXQUFXRCxPQUFPTCxjQUFjO0FBRXRDLGVBQ0UsdUJBQUMsU0FBYyxXQUFVLHdCQUN2QixpQ0FBQyxTQUFJLFdBQVUsb0NBQ2IsaUNBQUMsU0FBSSxXQUFVLFVBQ2I7QUFBQSxpQ0FBQyxTQUFJLFdBQVUsb0NBQ2I7QUFBQSxtQ0FBQyxVQUFLLFdBQVUsNkJBQ2JHLGNBQUlJLGdCQURQO0FBQUE7QUFBQTtBQUFBO0FBQUEsbUJBRUE7QUFBQSxZQUNBLHVCQUFDLFVBQUssV0FBVSx5REFDYkosY0FBSUssZ0JBRFA7QUFBQTtBQUFBO0FBQUE7QUFBQSxtQkFFQTtBQUFBLFlBQ0NMLElBQUlNLFdBQ0gsdUJBQUMsVUFBSyxXQUFVLHlEQUNiTixjQUFJTSxXQURQO0FBQUE7QUFBQTtBQUFBO0FBQUEsbUJBRUE7QUFBQSxlQVZKO0FBQUE7QUFBQTtBQUFBO0FBQUEsaUJBWUE7QUFBQSxVQUNBLHVCQUFDLE9BQUUsV0FBVSx5QkFBeUJOLGNBQUlPLFlBQTFDO0FBQUE7QUFBQTtBQUFBO0FBQUEsaUJBQW1EO0FBQUEsVUFDbERKLFdBQ0MsdUJBQUMsU0FBSSxXQUFVLG9DQUNiO0FBQUEsbUNBQUMsZUFBWSxNQUFNLElBQUksV0FBVSxvQkFBakM7QUFBQTtBQUFBO0FBQUE7QUFBQSxtQkFBaUQ7QUFBQSxZQUNqRCx1QkFBQyxVQUFLLFdBQVUsMEJBQXlCO0FBQUE7QUFBQSxjQUNwQ0QsTUFBTU07QUFBQUEsaUJBRFg7QUFBQTtBQUFBO0FBQUE7QUFBQSxtQkFFQTtBQUFBLFlBQ0EsdUJBQUMsVUFBSyxXQUFVLHlCQUF3QjtBQUFBO0FBQUEsY0FDcENOLE1BQU1PO0FBQUFBLGNBQVc7QUFBQSxpQkFEckI7QUFBQTtBQUFBO0FBQUE7QUFBQSxtQkFFQTtBQUFBLGVBUEY7QUFBQTtBQUFBO0FBQUE7QUFBQSxpQkFRQSxJQUVBLHVCQUFDLFNBQUksV0FBVSxvQ0FDYjtBQUFBLG1DQUFDLGVBQVksTUFBTSxJQUFJLFdBQVUsbUJBQWpDO0FBQUE7QUFBQTtBQUFBO0FBQUEsbUJBQWdEO0FBQUEsWUFDaEQsdUJBQUMsVUFBSyxXQUFVLHlCQUF3QixrQ0FBeEM7QUFBQTtBQUFBO0FBQUE7QUFBQSxtQkFFQTtBQUFBLGVBSkY7QUFBQTtBQUFBO0FBQUE7QUFBQSxpQkFLQTtBQUFBLGFBL0JKO0FBQUE7QUFBQTtBQUFBO0FBQUEsZUFpQ0EsS0FsQ0Y7QUFBQTtBQUFBO0FBQUE7QUFBQSxlQW1DQSxLQXBDUVIsS0FBVjtBQUFBO0FBQUE7QUFBQTtBQUFBLGVBcUNBO0FBQUEsTUFFSixDQUFDLEtBN0NIO0FBQUE7QUFBQTtBQUFBO0FBQUEsYUE4Q0E7QUFBQSxTQWxERjtBQUFBO0FBQUE7QUFBQTtBQUFBLFdBbURBO0FBQUEsSUFHQSx1QkFBQyxTQUFJLFdBQVUsb0RBQ2I7QUFBQSw2QkFBQyxRQUFHLFdBQVUsa0NBQWlDLGlDQUEvQztBQUFBO0FBQUE7QUFBQTtBQUFBLGFBQWdFO0FBQUEsTUFDaEUsdUJBQUMsUUFBRyxXQUFVLG1DQUNaO0FBQUEsK0JBQUMsUUFBRztBQUFBO0FBQUEsVUFBR1Q7QUFBQUEsVUFBZTtBQUFBLGFBQXRCO0FBQUE7QUFBQTtBQUFBO0FBQUEsZUFBdUQ7QUFBQSxRQUN2RCx1QkFBQyxRQUFHO0FBQUE7QUFBQSxVQUFHRTtBQUFBQSxVQUFRO0FBQUEsYUFBZjtBQUFBO0FBQUE7QUFBQTtBQUFBLGVBQXVEO0FBQUEsUUFDdkQsdUJBQUMsUUFBRyw2REFBSjtBQUFBO0FBQUE7QUFBQTtBQUFBLGVBQWlEO0FBQUEsUUFDaERJLFlBQVksS0FDWCx1QkFBQyxRQUFHLFdBQVUsbUJBQWtCO0FBQUE7QUFBQSxVQUMzQkE7QUFBQUEsVUFBVTtBQUFBLGFBRGY7QUFBQTtBQUFBO0FBQUE7QUFBQSxlQUVBO0FBQUEsV0FQSjtBQUFBO0FBQUE7QUFBQTtBQUFBLGFBU0E7QUFBQSxTQVhGO0FBQUE7QUFBQTtBQUFBO0FBQUEsV0FZQTtBQUFBLElBR0NBLFlBQVksS0FDWCx1QkFBQyxTQUFJLFdBQVUsd0RBQ2IsaUNBQUMsU0FBSSxXQUFVLDhCQUNiO0FBQUEsNkJBQUMsZUFBWSxXQUFVLHdDQUF1QyxNQUFNLE1BQXBFO0FBQUE7QUFBQTtBQUFBO0FBQUEsYUFBdUU7QUFBQSxNQUN2RSx1QkFBQyxTQUNDO0FBQUEsK0JBQUMsT0FBRSxXQUFVLCtCQUE4Qiw0Q0FBM0M7QUFBQTtBQUFBO0FBQUE7QUFBQSxlQUF1RTtBQUFBLFFBQ3ZFLHVCQUFDLE9BQUUsV0FBVSxnQ0FDVkE7QUFBQUE7QUFBQUEsVUFBVTtBQUFBLFVBQVVBLGNBQWMsSUFBSSxNQUFNO0FBQUEsVUFBRztBQUFBLGFBRGxEO0FBQUE7QUFBQTtBQUFBO0FBQUEsZUFHQTtBQUFBLFdBTEY7QUFBQTtBQUFBO0FBQUE7QUFBQSxhQU1BO0FBQUEsU0FSRjtBQUFBO0FBQUE7QUFBQTtBQUFBLFdBU0EsS0FWRjtBQUFBO0FBQUE7QUFBQTtBQUFBLFdBV0E7QUFBQSxJQUlGLHVCQUFDLFNBQUksV0FBVSxzQ0FDYjtBQUFBO0FBQUEsUUFBQztBQUFBO0FBQUEsVUFDQyxTQUFTUjtBQUFBQSxVQUNULFVBQVVDO0FBQUFBLFVBQ1YsV0FBVTtBQUFBLFVBQWtGO0FBQUE7QUFBQSxRQUg5RjtBQUFBO0FBQUE7QUFBQTtBQUFBO0FBQUE7QUFBQTtBQUFBO0FBQUEsTUFNQTtBQUFBLE1BQ0E7QUFBQSxRQUFDO0FBQUE7QUFBQSxVQUNDLFNBQVNGO0FBQUFBLFVBQ1QsVUFBVUU7QUFBQUEsVUFDVixXQUFVO0FBQUEsVUFFVEEsc0JBQ0MsbUNBQ0U7QUFBQSxtQ0FBQyxVQUFPLFdBQVUsZ0JBQWUsTUFBTSxNQUF2QztBQUFBO0FBQUE7QUFBQTtBQUFBLG1CQUEwQztBQUFBLFlBQzFDLHVCQUFDLFVBQUssNEJBQU47QUFBQTtBQUFBO0FBQUE7QUFBQSxtQkFBa0I7QUFBQSxlQUZwQjtBQUFBO0FBQUE7QUFBQTtBQUFBLGlCQUdBLElBRUEsbUNBQ0U7QUFBQSxtQ0FBQyxlQUFZLE1BQU0sTUFBbkI7QUFBQTtBQUFBO0FBQUE7QUFBQSxtQkFBc0I7QUFBQSxZQUN0Qix1QkFBQyxVQUFLO0FBQUE7QUFBQSxjQUFRQztBQUFBQSxjQUFlO0FBQUEsaUJBQTdCO0FBQUE7QUFBQTtBQUFBO0FBQUEsbUJBQXVDO0FBQUEsZUFGekM7QUFBQTtBQUFBO0FBQUE7QUFBQSxpQkFHQTtBQUFBO0FBQUEsUUFkSjtBQUFBO0FBQUE7QUFBQTtBQUFBO0FBQUE7QUFBQTtBQUFBO0FBQUEsTUFnQkE7QUFBQSxTQXhCRjtBQUFBO0FBQUE7QUFBQTtBQUFBLFdBeUJBO0FBQUEsT0ExSkY7QUFBQTtBQUFBO0FBQUE7QUFBQSxTQTJKQTtBQUVKO0FBQUNrQixLQXpLZXhCO0FBQVUsSUFBQXdCO0FBQUFDLGFBQUFELElBQUEiLCJuYW1lcyI6WyJDaGVja0NpcmNsZSIsIkZpbGVUZXh0IiwiQWxlcnRDaXJjbGUiLCJMb2FkZXIiLCJSZXZpZXdTdGVwIiwiZG9jdW1lbnRNYXRjaGVzIiwicGFyc2VkUm93cyIsIm9uSW1wb3J0Iiwib25CYWNrIiwiaW1wb3J0aW5nIiwidG90YWxEb2N1bWVudHMiLCJsZW5ndGgiLCJtYXRjaGVkIiwiZmlsdGVyIiwiZG0iLCJjb250cm9sSWQiLCJ1bm1hdGNoZWQiLCJtYXAiLCJyb3ciLCJpZHgiLCJtYXRjaCIsImhhc01hdGNoIiwiZG9jdW1lbnROYW1lIiwiZG9jdW1lbnRUeXBlIiwidmVyc2lvbiIsImZpbGVQYXRoIiwiY29udHJvbFRpdGxlIiwiY29uZmlkZW5jZSIsIl9jIiwiJFJlZnJlc2hSZWckIl0sImlnbm9yZUxpc3QiOltdLCJzb3VyY2VzIjpbIlJldmlld1N0ZXAudHN4Il0sInNvdXJjZXNDb250ZW50IjpbImltcG9ydCBSZWFjdCBmcm9tICdyZWFjdCc7XHJcbmltcG9ydCB7IENoZWNrQ2lyY2xlLCBGaWxlVGV4dCwgQWxlcnRDaXJjbGUsIExvYWRlciB9IGZyb20gJ2x1Y2lkZS1yZWFjdCc7XHJcbmltcG9ydCB7IERvY3VtZW50TWF0Y2gsIFBhcnNlZFJvdyB9IGZyb20gJy4vZG9jdW1lbnQtaW1wb3J0ZXInO1xyXG5cclxuaW50ZXJmYWNlIFJldmlld1N0ZXBQcm9wcyB7XHJcbiAgZG9jdW1lbnRNYXRjaGVzOiBEb2N1bWVudE1hdGNoW107XHJcbiAgcGFyc2VkUm93czogUGFyc2VkUm93W107XHJcbiAgb25JbXBvcnQ6ICgpID0+IFByb21pc2U8dm9pZD47XHJcbiAgb25CYWNrOiAoKSA9PiB2b2lkO1xyXG4gIGltcG9ydGluZzogYm9vbGVhbjtcclxufVxyXG5cclxuZXhwb3J0IGZ1bmN0aW9uIFJldmlld1N0ZXAoe1xyXG4gIGRvY3VtZW50TWF0Y2hlcyxcclxuICBwYXJzZWRSb3dzLFxyXG4gIG9uSW1wb3J0LFxyXG4gIG9uQmFjayxcclxuICBpbXBvcnRpbmcsXHJcbn06IFJldmlld1N0ZXBQcm9wcykge1xyXG4gIGNvbnN0IHRvdGFsRG9jdW1lbnRzID0gcGFyc2VkUm93cy5sZW5ndGg7XHJcbiAgY29uc3QgbWF0Y2hlZCA9IGRvY3VtZW50TWF0Y2hlcy5maWx0ZXIoKGRtKSA9PiBkbS5jb250cm9sSWQgIT09IG51bGwpLmxlbmd0aDtcclxuICBjb25zdCB1bm1hdGNoZWQgPSB0b3RhbERvY3VtZW50cyAtIG1hdGNoZWQ7XHJcblxyXG4gIHJldHVybiAoXHJcbiAgICA8ZGl2IGNsYXNzTmFtZT1cInNwYWNlLXktNlwiPlxyXG4gICAgICA8ZGl2PlxyXG4gICAgICAgIDxoMyBjbGFzc05hbWU9XCJ0ZXh0LWxnIGZvbnQtc2VtaWJvbGQgdGV4dC1ncmF5LTkwMCBtYi0yXCI+XHJcbiAgICAgICAgICBSZXZpZXcgJiBJbXBvcnRcclxuICAgICAgICA8L2gzPlxyXG4gICAgICAgIDxwIGNsYXNzTmFtZT1cInRleHQtZ3JheS02MDAgdGV4dC1zbVwiPlxyXG4gICAgICAgICAgUmV2aWV3IHRoZSBmaW5hbCBpbXBvcnQgc3VtbWFyeSBiZWZvcmUgcHJvY2VlZGluZy5cclxuICAgICAgICA8L3A+XHJcbiAgICAgIDwvZGl2PlxyXG5cclxuICAgICAgey8qIFN1bW1hcnkgQ2FyZHMgKi99XHJcbiAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZ3JpZCBncmlkLWNvbHMtMyBnYXAtNFwiPlxyXG4gICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiYmctYmx1ZS01MCBib3JkZXIgYm9yZGVyLWJsdWUtMjAwIHJvdW5kZWQtbGcgcC00XCI+XHJcbiAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXggaXRlbXMtY2VudGVyIGp1c3RpZnktYmV0d2VlblwiPlxyXG4gICAgICAgICAgICA8ZGl2PlxyXG4gICAgICAgICAgICAgIDxwIGNsYXNzTmFtZT1cInRleHQtc20gdGV4dC1ibHVlLTYwMFwiPlRvdGFsIERvY3VtZW50czwvcD5cclxuICAgICAgICAgICAgICA8cCBjbGFzc05hbWU9XCJ0ZXh0LTJ4bCBmb250LWJvbGQgdGV4dC1ibHVlLTkwMFwiPnt0b3RhbERvY3VtZW50c308L3A+XHJcbiAgICAgICAgICAgIDwvZGl2PlxyXG4gICAgICAgICAgICA8RmlsZVRleHQgY2xhc3NOYW1lPVwidGV4dC1ibHVlLTYwMFwiIHNpemU9ezMyfSAvPlxyXG4gICAgICAgICAgPC9kaXY+XHJcbiAgICAgICAgPC9kaXY+XHJcblxyXG4gICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiYmctZ3JlZW4tNTAgYm9yZGVyIGJvcmRlci1ncmVlbi0yMDAgcm91bmRlZC1sZyBwLTRcIj5cclxuICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1jZW50ZXIganVzdGlmeS1iZXR3ZWVuXCI+XHJcbiAgICAgICAgICAgIDxkaXY+XHJcbiAgICAgICAgICAgICAgPHAgY2xhc3NOYW1lPVwidGV4dC1zbSB0ZXh0LWdyZWVuLTYwMFwiPk1hdGNoZWQgdG8gQ29udHJvbHM8L3A+XHJcbiAgICAgICAgICAgICAgPHAgY2xhc3NOYW1lPVwidGV4dC0yeGwgZm9udC1ib2xkIHRleHQtZ3JlZW4tOTAwXCI+e21hdGNoZWR9PC9wPlxyXG4gICAgICAgICAgICA8L2Rpdj5cclxuICAgICAgICAgICAgPENoZWNrQ2lyY2xlIGNsYXNzTmFtZT1cInRleHQtZ3JlZW4tNjAwXCIgc2l6ZT17MzJ9IC8+XHJcbiAgICAgICAgICA8L2Rpdj5cclxuICAgICAgICA8L2Rpdj5cclxuXHJcbiAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJiZy1ncmF5LTUwIGJvcmRlciBib3JkZXItZ3JheS0yMDAgcm91bmRlZC1sZyBwLTRcIj5cclxuICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1jZW50ZXIganVzdGlmeS1iZXR3ZWVuXCI+XHJcbiAgICAgICAgICAgIDxkaXY+XHJcbiAgICAgICAgICAgICAgPHAgY2xhc3NOYW1lPVwidGV4dC1zbSB0ZXh0LWdyYXktNjAwXCI+VW5tYXRjaGVkPC9wPlxyXG4gICAgICAgICAgICAgIDxwIGNsYXNzTmFtZT1cInRleHQtMnhsIGZvbnQtYm9sZCB0ZXh0LWdyYXktOTAwXCI+e3VubWF0Y2hlZH08L3A+XHJcbiAgICAgICAgICAgIDwvZGl2PlxyXG4gICAgICAgICAgICA8QWxlcnRDaXJjbGUgY2xhc3NOYW1lPVwidGV4dC1ncmF5LTYwMFwiIHNpemU9ezMyfSAvPlxyXG4gICAgICAgICAgPC9kaXY+XHJcbiAgICAgICAgPC9kaXY+XHJcbiAgICAgIDwvZGl2PlxyXG5cclxuICAgICAgey8qIEltcG9ydCBQcmV2aWV3ICovfVxyXG4gICAgICA8ZGl2IGNsYXNzTmFtZT1cImJvcmRlciByb3VuZGVkLWxnXCI+XHJcbiAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJiZy1ncmF5LTUwIHB4LTQgcHktMyBib3JkZXItYlwiPlxyXG4gICAgICAgICAgPGg0IGNsYXNzTmFtZT1cImZvbnQtbWVkaXVtIHRleHQtZ3JheS05MDBcIj5JbXBvcnQgUHJldmlldzwvaDQ+XHJcbiAgICAgICAgPC9kaXY+XHJcbiAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJkaXZpZGUteSBtYXgtaC05NiBvdmVyZmxvdy15LWF1dG9cIj5cclxuICAgICAgICAgIHtwYXJzZWRSb3dzLm1hcCgocm93LCBpZHgpID0+IHtcclxuICAgICAgICAgICAgY29uc3QgbWF0Y2ggPSBkb2N1bWVudE1hdGNoZXNbaWR4XTtcclxuICAgICAgICAgICAgY29uc3QgaGFzTWF0Y2ggPSBtYXRjaD8uY29udHJvbElkICE9PSBudWxsO1xyXG5cclxuICAgICAgICAgICAgcmV0dXJuIChcclxuICAgICAgICAgICAgICA8ZGl2IGtleT17aWR4fSBjbGFzc05hbWU9XCJwLTQgaG92ZXI6YmctZ3JheS01MFwiPlxyXG4gICAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJmbGV4IGl0ZW1zLXN0YXJ0IGp1c3RpZnktYmV0d2VlblwiPlxyXG4gICAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXgtMVwiPlxyXG4gICAgICAgICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1jZW50ZXIgc3BhY2UteC0yIG1iLTFcIj5cclxuICAgICAgICAgICAgICAgICAgICAgIDxzcGFuIGNsYXNzTmFtZT1cImZvbnQtbWVkaXVtIHRleHQtZ3JheS05MDBcIj5cclxuICAgICAgICAgICAgICAgICAgICAgICAge3Jvdy5kb2N1bWVudE5hbWV9XHJcbiAgICAgICAgICAgICAgICAgICAgICA8L3NwYW4+XHJcbiAgICAgICAgICAgICAgICAgICAgICA8c3BhbiBjbGFzc05hbWU9XCJweC0yIHB5LTAuNSBiZy1ibHVlLTEwMCB0ZXh0LWJsdWUtNzAwIHRleHQteHMgcm91bmRlZFwiPlxyXG4gICAgICAgICAgICAgICAgICAgICAgICB7cm93LmRvY3VtZW50VHlwZX1cclxuICAgICAgICAgICAgICAgICAgICAgIDwvc3Bhbj5cclxuICAgICAgICAgICAgICAgICAgICAgIHtyb3cudmVyc2lvbiAmJiAoXHJcbiAgICAgICAgICAgICAgICAgICAgICAgIDxzcGFuIGNsYXNzTmFtZT1cInB4LTIgcHktMC41IGJnLWdyYXktMTAwIHRleHQtZ3JheS02MDAgdGV4dC14cyByb3VuZGVkXCI+XHJcbiAgICAgICAgICAgICAgICAgICAgICAgICAge3Jvdy52ZXJzaW9ufVxyXG4gICAgICAgICAgICAgICAgICAgICAgICA8L3NwYW4+XHJcbiAgICAgICAgICAgICAgICAgICAgICApfVxyXG4gICAgICAgICAgICAgICAgICAgIDwvZGl2PlxyXG4gICAgICAgICAgICAgICAgICAgIDxwIGNsYXNzTmFtZT1cInRleHQteHMgdGV4dC1ncmF5LTUwMFwiPntyb3cuZmlsZVBhdGh9PC9wPlxyXG4gICAgICAgICAgICAgICAgICAgIHtoYXNNYXRjaCA/IChcclxuICAgICAgICAgICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1jZW50ZXIgc3BhY2UteC0yIG10LTJcIj5cclxuICAgICAgICAgICAgICAgICAgICAgICAgPENoZWNrQ2lyY2xlIHNpemU9ezE0fSBjbGFzc05hbWU9XCJ0ZXh0LWdyZWVuLTYwMFwiIC8+XHJcbiAgICAgICAgICAgICAgICAgICAgICAgIDxzcGFuIGNsYXNzTmFtZT1cInRleHQtc20gdGV4dC1ncmVlbi03MDBcIj5cclxuICAgICAgICAgICAgICAgICAgICAgICAgICDihpIge21hdGNoLmNvbnRyb2xUaXRsZX1cclxuICAgICAgICAgICAgICAgICAgICAgICAgPC9zcGFuPlxyXG4gICAgICAgICAgICAgICAgICAgICAgICA8c3BhbiBjbGFzc05hbWU9XCJ0ZXh0LXhzIHRleHQtZ3JheS01MDBcIj5cclxuICAgICAgICAgICAgICAgICAgICAgICAgICAoe21hdGNoLmNvbmZpZGVuY2V9JSBjb25maWRlbmNlKVxyXG4gICAgICAgICAgICAgICAgICAgICAgICA8L3NwYW4+XHJcbiAgICAgICAgICAgICAgICAgICAgICA8L2Rpdj5cclxuICAgICAgICAgICAgICAgICAgICApIDogKFxyXG4gICAgICAgICAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJmbGV4IGl0ZW1zLWNlbnRlciBzcGFjZS14LTIgbXQtMlwiPlxyXG4gICAgICAgICAgICAgICAgICAgICAgICA8QWxlcnRDaXJjbGUgc2l6ZT17MTR9IGNsYXNzTmFtZT1cInRleHQtZ3JheS00MDBcIiAvPlxyXG4gICAgICAgICAgICAgICAgICAgICAgICA8c3BhbiBjbGFzc05hbWU9XCJ0ZXh0LXNtIHRleHQtZ3JheS01MDBcIj5cclxuICAgICAgICAgICAgICAgICAgICAgICAgICBObyBjb250cm9sIG1hcHBpbmdcclxuICAgICAgICAgICAgICAgICAgICAgICAgPC9zcGFuPlxyXG4gICAgICAgICAgICAgICAgICAgICAgPC9kaXY+XHJcbiAgICAgICAgICAgICAgICAgICAgKX1cclxuICAgICAgICAgICAgICAgICAgPC9kaXY+XHJcbiAgICAgICAgICAgICAgICA8L2Rpdj5cclxuICAgICAgICAgICAgICA8L2Rpdj5cclxuICAgICAgICAgICAgKTtcclxuICAgICAgICAgIH0pfVxyXG4gICAgICAgIDwvZGl2PlxyXG4gICAgICA8L2Rpdj5cclxuXHJcbiAgICAgIHsvKiBXaGF0IFdpbGwgSGFwcGVuICovfVxyXG4gICAgICA8ZGl2IGNsYXNzTmFtZT1cImJnLWJsdWUtNTAgYm9yZGVyIGJvcmRlci1ibHVlLTIwMCByb3VuZGVkLWxnIHAtNFwiPlxyXG4gICAgICAgIDxoNCBjbGFzc05hbWU9XCJmb250LW1lZGl1bSB0ZXh0LWJsdWUtOTAwIG1iLTJcIj5XaGF0IHdpbGwgaGFwcGVuOjwvaDQ+XHJcbiAgICAgICAgPHVsIGNsYXNzTmFtZT1cInNwYWNlLXktMSB0ZXh0LXNtIHRleHQtYmx1ZS04MDBcIj5cclxuICAgICAgICAgIDxsaT7inJMge3RvdGFsRG9jdW1lbnRzfSBEb2N1bWVudCByZWNvcmRzIHdpbGwgYmUgY3JlYXRlZDwvbGk+XHJcbiAgICAgICAgICA8bGk+4pyTIHttYXRjaGVkfSBEb2N1bWVudC1Db250cm9sIG1hcHBpbmdzIHdpbGwgYmUgc2F2ZWQ8L2xpPlxyXG4gICAgICAgICAgPGxpPuKckyBNYXBwaW5ncyB3aWxsIGJlIGxlYXJuZWQgZm9yIGZ1dHVyZSBpbXBvcnRzPC9saT5cclxuICAgICAgICAgIHt1bm1hdGNoZWQgPiAwICYmIChcclxuICAgICAgICAgICAgPGxpIGNsYXNzTmFtZT1cInRleHQteWVsbG93LTcwMFwiPlxyXG4gICAgICAgICAgICAgIOKaoCB7dW5tYXRjaGVkfSBkb2N1bWVudHMgd2lsbCBiZSBpbXBvcnRlZCB3aXRob3V0IGNvbnRyb2wgbWFwcGluZ3NcclxuICAgICAgICAgICAgPC9saT5cclxuICAgICAgICAgICl9XHJcbiAgICAgICAgPC91bD5cclxuICAgICAgPC9kaXY+XHJcblxyXG4gICAgICB7LyogV2FybmluZyBmb3IgdW5tYXRjaGVkICovfVxyXG4gICAgICB7dW5tYXRjaGVkID4gMCAmJiAoXHJcbiAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJiZy15ZWxsb3ctNTAgYm9yZGVyIGJvcmRlci15ZWxsb3ctMjAwIHJvdW5kZWQtbGcgcC00XCI+XHJcbiAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXggaXRlbXMtc3RhcnQgc3BhY2UteC0zXCI+XHJcbiAgICAgICAgICAgIDxBbGVydENpcmNsZSBjbGFzc05hbWU9XCJ0ZXh0LXllbGxvdy02MDAgZmxleC1zaHJpbmstMCBtdC0wLjVcIiBzaXplPXsyMH0gLz5cclxuICAgICAgICAgICAgPGRpdj5cclxuICAgICAgICAgICAgICA8cCBjbGFzc05hbWU9XCJmb250LW1lZGl1bSB0ZXh0LXllbGxvdy05MDBcIj5Tb21lIGRvY3VtZW50cyBhcmUgdW5tYXRjaGVkPC9wPlxyXG4gICAgICAgICAgICAgIDxwIGNsYXNzTmFtZT1cInRleHQtc20gdGV4dC15ZWxsb3ctNzAwIG10LTFcIj5cclxuICAgICAgICAgICAgICAgIHt1bm1hdGNoZWR9IGRvY3VtZW50e3VubWF0Y2hlZCAhPT0gMSA/ICdzJyA6ICcnfSB3aWxsIGJlIGltcG9ydGVkIHdpdGhvdXRcclxuICAgICAgICAgICAgICAgIGNvbnRyb2wgbWFwcGluZ3MuIFlvdSBjYW4gYXNzaWduIGNvbnRyb2xzIG1hbnVhbGx5IGFmdGVyIGltcG9ydC5cclxuICAgICAgICAgICAgICA8L3A+XHJcbiAgICAgICAgICAgIDwvZGl2PlxyXG4gICAgICAgICAgPC9kaXY+XHJcbiAgICAgICAgPC9kaXY+XHJcbiAgICAgICl9XHJcblxyXG4gICAgICB7LyogQWN0aW9ucyAqL31cclxuICAgICAgPGRpdiBjbGFzc05hbWU9XCJmbGV4IGp1c3RpZnktYmV0d2VlbiBwdC00IGJvcmRlci10XCI+XHJcbiAgICAgICAgPGJ1dHRvblxyXG4gICAgICAgICAgb25DbGljaz17b25CYWNrfVxyXG4gICAgICAgICAgZGlzYWJsZWQ9e2ltcG9ydGluZ31cclxuICAgICAgICAgIGNsYXNzTmFtZT1cInB4LTQgcHktMiBib3JkZXIgYm9yZGVyLWdyYXktMzAwIHJvdW5kZWQtbGcgaG92ZXI6YmctZ3JheS01MCBkaXNhYmxlZDpvcGFjaXR5LTUwXCJcclxuICAgICAgICA+XHJcbiAgICAgICAgICBCYWNrXHJcbiAgICAgICAgPC9idXR0b24+XHJcbiAgICAgICAgPGJ1dHRvblxyXG4gICAgICAgICAgb25DbGljaz17b25JbXBvcnR9XHJcbiAgICAgICAgICBkaXNhYmxlZD17aW1wb3J0aW5nfVxyXG4gICAgICAgICAgY2xhc3NOYW1lPVwicHgtNiBweS0yIGJnLWdyZWVuLTYwMCB0ZXh0LXdoaXRlIHJvdW5kZWQtbGcgaG92ZXI6YmctZ3JlZW4tNzAwIGRpc2FibGVkOm9wYWNpdHktNTAgZmxleCBpdGVtcy1jZW50ZXIgc3BhY2UteC0yXCJcclxuICAgICAgICA+XHJcbiAgICAgICAgICB7aW1wb3J0aW5nID8gKFxyXG4gICAgICAgICAgICA8PlxyXG4gICAgICAgICAgICAgIDxMb2FkZXIgY2xhc3NOYW1lPVwiYW5pbWF0ZS1zcGluXCIgc2l6ZT17MjB9IC8+XHJcbiAgICAgICAgICAgICAgPHNwYW4+SW1wb3J0aW5nLi4uPC9zcGFuPlxyXG4gICAgICAgICAgICA8Lz5cclxuICAgICAgICAgICkgOiAoXHJcbiAgICAgICAgICAgIDw+XHJcbiAgICAgICAgICAgICAgPENoZWNrQ2lyY2xlIHNpemU9ezIwfSAvPlxyXG4gICAgICAgICAgICAgIDxzcGFuPkltcG9ydCB7dG90YWxEb2N1bWVudHN9IERvY3VtZW50czwvc3Bhbj5cclxuICAgICAgICAgICAgPC8+XHJcbiAgICAgICAgICApfVxyXG4gICAgICAgIDwvYnV0dG9uPlxyXG4gICAgICA8L2Rpdj5cclxuICAgIDwvZGl2PlxyXG4gICk7XHJcbn0iXSwiZmlsZSI6IkM6L1VzZXJzL0JpbGwuUy9zYWZldHktaW50ZWxsaWdlbmNlLWVuZ2luZS9zcmMvY29tcG9uZW50cy9kb2N1bWVudHMvUmV2aWV3U3RlcC50c3gifQ==

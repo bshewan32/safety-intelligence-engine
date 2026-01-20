@@ -6,6 +6,7 @@ import { handleTrainingIPC } from './ipc-training.js';
 import { registerClientSetupHandlers } from './ipc-client-setup-enhanced.js';
 import { registerRiskMatrixHandlers } from './ipc-risk-matrix.js';
 import { registerGapAnalysisHandlers } from './ipc-gap-analysis.js';
+import { handleDocumentIPC } from './ipc-documents.js';
 registerRiskMatrixHandlers();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -38,6 +39,7 @@ app.whenReady().then(() => {
     createWindow();
     registerClientSetupHandlers(ipcMain);
     registerGapAnalysisHandlers(ipcMain);
+    handleDocumentIPC(ipcMain);
 });
 app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') {

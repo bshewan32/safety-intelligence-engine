@@ -445,6 +445,36 @@ declare global {
       updateControl?: (payload: Partial<Control> & { id: string }) => Promise<Control>;
       importControlPack?: (payload: { pack: string } | any) => Promise<{ inserted: number }>;
 
+      // Document Import (add to window.api interface)
+      importDocuments: (payload: {
+        documents: Array<{
+          documentName: string;
+          documentType: string;
+          filePath: string;
+          version?: string;
+          issuedDate?: string;
+          expiryDate?: string;
+          notes?: string;
+          controlId?: string | null;
+          clientId?: string | null;
+        }>;
+      }) => Promise<{
+        imported: number;
+        documents: any[];
+      }>;
+
+      matchDocumentsToControls: (documents: Array<{
+        documentName: string;
+        documentType: string;
+      }>) => Promise<Array<{
+        documentName: string;
+        documentType: string;
+        controlId: string | null;
+        controlTitle: string;
+        confidence: number;
+        reason: string;
+      }>>;
+
       // Clients
       listClients: () => Promise<Client[]>;
       getClient: (clientId: string) => Promise<Client | null>;
