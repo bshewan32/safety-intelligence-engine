@@ -499,9 +499,46 @@ declare global {
         industry?: string;
         jurisdiction?: string;
         isoAlignment?: boolean;
-        hazardCustomizations?: Array<any>;
-      }) => Promise<any>;
-
+        hazardCustomizations?: Array<{
+          hazardId: string;
+          code: string;
+          name: string;
+          category: string;
+          originalRisk: number;
+          customRisk?: number;
+          isActive: boolean;
+          notes?: string;
+        }>;
+        selectedRoles?: Array<{
+          name: string;
+          description: string;
+          category: 'industry' | 'universal';
+          hazardCategories?: string[];
+          isDefault?: boolean;
+        }>;
+      }) => Promise<{
+        success: boolean;
+        client: {
+          id: string;
+          name: string;
+          industry?: string;
+          jurisdiction?: string;
+        };
+        stats: {
+          hazardsImported: number;
+          activeHazards: number;
+          controlsImported: number;
+          mappingsCreated: number;
+          rolesCreated: number;
+          rolesSkipped: number;
+          totalRoles: number;
+        };
+        roles: Array<{
+          id: string;
+          name: string;
+          description?: string;
+        }>;
+      }>;
       // Sites
       createSite: (payload: { clientId: string; name: string }) => Promise<Site>;
       deleteSite: (siteId: string) => Promise<Site>;

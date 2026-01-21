@@ -3,7 +3,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'url';
 import { handleIPC } from './ipc.js';
 import { handleTrainingIPC } from './ipc-training.js';
-import { registerClientSetupHandlers } from './ipc-client-setup-enhanced.js';
+//import { registerClientSetupHandlers } from './ipc-client-setup-enhanced.js';  // ✅ Already commented out
 import { registerRiskMatrixHandlers } from './ipc-risk-matrix.js';
 import { registerGapAnalysisHandlers } from './ipc-gap-analysis.js';
 import { handleDocumentIPC } from './ipc-documents.js';
@@ -23,7 +23,7 @@ async function createWindow() {
     width: 1400,
     height: 900,
     webPreferences: {
-      preload: path.join(__dirname, '../../../electron/preload.cjs'), // â† Changed: go up 3 levels
+      preload: path.join(__dirname, '../../../electron/preload.cjs'),
       nodeIntegration: false,
       contextIsolation: true,
       sandbox: false,
@@ -37,17 +37,18 @@ async function createWindow() {
     mainWindow.loadFile(path.join(__dirname, '../../renderer/index.html'));
   }
 
-  handleIPC(ipcMain, mainWindow);
-  handleTrainingIPC(ipcMain); 
+  
 }
 
 app.whenReady().then(() => {
   createWindow();
-  registerClientSetupHandlers(ipcMain);
-  registerGapAnalysisHandlers(ipcMain);
-  handleDocumentIPC(ipcMain);
+  
+  // ✅ Register ALL IPC handlers here, AFTER window is created
+  handleIPC(ipcMain, mainWindow!);        // Main handlers (includes setupClientWithRiskUniverse)
+  handleTrainingIPC(ipcMain);             // Training import handlers
+  registerGapAnalysisHandlers(ipcMain);   // Gap analysis handlers
+  handleDocumentIPC(ipcMain);             // Document handlers
 }); 
-
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {

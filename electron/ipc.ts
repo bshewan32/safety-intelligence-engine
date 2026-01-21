@@ -61,6 +61,374 @@ export function handleIPC(ipc: IpcMain, win: BrowserWindow) {
   // ========================================
   // ROLES
   // ========================================
+    // Risk score conversion utilities (keep these at top level)
+    function riskLabelToScore(label: string): number {
+      const map: Record<string, number> = {
+        'Critical': 20,
+        'High': 12,
+        'Medium': 6,
+        'Low': 2
+      };
+      return map[label] || 6;
+    }
+
+    function riskScoreToLabel(score: number): string {
+      if (score >= 15) return 'Critical';
+      if (score >= 10) return 'High';
+      if (score >= 5) return 'Medium';
+      return 'Low';
+    }
+
+    // ========================================
+    // CLIENT SETUP WITH RISK UNIVERSE
+    // ========================================
+
+    ipc.handle('db:setupClientWithRiskUniverse', async (_event, payload) => {
+      const {
+        name,
+        industry,
+        jurisdiction,
+        isoAlignment,
+        hazardCustomizations = [],
+        selectedRoles = [] // NEW parameter
+      } = payload;
+
+      console.log('Starting client setup with risk universe...', { 
+        name, 
+        industry, 
+        hazardsToCustomize: hazardCustomizations.length,
+        rolesToCreate: selectedRoles.length 
+      });
+
+      try {
+        // 1. Create the client
+        const client = await prisma.client.create({
+          data: {
+            name: name.trim(),
+            industry: industry || null,
+            jurisdiction: jurisdiction || null,
+            isoAlignment: isoAlignment || false
+          }
+        });
+
+        console.log('✓ Client created:', client.id);
+
+        // 2. Build filter for hazards based on industry
+        const hazardFilter: any = {};
+        if (industry) {
+          hazardFilter.OR = [
+            { industryId: industry },
+            { industryId: null },
+            { category: { in: ['Legislation', 'Management'] } }
+          ];
+        }
+
+        // 3. Get all applicable hazards from global library
+        const globalHazards = await prisma.hazard.findMany({
+          where: hazardFilter,
+          include: {
+            controls: {
+              include: {
+                control: true
+              }
+            }
+          }
+        });
+
+        console.log(`✓ Found ${globalHazards.length} applicable hazards`);
+
+        // 4. Create ClientHazards with customizations
+        const createdClientHazards = [];
+        for (const globalHazard of globalHazards) {
+          const customization = hazardCustomizations.find(
+            (c: any) => c.hazardId === globalHazard.id
+          );
+
+          const isActive = customization?.isActive ?? true;
+          const customRisk = customization?.customRisk ?? globalHazard.preControlRisk;
+          const notes = customization?.notes ?? null;
+          const isNotApplicable = customization?.isActive === false;
+
+          const clientHazard = await prisma.clientHazard.create({
+            data: {
+              clientId: client.id,
+              hazardId: globalHazard.id,
+              code: globalHazard.code,
+              name: globalHazard.name,
+              description: globalHazard.description,
+              category: globalHazard.category,
+              originalRiskLevel: riskScoreToLabel(globalHazard.preControlRisk),
+              adjustedRiskLevel: customRisk !== globalHazard.preControlRisk 
+                ? riskScoreToLabel(customRisk) 
+                : null,
+              preControlRisk: globalHazard.preControlRisk,
+              postControlRisk: globalHazard.postControlRisk,
+              isActive,
+              isNotApplicable,
+              clientNotes: notes
+            }
+          });
+
+          createdClientHazards.push(clientHazard);
+        }
+
+        console.log(`✓ Created ${createdClientHazards.length} ClientHazards`);
+
+        // 5. Collect all unique controls from hazards
+        const controlSet = new Map();
+        for (const globalHazard of globalHazards) {
+          for (const hc of globalHazard.controls) {
+            if (!controlSet.has(hc.control.id)) {
+              controlSet.set(hc.control.id, hc.control);
+            }
+          }
+        }
+
+        // 6. Create ClientControls
+        const createdClientControls = [];
+        for (const [controlId, control] of controlSet.entries()) {
+          const clientControl = await prisma.clientControl.create({
+            data: {
+              clientId: client.id,
+              controlId: control.id,
+              code: control.code,
+              title: control.title,
+              type: control.type,
+              description: control.description,
+              reference: control.reference,
+              validityDays: control.validityDays,
+              isOptional: false,
+              isActive: true
+            }
+          });
+
+          createdClientControls.push(clientControl);
+        }
+
+        console.log(`✓ Created ${createdClientControls.length} ClientControls`);
+
+        // 7. Create ClientHazardControl mappings
+        let mappingsCreated = 0;
+        for (const globalHazard of globalHazards) {
+          const clientHazard = createdClientHazards.find(
+            ch => ch.hazardId === globalHazard.id
+          );
+          
+          if (!clientHazard) continue;
+
+          const isHazardNA = !clientHazard.isActive;
+
+          for (const hc of globalHazard.controls) {
+            const clientControl = createdClientControls.find(
+              cc => cc.controlId === hc.control.id
+            );
+
+            if (!clientControl) continue;
+
+            // If hazard is N/A, mark control as optional
+            if (isHazardNA) {
+              await prisma.clientControl.update({
+                where: { id: clientControl.id },
+                data: { isOptional: true }
+              });
+            }
+
+            // Create mapping
+            await prisma.clientHazardControl.create({
+              data: {
+                clientHazardId: clientHazard.id,
+                clientControlId: clientControl.id,
+                isCriticalControl: hc.isCritical || false,
+                priority: hc.priority || 0
+              }
+            });
+
+            mappingsCreated++;
+          }
+        }
+
+        console.log(`✓ Created ${mappingsCreated} ClientHazardControl mappings`);
+
+        // 8. NEW: Create Roles
+        const createdRoles = [];
+        let rolesCreated = 0;
+        let rolesSkipped = 0;
+
+        for (const roleTemplate of selectedRoles) {
+          try {
+            // Check if role already exists (roles are global)
+            const existingRole = await prisma.role.findUnique({
+              where: { name: roleTemplate.name }
+            });
+
+            if (existingRole) {
+              console.log(`↷ Role "${roleTemplate.name}" already exists, skipping`);
+              createdRoles.push(existingRole);
+              rolesSkipped++;
+              continue;
+            }
+
+            // Create new role
+            const role = await prisma.role.create({
+              data: {
+                name: roleTemplate.name,
+                description: roleTemplate.description,
+                activityPackage: roleTemplate.hazardCategories 
+                  ? JSON.stringify(roleTemplate.hazardCategories) 
+                  : null
+              }
+            });
+
+            createdRoles.push(role);
+            rolesCreated++;
+            console.log(`✓ Created role: ${role.name}`);
+          } catch (err) {
+            console.error(`Failed to create role "${roleTemplate.name}":`, err);
+            // Continue with other roles
+          }
+        }
+
+        console.log(`✓ Roles: ${rolesCreated} created, ${rolesSkipped} already existed`);
+
+        // 9. Return comprehensive results
+        return {
+          success: true,
+          client: {
+            id: client.id,
+            name: client.name,
+            industry: client.industry,
+            jurisdiction: client.jurisdiction
+          },
+          stats: {
+            hazardsImported: createdClientHazards.length,
+            activeHazards: createdClientHazards.filter(h => h.isActive).length,
+            controlsImported: createdClientControls.length,
+            mappingsCreated,
+            rolesCreated,
+            rolesSkipped,
+            totalRoles: createdRoles.length
+          },
+          roles: createdRoles.map(r => ({
+            id: r.id,
+            name: r.name,
+            description: r.description
+          }))
+        };
+
+      } catch (error) {
+        console.error('Failed to setup client with risk universe:', error);
+        throw error;
+      }
+    });
+
+
+
+    // ========================================
+    // PREVIEW CLIENT HAZARDS (for wizard)
+    // ========================================
+
+    ipc.handle('db:previewClientHazards', async (_event, payload) => {
+      const { industry, jurisdiction, isoAlignment } = payload;
+
+      try {
+        console.log('Previewing hazards for:', { industry, jurisdiction, isoAlignment });
+
+        // Build filter for hazards based on industry
+        const hazardFilter: any = {};
+        if (industry) {
+          hazardFilter.industryId = {
+            in: getIndustryIds(industry)
+          };
+        }
+
+        // Get all applicable hazards from global library
+        const hazards = await prisma.hazard.findMany({
+          where: hazardFilter,
+          include: {
+            controls: {
+              include: {
+                control: true
+              }
+            }
+          },
+          orderBy: [
+            { category: 'asc' },
+            { name: 'asc' }
+          ]
+        });
+
+        // Collect all unique controls from hazards
+        const controlSet = new Map();
+        for (const hazard of hazards) {
+          for (const hc of hazard.controls) {
+            if (!controlSet.has(hc.control.id)) {
+              controlSet.set(hc.control.id, hc.control);
+            }
+          }
+        }
+
+        // Get jurisdiction-specific controls
+        let jurisdictionControls: any[] = [];
+        if (jurisdiction) {
+          jurisdictionControls = await getJurisdictionControls(jurisdiction);
+        }
+
+        // Get ISO 45001 controls
+        let isoControls: any[] = [];
+        if (isoAlignment) {
+          isoControls = await getISOControls();
+        }
+
+        // Add jurisdiction controls to set
+        jurisdictionControls.forEach(control => {
+          if (!controlSet.has(control.id)) {
+            controlSet.set(control.id, control);
+          }
+        });
+
+        // Add ISO controls to set
+        isoControls.forEach(control => {
+          if (!controlSet.has(control.id)) {
+            controlSet.set(control.id, control);
+          }
+        });
+
+        const controls = Array.from(controlSet.values());
+
+        console.log(`✓ Preview: ${hazards.length} hazards, ${controls.length} controls (${jurisdictionControls.length} jurisdiction, ${isoControls.length} ISO)`);
+
+        return {
+          hazards: hazards.map(h => ({
+            id: h.id,
+            code: h.code,
+            name: h.name,
+            description: h.description,
+            category: h.category,
+            preControlRisk: h.preControlRisk,
+            postControlRisk: h.postControlRisk,
+            controlCount: h.controls.length
+          })),
+          controls: controls.map(c => ({
+            id: c.id,
+            code: c.code,
+            title: c.title,
+            type: c.type
+          })),
+          stats: {
+            totalHazards: hazards.length,
+            totalControls: controls.length,
+            categories: [...new Set(hazards.map(h => h.category))],
+            fromIndustry: hazards.length,
+            fromJurisdiction: jurisdictionControls.length,
+            fromISO: isoControls.length
+          }
+        };
+
+      } catch (error) {
+        console.error('Preview failed:', error);
+        throw error;
+      }
+    });
 
   // List roles for dropdowns
   ipc.handle('db:listRoles', async () => {
@@ -828,24 +1196,7 @@ export function handleIPC(ipc: IpcMain, win: BrowserWindow) {
   // HAZARDS
   // ========================================
 
-  // Helpers for risk label/score conversion
-  const riskLabelToScore = (label?: string): number => {
-  switch ((label || '').toLowerCase()) {
-    case 'critical': return 20;  // ✅ 15-25 range
-    case 'high': return 12;      // ✅ 10-14 range
-    case 'medium': return 7;     // ✅ 5-9 range
-    case 'low': return 3;        // ✅ 1-4 range
-    default: return 7;           // Default to Medium
-  }
-};
-
-const riskScoreToLabel = (score?: number): 'Critical'|'High'|'Medium'|'Low' => {
-  const s = typeof score === 'number' ? score : 7;
-  if (s >= 15) return 'Critical';  // ✅ 15-25
-  if (s >= 10) return 'High';      // ✅ 10-14
-  if (s >= 5) return 'Medium';     // ✅ 5-9
-  return 'Low';                    // ✅ 1-4
-};
+  
 
   // List hazards
   ipc.handle('db:listHazards', async () => {
@@ -1475,4 +1826,92 @@ ipc.handle('db:setupClientFramework', async (_e, payload: {
   ipc.handle('report:buildClient', async (_e, filters: any) => {
     return await buildClientReport(filters, win);
   });
+
+  // ============================================
+// HELPER FUNCTIONS FOR CLIENT SETUP
+// ============================================
+
+// Map industry names to industry IDs
+function getIndustryIds(industry: string): string[] {
+  const industryMap: Record<string, string[]> = {
+    'Electrical Contracting': ['electrical', 'construction'],
+    'Construction & Building': ['construction', 'building'],
+    'Manufacturing': ['manufacturing', 'industrial'],
+    'Mining & Resources': ['mining', 'resources'],
+    'Transport & Logistics': ['transport', 'logistics'],
+    'Healthcare & Medical': ['healthcare', 'medical'],
+    'Hospitality & Retail': ['hospitality', 'retail'],
+    'General Services': ['general']
+  };
+  
+  return industryMap[industry] || ['general'];
+}
+
+// Get jurisdiction-specific controls
+async function getJurisdictionControls(jurisdiction: string): Promise<any[]> {
+  // Extract jurisdiction code (e.g., "VIC" from "VIC (Victoria)")
+  const jurisdictionCode = jurisdiction.split(' ')[0];
+  
+  // Find controls with jurisdiction-specific references
+  const controls = await prisma.control.findMany({
+    where: {
+      OR: [
+        { reference: { contains: jurisdictionCode } },
+        { description: { contains: jurisdictionCode } },
+        { metadata: { contains: jurisdictionCode } }
+      ]
+    }
+  });
+  
+  // If no specific controls found, return base WHS controls
+  if (controls.length === 0) {
+    return await prisma.control.findMany({
+      where: {
+        OR: [
+          { code: { startsWith: 'WHS-' } },
+          { reference: { contains: 'WHS Act' } }
+        ]
+      },
+      take: 5
+    });
+  }
+  
+  return controls;
+}
+
+// Get ISO 45001 alignment controls
+async function getISOControls(): Promise<any[]> {
+  const controls = await prisma.control.findMany({
+    where: {
+      OR: [
+        { reference: { contains: 'ISO 45001' } },
+        { code: { startsWith: 'ISO-' } },
+        { description: { contains: 'ISO 45001' } },
+        { metadata: { contains: 'iso45001' } }
+      ]
+    }
+  });
+  
+  // If no ISO controls found, return generic management system controls
+  if (controls.length === 0) {
+    return await prisma.control.findMany({
+      where: {
+        type: {
+          in: ['Policy', 'Procedure', 'Audit', 'Review']
+        }
+      },
+      take: 5
+    });
+  }
+  
+  return controls;
+}
+
+  function calculateRiskLevel(riskScore: number): string {
+    if (riskScore >= 20) return 'Critical';
+    if (riskScore >= 12) return 'High';
+    if (riskScore >= 6) return 'Medium';
+    return 'Low';
+  }
+
 }

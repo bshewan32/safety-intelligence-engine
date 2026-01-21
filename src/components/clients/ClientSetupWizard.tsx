@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { 
   X, 
   ChevronRight, 
@@ -10,8 +10,14 @@ import {
   MapPin,
   Shield,
   Eye,
-  Sliders
+  Sliders,
+  Users
 } from 'lucide-react';
+import { 
+  getRoleTemplatesForIndustry, 
+  getDefaultRolesForIndustry,
+  type RoleTemplate 
+} from './role-templates';
 
 interface SetupData {
   // Step 1: Basic info
@@ -36,6 +42,7 @@ interface SetupData {
     isActive: boolean;
     notes?: string;
   }>;
+   selectedRoles: RoleTemplate[];
 }
 
 interface ClientSetupWizardProps {
@@ -43,7 +50,7 @@ interface ClientSetupWizardProps {
   onComplete: () => void;
 }
 
-type WizardStep = 'info' | 'industry' | 'hazards' | 'customize' | 'review' | 'complete';
+type WizardStep = 'info' | 'industry' | 'hazards' | 'customize' | 'roles' | 'review' | 'complete';
 
 const INDUSTRIES = [
   'Electrical Contracting',
@@ -97,7 +104,8 @@ export function ClientSetupWizard({ onClose, onComplete }: ClientSetupWizardProp
     jurisdiction: '',
     isoAlignment: false,
     selectedHazardPacks: [],
-    hazardCustomizations: []
+    hazardCustomizations: [],
+    selectedRoles: []
   });
 
   const steps = [
@@ -105,6 +113,7 @@ export function ClientSetupWizard({ onClose, onComplete }: ClientSetupWizardProp
     { id: 'industry', label: 'Industry', description: 'Select type', icon: Factory },
     { id: 'hazards', label: 'Hazard Packs', description: 'Preview risks', icon: Eye },
     { id: 'customize', label: 'Customize', description: 'Adjust risks', icon: Sliders },
+    { id: 'roles', label: 'Roles', description: 'Select roles', icon: Users },
     { id: 'review', label: 'Review', description: 'Confirm setup', icon: Shield },
     { id: 'complete', label: 'Complete', description: 'Finish', icon: CheckCircle }
   ];
@@ -119,6 +128,7 @@ export function ClientSetupWizard({ onClose, onComplete }: ClientSetupWizardProp
     if (currentStep === 'industry') return setupData.industry.length > 0;
     if (currentStep === 'hazards') return true; // Preview is optional
     if (currentStep === 'customize') return true; // Customization is optional
+    if (currentStep === 'roles') return true;
     if (currentStep === 'review') return true; // Always can proceed from review
     return false;
   }, [currentStep, setupData]);
@@ -163,26 +173,29 @@ export function ClientSetupWizard({ onClose, onComplete }: ClientSetupWizardProp
   };
 
   const handleNext = () => {
-    if (currentStep === 'info') {
-      setCurrentStep('industry');
-    } else if (currentStep === 'industry') {
-      loadHazardPreview(); // Load preview before showing
-      setCurrentStep('hazards');
-    } else if (currentStep === 'hazards') {
-      setCurrentStep('customize');
-    } else if (currentStep === 'customize') {
-      setCurrentStep('review');
-    } else if (currentStep === 'review') {
-      handleSetupClient();
-    }
-  };
+  if (currentStep === 'info') {
+    setCurrentStep('industry');
+  } else if (currentStep === 'industry') {
+    loadHazardPreview();
+    setCurrentStep('hazards');
+  } else if (currentStep === 'hazards') {
+    setCurrentStep('customize');
+  } else if (currentStep === 'customize') {
+    setCurrentStep('roles'); // ADD THIS LINE (was: 'review')
+  } else if (currentStep === 'roles') { // ADD THIS BLOCK
+    setCurrentStep('review');
+  } else if (currentStep === 'review') {
+    handleSetupClient();
+  }
+};
 
   const handleBack = () => {
-    if (currentStep === 'industry') setCurrentStep('info');
-    else if (currentStep === 'hazards') setCurrentStep('industry');
-    else if (currentStep === 'customize') setCurrentStep('hazards');
-    else if (currentStep === 'review') setCurrentStep('customize');
-  };
+  if (currentStep === 'industry') setCurrentStep('info');
+  else if (currentStep === 'hazards') setCurrentStep('industry');
+  else if (currentStep === 'customize') setCurrentStep('hazards');
+  else if (currentStep === 'roles') setCurrentStep('customize'); // ADD THIS LINE
+  else if (currentStep === 'review') setCurrentStep('roles'); // CHANGE FROM: 'customize'
+};
 
   const handleSetupClient = async () => {
     setLoading(true);
@@ -195,7 +208,8 @@ export function ClientSetupWizard({ onClose, onComplete }: ClientSetupWizardProp
         industry: setupData.industry,
         jurisdiction: setupData.jurisdiction,
         isoAlignment: setupData.isoAlignment,
-        hazardCustomizations: setupData.hazardCustomizations
+        hazardCustomizations: setupData.hazardCustomizations,
+        selectedRoles: setupData.selectedRoles
       });
 
       if (!result?.client?.id) {
@@ -220,6 +234,14 @@ export function ClientSetupWizard({ onClose, onComplete }: ClientSetupWizardProp
       )
     }));
   };
+
+  // Auto-select default roles when industry changes
+useEffect(() => {
+  if (setupData.industry) {
+    const defaultRoles = getDefaultRolesForIndustry(setupData.industry);
+    setSetupData(prev => ({ ...prev, selectedRoles: defaultRoles }));
+  }
+}, [setupData.industry]);
 
   // ============================================
   // STEP RENDERERS
@@ -606,6 +628,19 @@ export function ClientSetupWizard({ onClose, onComplete }: ClientSetupWizardProp
             <span className="text-xs text-gray-600">ISO 45001</span>
             <p className="font-medium mt-1">{setupData.isoAlignment ? 'Yes' : 'No'}</p>
           </div>
+          <div className="bg-gray-50 rounded-lg p-4">
+            <span className="text-xs text-gray-600">Roles</span>
+            <p className="font-medium mt-1">
+              {setupData.selectedRoles.length} role{setupData.selectedRoles.length !== 1 ? 's' : ''} selected
+            </p>
+            <div className="flex flex-wrap gap-2 mt-2">
+              {setupData.selectedRoles.map(role => (
+                <span key={role.name} className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs">
+                  {role.name}
+                </span>
+              ))}
+            </div>
+          </div>
         </div>
 
         {/* Import Summary */}
@@ -697,6 +732,17 @@ export function ClientSetupWizard({ onClose, onComplete }: ClientSetupWizardProp
               </div>
               <div className="text-xs text-gray-600 mt-1">Hazard-Control Mappings</div>
             </div>
+            <div className="bg-white rounded-lg p-4 border border-gray-200">
+              <div className="text-3xl font-bold text-orange-600">
+                {setupResults.stats?.rolesCreated || 0}
+              </div>
+              <div className="text-xs text-gray-600 mt-1">New Roles</div>
+              {setupResults.stats?.rolesSkipped > 0 && (
+                <div className="text-xs text-gray-500 mt-1">
+                  ({setupResults.stats.rolesSkipped} existed)
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}
@@ -718,6 +764,108 @@ export function ClientSetupWizard({ onClose, onComplete }: ClientSetupWizardProp
     </div>
   );
 
+  const renderRolesStep = () => {
+  const availableRoles = getRoleTemplatesForIndustry(setupData.industry);
+  const industryRoles = availableRoles.filter(r => r.category === 'industry');
+  const universalRoles = availableRoles.filter(r => r.category === 'universal');
+
+  const toggleRole = (role: RoleTemplate) => {
+    setSetupData(prev => {
+      const isSelected = prev.selectedRoles.some(r => r.name === role.name);
+      return {
+        ...prev,
+        selectedRoles: isSelected
+          ? prev.selectedRoles.filter(r => r.name !== role.name)
+          : [...prev.selectedRoles, role]
+      };
+    });
+  };
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h3 className="text-lg font-semibold text-gray-900 mb-2">Select Standard Roles</h3>
+        <p className="text-sm text-gray-600">
+          Choose roles that apply to this client. You can customize or add more after creation.
+        </p>
+      </div>
+
+      {industryRoles.length > 0 && (
+        <div>
+          <h4 className="text-sm font-semibold text-gray-700 mb-3">
+            {setupData.industry} Industry Roles
+          </h4>
+          <div className="grid grid-cols-2 gap-3">
+            {industryRoles.map(role => {
+              const isSelected = setupData.selectedRoles.some(r => r.name === role.name);
+              return (
+                <div
+                  key={role.name}
+                  onClick={() => toggleRole(role)}
+                  className={`border rounded-lg p-4 cursor-pointer transition-all ${
+                    isSelected ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:bg-gray-50'
+                  }`}
+                >
+                  <div className="flex items-center space-x-2">
+                    <div className={`w-4 h-4 rounded border-2 flex items-center justify-center ${
+                      isSelected ? 'border-blue-500 bg-blue-500' : 'border-gray-300'
+                    }`}>
+                      {isSelected && <CheckCircle className="text-white" size={12} />}
+                    </div>
+                    <span className="font-medium text-sm">{role.name}</span>
+                  </div>
+                  <p className="text-xs text-gray-600 mt-1 ml-6">{role.description}</p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      <div>
+        <h4 className="text-sm font-semibold text-gray-700 mb-3">Universal Roles</h4>
+        <div className="grid grid-cols-2 gap-3">
+          {universalRoles.map(role => {
+            const isSelected = setupData.selectedRoles.some(r => r.name === role.name);
+            return (
+              <div
+                key={role.name}
+                onClick={() => toggleRole(role)}
+                className={`border rounded-lg p-4 cursor-pointer transition-all ${
+                  isSelected ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:bg-gray-50'
+                }`}
+              >
+                <div className="flex items-center space-x-2">
+                  <div className={`w-4 h-4 rounded border-2 flex items-center justify-center ${
+                    isSelected ? 'border-blue-500 bg-blue-500' : 'border-gray-300'
+                  }`}>
+                    {isSelected && <CheckCircle className="text-white" size={12} />}
+                  </div>
+                  <span className="font-medium text-sm">{role.name}</span>
+                </div>
+                <p className="text-xs text-gray-600 mt-1 ml-6">{role.description}</p>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <div className="flex items-start space-x-3">
+          <Users className="text-blue-600 flex-shrink-0 mt-0.5" size={20} />
+          <div className="text-sm text-blue-900">
+            <p className="font-medium mb-1">
+              {setupData.selectedRoles.length} role{setupData.selectedRoles.length !== 1 ? 's' : ''} selected
+            </p>
+            <p className="text-xs">
+              These roles will be created globally and can be assigned to workers.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
   // ============================================
   // MAIN RENDER
   // ============================================
@@ -765,6 +913,7 @@ export function ClientSetupWizard({ onClose, onComplete }: ClientSetupWizardProp
           {currentStep === 'industry' && renderIndustryStep()}
           {currentStep === 'hazards' && renderHazardsStep()}
           {currentStep === 'customize' && renderCustomizeStep()}
+          {currentStep === 'roles' && renderRolesStep()}
           {currentStep === 'review' && renderReviewStep()}
           {currentStep === 'complete' && renderCompleteStep()}
         </div>
