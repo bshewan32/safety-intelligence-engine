@@ -90,7 +90,7 @@ export function handleIPC(ipc: IpcMain, win: BrowserWindow) {
         jurisdiction,
         isoAlignment,
         hazardCustomizations = [],
-        selectedRoles = [] // NEW parameter
+        selectedRoles = []
       } = payload;
 
       console.log('Starting client setup with risk universe...', { 
@@ -113,14 +113,18 @@ export function handleIPC(ipc: IpcMain, win: BrowserWindow) {
 
         console.log('✓ Client created:', client.id);
 
-        // 2. Build filter for hazards based on industry
+        // 2. Build filter for hazards based on industry - WITH DEBUG
         const hazardFilter: any = {};
         if (industry) {
-          hazardFilter.OR = [
-            { industryId: industry },
-            { industryId: null },
-            { category: { in: ['Legislation', 'Management'] } }
-          ];
+          const industryIds = getIndustryIds(industry);
+          console.log('🔍 DEBUG - Industry selected:', industry);
+          console.log('🔍 DEBUG - Industry IDs to search:', industryIds);
+          
+          hazardFilter.industryId = {
+            in: industryIds
+          };
+          
+          console.log('🔍 DEBUG - Filter object:', JSON.stringify(hazardFilter, null, 2));
         }
 
         // 3. Get all applicable hazards from global library
@@ -136,6 +140,13 @@ export function handleIPC(ipc: IpcMain, win: BrowserWindow) {
         });
 
         console.log(`✓ Found ${globalHazards.length} applicable hazards`);
+
+        // DEBUG - Show actual hazards in DB
+        const allHazards = await prisma.hazard.findMany({
+          select: { id: true, name: true, industryId: true },
+          take: 5
+        });
+        console.log('🔍 DEBUG - Sample hazards in DB:', allHazards.map(h => `${h.name} (industryId: ${h.industryId})`));
 
         // 4. Create ClientHazards with customizations
         const createdClientHazards = [];
@@ -320,7 +331,6 @@ export function handleIPC(ipc: IpcMain, win: BrowserWindow) {
         throw error;
       }
     });
-
 
 
     // ========================================

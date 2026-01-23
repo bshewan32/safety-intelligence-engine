@@ -76,8 +76,7 @@ export function handleIPC(ipc, win) {
     // CLIENT SETUP WITH RISK UNIVERSE
     // ========================================
     ipc.handle('db:setupClientWithRiskUniverse', async (_event, payload) => {
-        const { name, industry, jurisdiction, isoAlignment, hazardCustomizations = [], selectedRoles = [] // NEW parameter
-         } = payload;
+        const { name, industry, jurisdiction, isoAlignment, hazardCustomizations = [], selectedRoles = [] } = payload;
         console.log('Starting client setup with risk universe...', {
             name,
             industry,
@@ -95,14 +94,16 @@ export function handleIPC(ipc, win) {
                 }
             });
             console.log('✓ Client created:', client.id);
-            // 2. Build filter for hazards based on industry
+            // 2. Build filter for hazards based on industry - WITH DEBUG
             const hazardFilter = {};
             if (industry) {
-                hazardFilter.OR = [
-                    { industryId: industry },
-                    { industryId: null },
-                    { category: { in: ['Legislation', 'Management'] } }
-                ];
+                const industryIds = getIndustryIds(industry);
+                console.log('🔍 DEBUG - Industry selected:', industry);
+                console.log('🔍 DEBUG - Industry IDs to search:', industryIds);
+                hazardFilter.industryId = {
+                    in: industryIds
+                };
+                console.log('🔍 DEBUG - Filter object:', JSON.stringify(hazardFilter, null, 2));
             }
             // 3. Get all applicable hazards from global library
             const globalHazards = await prisma.hazard.findMany({
@@ -116,6 +117,12 @@ export function handleIPC(ipc, win) {
                 }
             });
             console.log(`✓ Found ${globalHazards.length} applicable hazards`);
+            // DEBUG - Show actual hazards in DB
+            const allHazards = await prisma.hazard.findMany({
+                select: { id: true, name: true, industryId: true },
+                take: 5
+            });
+            console.log('🔍 DEBUG - Sample hazards in DB:', allHazards.map(h => `${h.name} (industryId: ${h.industryId})`));
             // 4. Create ClientHazards with customizations
             const createdClientHazards = [];
             for (const globalHazard of globalHazards) {
