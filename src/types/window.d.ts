@@ -474,7 +474,7 @@ declare global {
         confidence: number;
         reason: string;
       }>>;
-
+      
       // Clients
       listClients: () => Promise<Client[]>;
       getClient: (clientId: string) => Promise<Client | null>;
@@ -570,4 +570,199 @@ declare global {
       getGapSummary: (clientId?: string) => Promise<GapSummary>;
     };
   }
+}// window.d.ts additions for Client Control Document Evidence
+// Add these to your existing src/types/window.d.ts file
+
+interface ClientDocument {
+  id: string;
+  clientId: string;
+  name: string;
+  type: string | null;
+  version: string | null;
+  lastUpdated: Date | null;
+  externalLocation: string | null;
+  uploadedFilePath: string | null;
+  uploadedFileName: string | null;
+  fileSize: number | null;
+  mimeType: string | null;
+  checksum: string | null;
+  notes: string | null;
+  extractedText: string | null;
+  pageCount: number | null;
+  createdAt: Date;
+  updatedAt: Date;
 }
+
+interface ClientControlDocumentLink {
+  id: string;
+  clientControlId: string;
+  clientDocumentId: string;
+  mappingConfidence: number | null;
+  manuallyVerified: boolean;
+  status: string;
+  coversPartOfControl: string | null;
+  notes: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+  clientDocument?: ClientDocument;
+}
+
+interface ClientControlWithDocuments {
+  id: string;
+  clientId: string;
+  controlId: string;
+  code: string;
+  title: string;
+  type: string;
+  description: string | null;
+  reference: string | null;
+  validityDays: number | null;
+  isOptional: boolean;
+  isActive: boolean;
+  customEvidence: string | null;
+  clientNotes: string | null;
+  applicability: string;
+  naReason: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+  documentLinks: ClientControlDocumentLink[];
+}
+
+interface DocumentMatchSuggestion {
+  controlId: string;
+  controlTitle: string;
+  controlCode: string;
+  confidence: number;
+  matchReason: string;
+}
+
+interface ImportDocumentRow {
+  name: string;
+  type?: string;
+  location?: string;
+  lastUpdated?: string;
+  version?: string;
+  notes?: string;
+}
+
+interface ControlDocumentGap {
+  controlId: string;
+  controlCode: string;
+  controlTitle: string;
+  controlType: string;
+  severity: 'Critical' | 'High' | 'Medium' | 'Low';
+  linkedHazards: Array<{
+    name: string;
+    category: string;
+    riskLevel: string;
+  }>;
+}
+
+// Add to your existing ElectronAPI interface:
+interface ElectronAPI {
+  db: {
+    // ... existing methods ...
+    
+    // CLIENT CONTROL DOCUMENT EVIDENCE - New methods
+    
+    /**
+     * Import client control documents from CSV data
+     * Returns created documents with fuzzy match suggestions
+     */
+    importClientControlDocuments: (payload: {
+      clientId: string;
+      documents: ImportDocumentRow[];
+    }) => Promise<{
+      success: boolean;
+      documents: Array<{
+        document: ClientDocument;
+        suggestions: DocumentMatchSuggestion[];
+      }>;
+      stats: {
+        documentsImported: number;
+        avgConfidence: number;
+        documentsWithHighConfidence: number;
+      };
+    }>;
+    
+    /**
+     * Get all client controls with their linked documents
+     * Returns controls and coverage statistics
+     */
+    getClientControlsWithDocuments: (payload: {
+      clientId: string;
+    }) => Promise<{
+      controls: ClientControlWithDocuments[];
+      stats: {
+        total: number;
+        documented: number;
+        missing: number;
+        notApplicable: number;
+        coveragePercent: number;
+      };
+    }>;
+    
+    /**
+     * Link a document to a control
+     * Creates or updates the document-control link
+     */
+    linkDocumentToControl: (payload: {
+      clientDocumentId: string;
+      clientControlId: string;
+      mappingConfidence?: number;
+      manuallyVerified: boolean;
+    }) => Promise<ClientControlDocumentLink>;
+    
+    /**
+     * Remove a document-control link
+     */
+    removeDocumentControlLink: (payload: {
+      linkId: string;
+    }) => Promise<{ success: boolean }>;
+    
+    /**
+     * Mark a control as not applicable
+     */
+    markControlNotApplicable: (payload: {
+      clientControlId: string;
+      reason: string;
+    }) => Promise<ClientControlWithDocuments>;
+    
+    /**
+     * Remove N/A status from a control
+     */
+    removeControlNotApplicable: (payload: {
+      clientControlId: string;
+    }) => Promise<ClientControlWithDocuments>;
+    
+    /**
+     * Delete a client document and all its links
+     */
+    deleteClientDocument: (payload: {
+      clientDocumentId: string;
+    }) => Promise<{ success: boolean }>;
+    
+    /**
+     * Get control document gaps for gap analysis
+     * Returns controls without documentation
+     */
+    getControlDocumentGaps: (payload: {
+      clientId: string;
+    }) => Promise<{
+      gaps: ControlDocumentGap[];
+      total: number;
+      critical: number;
+      high: number;
+      medium: number;
+      low: number;
+    }>;
+  };
+}
+
+declare global {
+  interface Window {
+    electronAPI: ElectronAPI;
+  }
+}
+
+export {};
